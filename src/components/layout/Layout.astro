@@ -80,7 +80,9 @@ const logicalPath = pagePath ?? stripLocalePrefix(Astro.url.pathname);
 const resolvedCanonical = canonical ?? buildLocalizedPath(locale, logicalPath);
 const resolvedAlternates = alternateLinks ?? buildLocalizedAlternates(logicalPath);
 const discordHref = import.meta.env.PUBLIC_DISCORD_URL?.trim();
-const githubHref = import.meta.env.PUBLIC_GITHUB_URL ?? (process.env.GITHUB_REPOSITORY ? `https://github.com/${process.env.GITHUB_REPOSITORY}` : undefined);
+const githubRepository = process.env.GITHUB_REPOSITORY ?? 'giorgionetg/bboyarena';
+const githubHref = import.meta.env.PUBLIC_GITHUB_URL?.trim() ?? `https://github.com/${githubRepository}`;
+const githubLabel = githubRepository.split('/').pop() ?? 'GitHub';
 const footerLinks = [
   { label: copy.footer.manifesto, href: buildLocalizedPath(locale, '/manifesto') },
   { label: copy.footer.privacy, href: buildLocalizedPath(locale, '/privacy') },
@@ -283,6 +285,28 @@ const registerServiceWorkerTag = pwaInfo?.registerSW?.scriptTag;
     class={`min-h-screen flex flex-col justify-between text-[#241f18] selection:bg-[#9fb55f] selection:text-white ${plainBackground ? 'manifesto-plain-bg' : ''}`}
     style={plainBackground ? 'background:#eae0d0 !important; background-image:none !important;' : undefined}
   >
+    <div class="os-ribbon-shell">
+      <a
+        href={githubHref}
+        target="_blank"
+        rel="noreferrer noopener"
+        aria-label={`Open source repository on ${githubLabel}`}
+        class="os-ribbon group"
+      >
+        <span class="os-ribbon__inner">
+          <span class="os-ribbon__content">
+            <svg viewBox="0 0 24 24" class="os-ribbon__icon" aria-hidden="true">
+              <path
+                d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 7 9.5.5.1.7-.2.7-.5v-1.8c-2.9.6-3.5-1.2-3.5-1.2-.5-1.2-1.1-1.5-1.1-1.5-.9-.7.1-.7.1-.7 1 0 1.6 1 1.6 1 .9 1.6 2.3 1.2 2.9.9.1-.7.4-1.2.7-1.5-2.3-.3-4.7-1.1-4.7-5 0-1.1.4-2.1 1.1-2.8-.1-.3-.5-1.3.1-2.7 0 0 .9-.3 2.8 1.1a9.7 9.7 0 0 1 5 0c1.9-1.4 2.8-1.1 2.8-1.1.6 1.4.2 2.4.1 2.7.7.7 1.1 1.7 1.1 2.8 0 3.9-2.4 4.7-4.7 5 .4.4.8 1.2.8 2.4v3.6c0 .3.2.6.7.5 4.1-1.3 7-5.1 7-9.5 0-5.5-4.5-10-10-10Z"
+                fill="currentColor"
+              />
+            </svg>
+            <span>GitHub</span>
+          </span>
+        </span>
+      </a>
+    </div>
+
     <!-- Header Navigation -->
     <header class="sticky top-0 z-50 w-full border-b-4 border-[#4f4337] bg-[rgba(234,224,208,0.95)] shadow-[0_4px_0_rgba(95,82,69,0.7)]">
       <div class="mx-auto max-w-6xl px-4 py-3 sm:py-4">
