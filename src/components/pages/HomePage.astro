@@ -14,7 +14,7 @@ const copy = getHomeCopy(locale);
 const siteCopy = getSiteCopy(locale);
 const devlogs = (await getRecentNewsItems(8)).filter((item) => item.category === 'devlog').slice(0, 3);
 const manifestoHref = buildLocalizedPath(locale, '/manifesto');
-const discordHref = import.meta.env.PUBLIC_DISCORD_URL?.trim();
+const discordHref = import.meta.env.PUBLIC_DISCORD_URL?.trim() ?? buildLocalizedPath(locale, '/contact');
 const githubHref =
   import.meta.env.PUBLIC_GITHUB_URL?.trim() ??
   (process.env.GITHUB_REPOSITORY ? `https://github.com/${process.env.GITHUB_REPOSITORY}` : buildLocalizedPath(locale, '/open-development'));
@@ -99,16 +99,16 @@ const newsletterHref = import.meta.env.PUBLIC_NEWSLETTER_URL?.trim() ?? buildLoc
         </div>
       </aside>
     </section>
-
-    <section class="grid gap-4 pt-0 lg:grid-cols-3 lg:pt-8 xl:pt-10">
+    
+    <section class="grid gap-4 lg:grid-cols-3">
       <SecondaryCTA
         label={copy.discordLabel}
         title={copy.discordTitle}
         description={copy.discordDescription}
         cta={copy.discordCta}
-        href={discordHref ?? ''}
+        href={discordHref}
         icon="discord"
-        external={Boolean(discordHref)}
+        external={Boolean(import.meta.env.PUBLIC_DISCORD_URL?.trim())}
         buttonPlacement="bottom"
         buttonWidth="full"
       />
