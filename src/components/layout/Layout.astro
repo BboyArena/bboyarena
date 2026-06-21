@@ -42,6 +42,7 @@ const defaultSeoTitle = import.meta.env.PUBLIC_SEO_TITLE ?? 'BboyArena.org';
 const defaultSeoDescription =
   import.meta.env.PUBLIC_SEO_DESCRIPTION ??
   'BboyArena.org is an independent, community-driven project about breaking culture, creative movement, and experimental game development, built with open development and privacy-friendly design.';
+const appVersion = import.meta.env.PUBLIC_APP_VERSION?.trim() ?? process.env.GITHUB_SHA ?? 'dev';
 const defaultSiteName = import.meta.env.PUBLIC_SEO_SITE_NAME ?? 'BboyArena.org';
 const defaultLocale = (import.meta.env.PUBLIC_SEO_LOCALE as LocaleCode | undefined) ?? 'en-US';
 const defaultImage = import.meta.env.PUBLIC_SEO_OG_IMAGE ?? withBasePath('/og-image.png');
@@ -137,6 +138,7 @@ const registerServiceWorkerTag = pwaInfo?.registerSW?.scriptTag;
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content={siteName} />
+    <meta name="bboyarena-app-version" content={appVersion} />
     <Fragment set:html={manifestLinkTag} />
     <link rel="canonical" href={seo.canonicalUrl} />
     {resolvedAlternates.map((link) => (
@@ -186,6 +188,96 @@ const registerServiceWorkerTag = pwaInfo?.registerSW?.scriptTag;
     )}
     <script type="application/ld+json" set:html={JSON.stringify(seo.jsonLd)} />
     {registerServiceWorkerTag && <Fragment set:html={registerServiceWorkerTag} />}
+    <script define:vars={{ appVersion }}>
+      {`
+        (() => {
+          const storageKey = 'bboyarena-app-version';
+          const bannerId = 'bboyarena-update-banner';
+
+          const safeGet = () => {
+            try {
+              return window.localStorage.getItem(storageKey);
+            } catch {
+              return null;
+            }
+          };
+
+          const safeSet = (value) => {
+            try {
+              window.localStorage.setItem(storageKey, value);
+            } catch {
+              // Ignore storage failures in private mode or restricted contexts.
+            }
+          };
+
+          const removeBanner = () => {
+            document.getElementById(bannerId)?.remove();
+          };
+
+          const showBanner = () => {
+            if (document.getElementById(bannerId)) return;
+
+            const banner = document.createElement('div');
+            banner.id = bannerId;
+            banner.setAttribute('role', 'status');
+            banner.setAttribute('aria-live', 'polite');
+            banner.className =
+              'fixed bottom-4 left-4 right-4 z-[999] mx-auto flex max-w-xl flex-col gap-3 rounded-[1.25rem] border-2 border-[#4f4337] bg-[#f4ebdf] p-4 shadow-[0_12px_0_rgba(95,82,69,0.25)] sm:flex-row sm:items-center sm:justify-between';
+
+            banner.innerHTML = `
+              <div class="text-sm leading-relaxed text-[#2d261f]">
+                <strong class="block text-[10px] font-black uppercase tracking-[0.24em] text-[#756553]">Aggiornamento disponibile</strong>
+                <span>È stata pubblicata una nuova versione dell'app. Ricarica per aggiornare i contenuti.</span>
+              </div>
+              <div class="flex gap-2">
+                <button type="button" data-update-dismiss class="street-button inline-flex h-11 items-center justify-center rounded-full px-4 text-[10px] font-black uppercase tracking-[0.24em]">Più tardi</button>
+                <button type="button" data-update-reload class="street-button street-button-primary inline-flex h-11 items-center justify-center rounded-full px-4 text-[10px] font-black uppercase tracking-[0.24em]">Ricarica ora</button>
+              </div>
+            `;
+
+            banner.querySelector('[data-update-dismiss]')?.addEventListener('click', removeBanner);
+            banner.querySelector('[data-update-reload]')?.addEventListener('click', async () => {
+              try {
+                const registration = await navigator.serviceWorker.getRegistration();
+                await registration?.update();
+              } catch {
+                // Ignore update errors and fall through to reload.
+              }
+
+              window.location.reload();
+            });
+
+            document.body.appendChild(banner);
+          };
+
+          const syncVersion = () => {
+            const storedVersion = safeGet();
+
+            if (!storedVersion) {
+              safeSet(appVersion);
+              return;
+            }
+
+            if (storedVersion !== appVersion) {
+              showBanner();
+            }
+          };
+
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+              safeSet(appVersion);
+              window.location.reload();
+            });
+          }
+
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', syncVersion, { once: true });
+          } else {
+            syncVersion();
+          }
+        })();
+      `}
+    </script>
   </head>
   <body
     class={`min-h-screen flex flex-col justify-between text-[#241f18] selection:bg-[#9fb55f] selection:text-white ${plainBackground ? 'manifesto-plain-bg' : ''}`}

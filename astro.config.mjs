@@ -4,8 +4,10 @@ import tailwindcss from '@tailwindcss/vite';
 import AstroPWA from '@vite-pwa/astro';
 
 const repoName = process.env.GITHUB_REPOSITORY?.split('/')[1];
+const publicSiteUrl = process.env.PUBLIC_SITE_URL;
+const isCustomDomain = Boolean(publicSiteUrl) && !publicSiteUrl.includes('github.io');
 const isGithubPagesProjectRepo = process.env.GITHUB_ACTIONS === 'true' && repoName && !repoName.endsWith('.github.io');
-const base = process.env.ASTRO_BASE_PATH ?? (isGithubPagesProjectRepo ? `/${repoName}/` : '/');
+const base = process.env.ASTRO_BASE_PATH ?? (isCustomDomain ? '/' : isGithubPagesProjectRepo ? `/${repoName}/` : '/');
 const withBase = (pathname) => (base === '/' ? pathname : `${base.replace(/\/$/, '')}${pathname.startsWith('/') ? pathname : `/${pathname}`}`);
 const seoSiteName = process.env.PUBLIC_SEO_SITE_NAME ?? process.env.PUBLIC_SEO_TITLE ?? 'BboyArena.org';
 const seoTitle = process.env.PUBLIC_SEO_TITLE ?? seoSiteName;
@@ -15,7 +17,7 @@ const seoDescription =
 
 // https://astro.build/config
 export default defineConfig({
-  site: process.env.PUBLIC_SITE_URL,
+  site: publicSiteUrl,
   base,
   i18n: {
     defaultLocale: 'en-US',

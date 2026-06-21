@@ -52,10 +52,9 @@ Il client Supabase è pre-configurato in `src/lib/supabase.ts`. Per connetterlo 
 ```env
 PUBLIC_SUPABASE_URL=https://tuo-progetto.supabase.co
 PUBLIC_SUPABASE_ANON_KEY=tua-chiave-anonima-supabase
-PUBLIC_SITE_URL=https://tuo-sito.example.com
+PUBLIC_SITE_URL=https://bboyarena.org
 PUBLIC_DISCORD_URL=https://discord.gg/tuo-invito
 PUBLIC_NEWSLETTER_URL=https://tuo-newsletter.example.com
-ASTRO_BASE_PATH=/
 ```
 
 *Nota: le variabili con prefisso `PUBLIC_` vengono esposte sia client-side che server-side nel contesto di Astro.*
@@ -161,6 +160,8 @@ export default defineConfig({
   // ...
 });
 ```
+
+Se invece usi un dominio personalizzato come `https://bboyarena.org/`, il `base` deve restare `/` e devi impostare `PUBLIC_SITE_URL=https://bboyarena.org` nell'environment `github-pages`.
 
 ### Procedura di Deploy
 1. Esegui `npm run build` per generare la cartella `dist/`.

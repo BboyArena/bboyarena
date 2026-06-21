@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: github-pages
     env:
+      PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+      PUBLIC_APP_VERSION: ${{ github.sha }}
       PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
       PUBLIC_SUPABASE_ANON_KEY: ${{ vars.PUBLIC_SUPABASE_ANON_KEY }}
       PUBLIC_DISCORD_URL: ${{ vars.PUBLIC_DISCORD_URL }}
@@ -56,12 +58,10 @@ jobs:
       - name: Compute public site URL
         shell: bash
         run: |
-          repo_name="${GITHUB_REPOSITORY##*/}"
-          owner_name="${GITHUB_REPOSITORY_OWNER}"
-          if [ "$repo_name" = "$owner_name.github.io" ]; then
-            echo "PUBLIC_SITE_URL=https://${owner_name}.github.io/" >> "$GITHUB_ENV"
+          if [ -n "${PUBLIC_SITE_URL:-}" ]; then
+            echo "Using configured PUBLIC_SITE_URL=$PUBLIC_SITE_URL"
           else
-            echo "PUBLIC_SITE_URL=https://${owner_name}.github.io/${repo_name}/" >> "$GITHUB_ENV"
+            echo "PUBLIC_SITE_URL=https://bboyarena.org/" >> "$GITHUB_ENV"
           fi
 
       - name: Install dependencies

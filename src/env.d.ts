@@ -4,6 +4,7 @@ interface ImportMetaEnv {
   readonly PUBLIC_SUPABASE_URL?: string;
   readonly PUBLIC_SUPABASE_ANON_KEY?: string;
   readonly PUBLIC_SITE_URL?: string;
+  readonly PUBLIC_APP_VERSION?: string;
   readonly PUBLIC_DISCORD_URL?: string;
   readonly PUBLIC_NEWSLETTER_URL?: string;
   readonly PUBLIC_SEO_SITE_NAME?: string;
