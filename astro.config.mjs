@@ -39,7 +39,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       base,
       includeHtmlHeadLinks: false,
-      injectRegister: 'script-defer',
+      injectRegister: false,
       devOptions: {
         enabled: false,
         type: 'module'

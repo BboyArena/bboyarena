@@ -128,7 +128,6 @@ const seo = buildSeoData({
 
 const manifestLinkTag =
   pwaInfo?.webManifest.linkTag ?? `<link rel="manifest" href="${withBasePath('/manifest.webmanifest')}" />`;
-const registerServiceWorkerTag = enableVersioning ? pwaInfo?.registerSW?.scriptTag : undefined;
 ---
 
 <!doctype html>
@@ -275,8 +274,41 @@ const registerServiceWorkerTag = enableVersioning ? pwaInfo?.registerSW?.scriptT
       </style>
     )}
     <script type="application/ld+json" set:html={JSON.stringify(seo.jsonLd)} />
-    {registerServiceWorkerTag && <Fragment set:html={registerServiceWorkerTag} />}
     {enableVersioning && (
+      <script is:inline>
+        {`
+          (() => {
+            if (!('serviceWorker' in navigator)) return;
+
+            const swUrl = ${JSON.stringify(withBasePath('/sw.js'))};
+            const swScope = ${JSON.stringify(withBasePath('/'))};
+
+            const register = async () => {
+              try {
+                const registration = await navigator.serviceWorker.register(swUrl, {
+                  scope: swScope,
+                  type: 'classic',
+                  updateViaCache: 'none'
+                });
+
+                try {
+                  await registration.update();
+                } catch {
+                  // Ignore update failures and keep the existing registration.
+                }
+              } catch {
+                // Ignore registration failures silently; the app still works without SW.
+              }
+            };
+
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', register, { once: true });
+            } else {
+              void register();
+            }
+          })();
+        `}
+      </script>
       <script define:vars={{ appVersion }}>
       {`
         (() => {
