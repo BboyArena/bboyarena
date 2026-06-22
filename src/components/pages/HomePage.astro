@@ -1,9 +1,11 @@
 ---
 import Layout from '../layout/Layout.astro';
 import SecondaryCTA from '../cta/SecondaryCTA.astro';
+import PanoramaFallback from '../media/PanoramaFallback.astro';
 import { buildLocalizedAlternates, buildLocalizedPath, getSiteCopy, type LocaleCode } from '../../lib/i18n';
 import { getRecentNewsItems } from '../../lib/news';
 import { getHomeCopy } from '../../lib/home';
+import { buildPocketBaseDevlogListUrl } from '../../lib/pocketbase';
 
 interface Props {
   locale: LocaleCode;
@@ -19,6 +21,9 @@ const githubHref =
   import.meta.env.PUBLIC_GITHUB_URL?.trim() ??
   (process.env.GITHUB_REPOSITORY ? `https://github.com/${process.env.GITHUB_REPOSITORY}` : buildLocalizedPath(locale, '/open-development'));
 const newsletterHref = import.meta.env.PUBLIC_NEWSLETTER_URL?.trim() ?? buildLocalizedPath(locale, '/contact');
+const pocketBaseDevlogListUrl = buildPocketBaseDevlogListUrl(3);
+const devlogArchiveHref = buildLocalizedPath(locale, '/news/devlog');
+const hasLocalDevlogs = devlogs.length > 0;
 ---
 
 <Layout
@@ -76,35 +81,48 @@ const newsletterHref = import.meta.env.PUBLIC_NEWSLETTER_URL?.trim() ?? buildLoc
         </div>
       </div>
 
-      <aside class="street-dark rounded-[1.75rem] p-5 sm:p-7">
-        <p class="text-[10px] font-black uppercase tracking-[0.38em] text-[#d9c9b1]">{copy.devlogsTitle}</p>
-        <p class="mt-3 max-w-xl text-sm leading-relaxed text-[#f8f1e7]">{copy.devlogsLead}</p>
-
-        <div class="mt-5 space-y-4">
-          {devlogs.length > 0 ? (
-            devlogs.map((item) => (
-              <article class="rounded-[1.25rem] border border-[#6a5b4d] bg-[rgba(245,237,224,0.08)] p-4">
-                <div class="flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-[0.24em]">
-                  <span class="street-badge-passive rounded-full border-[#d9e2bf]/30 bg-[rgba(163,185,90,0.12)] px-2.5 py-1 text-[#d9e2bf]">
-                    {siteCopy.news.categories.devlog.label}
-                  </span>
-                  <span class="text-[#e8ddc6]">{new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(item.publishedTime))}</span>
-                </div>
-                <h2 class="mt-3 text-lg font-black uppercase tracking-[0.12em] text-[#f8f1e7]">{item.title}</h2>
-                <p class="mt-2 text-sm leading-relaxed text-[#f8f1e7]">{item.excerpt}</p>
-                <div class="mt-4 text-[10px] font-black uppercase tracking-[0.24em]">
-                  <a href={buildLocalizedPath(locale, `/news/${item.category}/${item.slug}`)} class="inline-flex items-center gap-1 text-[#d9e2bf] underline decoration-[#d9e2bf]/45 decoration-2 underline-offset-4 transition hover:text-white hover:decoration-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d9e2bf]">
-                    {copy.devlogCardCta}<span aria-hidden="true">→</span>
-                  </a>
-                </div>
-              </article>
-            ))
-          ) : (
-            <div class="rounded-[1.25rem] border border-[#6a5b4d] bg-[rgba(245,237,224,0.08)] p-4">
-              <p class="text-sm leading-relaxed text-[#f8f1e7]">{copy.emptyDevlogs}</p>
+      <aside
+        class={`street-dark flex h-full flex-col overflow-hidden rounded-[1.75rem] ${
+          hasLocalDevlogs ? 'p-5 sm:p-7' : 'p-0'
+        }`}
+      >
+        {hasLocalDevlogs ? (
+          <>
+            <div class="flex flex-wrap items-center gap-2">
+              <p class="text-[10px] font-black uppercase tracking-[0.38em] text-[#d9c9b1]">{copy.devlogsTitle}</p>
+              {pocketBaseDevlogListUrl && (
+                <span class="street-chip rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.22em] text-[#f8f1e7]">
+                  PocketBase live
+                </span>
+              )}
             </div>
-          )}
-        </div>
+            <p class="mt-3 max-w-xl text-sm leading-relaxed text-[#f8f1e7]">{copy.devlogsLead}</p>
+
+            <div class="mt-5 flex min-h-0 flex-1 flex-col gap-4" data-pb-devlog-feed>
+              {devlogs.map((item) => (
+                <article class="rounded-[1.25rem] border border-[#6a5b4d] bg-[rgba(245,237,224,0.08)] p-4">
+                  <div class="flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-[0.24em]">
+                    <span class="street-badge-passive rounded-full border-[#d9e2bf]/30 bg-[rgba(163,185,90,0.12)] px-2.5 py-1 text-[#d9e2bf]">
+                      {siteCopy.news.categories.devlog.label}
+                    </span>
+                    <span class="text-[#e8ddc6]">{new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(item.publishedTime))}</span>
+                  </div>
+                  <h2 class="mt-3 text-lg font-black uppercase tracking-[0.12em] text-[#f8f1e7]">{item.title}</h2>
+                  <p class="mt-2 text-sm leading-relaxed text-[#f8f1e7]">{item.excerpt}</p>
+                  <div class="mt-4 text-[10px] font-black uppercase tracking-[0.24em]">
+                    <a href={buildLocalizedPath(locale, `/news/${item.category}/${item.slug}`)} class="inline-flex items-center gap-1 text-[#d9e2bf] underline decoration-[#d9e2bf]/45 decoration-2 underline-offset-4 transition hover:text-white hover:decoration-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d9e2bf]">
+                      {copy.devlogCardCta}<span aria-hidden="true">→</span>
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div class="flex min-h-0 flex-1 flex-col gap-4" data-pb-devlog-feed>
+            <PanoramaFallback image="/equirectangular-01.png" fillParent />
+          </div>
+        )}
       </aside>
     </section>
     
@@ -144,4 +162,74 @@ const newsletterHref = import.meta.env.PUBLIC_NEWSLETTER_URL?.trim() ?? buildLoc
       />
     </section>
   </div>
+
+  {pocketBaseDevlogListUrl && (
+    <script define:vars={{ pocketBaseDevlogListUrl, devlogArchiveHref, locale }}>
+      {`
+        (() => {
+          const feed = document.querySelector('[data-pb-devlog-feed]');
+          if (!feed) return;
+
+          const escapeHtml = (value) =>
+            String(value ?? '')
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#39;');
+
+          const renderCard = (item) => {
+            const slug = String(item.slug || item.id || '').trim();
+            const title = escapeHtml(item.title || 'Untitled devlog');
+            const excerpt = escapeHtml(item.excerpt || item.description || '');
+            const publishedTime = item.publishedTime || item.created || '';
+            const author = escapeHtml(item.author || 'PocketBase');
+            const image = item.image ? String(item.image) : '';
+            const imageAlt = escapeHtml(item.imageAlt || item.title || 'PocketBase devlog image');
+
+            return \`
+              <article class="rounded-[1.25rem] border-2 border-[#4f4337] bg-[rgba(245,237,224,0.08)] p-4">
+                <div class="flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-[0.24em]">
+                  <span class="street-badge-passive rounded-full border-[#d9e2bf]/30 bg-[rgba(163,185,90,0.12)] px-2.5 py-1 text-[#d9e2bf]">Devlog</span>
+                  <span class="text-[#e8ddc6]">${publishedTime ? new Date(publishedTime).toLocaleDateString('${locale}') : ''}</span>
+                  ${author ? \`<span class="text-[#bc613a]">${author}</span>\` : ''}
+                </div>
+                <h3 class="mt-3 text-lg font-black uppercase tracking-[0.12em] text-[#f8f1e7]">${title}</h3>
+                <p class="mt-2 text-sm leading-relaxed text-[#f8f1e7]">${excerpt}</p>
+                ${image ? \`
+                  <div class="mt-4 overflow-hidden rounded-[1rem] border border-[#6a5b4d] bg-[#1f1a15]">
+                    <img src="${image}" alt="${imageAlt}" class="h-auto w-full object-cover" loading="lazy" decoding="async" />
+                  </div>
+                \` : ''}
+                <div class="mt-4 flex flex-wrap items-center gap-3 text-[10px] font-black uppercase tracking-[0.24em]">
+                  ${slug ? \`
+                    <a href="${devlogArchiveHref}/${slug}" class="street-button rounded-full px-3 py-1.5 text-[#2d251d] transition hover:bg-[#f4ebdf]">
+                      Read more
+                    </a>
+                  \` : ''}
+                </div>
+              </article>
+            \`;
+          };
+
+          const loadPocketBaseDevlogs = async () => {
+            try {
+              const response = await fetch(pocketBaseDevlogListUrl, { headers: { Accept: 'application/json' } });
+              if (!response.ok) return;
+
+              const payload = await response.json();
+              const records = Array.isArray(payload?.items) ? payload.items : [];
+              if (records.length === 0) return;
+
+              feed.innerHTML = records.slice(0, 3).map(renderCard).join('');
+            } catch {
+              // Keep the local fallback silently.
+            }
+          };
+
+          void loadPocketBaseDevlogs();
+        })();
+      `}
+    </script>
+  )}
 </Layout>

@@ -52,6 +52,7 @@ const defaultTwitterSite = import.meta.env.PUBLIC_SEO_TWITTER_SITE;
 const defaultTwitterCreator = import.meta.env.PUBLIC_SEO_TWITTER_CREATOR;
 const defaultAuthor = import.meta.env.PUBLIC_SEO_AUTHOR ?? defaultSiteName;
 const chromeColor = '#eae0d0';
+const enableVersioning = import.meta.env.PROD;
 const repoName = process.env.GITHUB_REPOSITORY?.split('/')[1] ?? '';
 const officialOrigin = site?.origin ?? '';
 const legacyProjectBase = repoName ? `/${repoName}` : '';
@@ -127,7 +128,7 @@ const seo = buildSeoData({
 
 const manifestLinkTag =
   pwaInfo?.webManifest.linkTag ?? `<link rel="manifest" href="${withBasePath('/manifest.webmanifest')}" />`;
-const registerServiceWorkerTag = pwaInfo?.registerSW?.scriptTag;
+const registerServiceWorkerTag = enableVersioning ? pwaInfo?.registerSW?.scriptTag : undefined;
 ---
 
 <!doctype html>
@@ -275,7 +276,8 @@ const registerServiceWorkerTag = pwaInfo?.registerSW?.scriptTag;
     )}
     <script type="application/ld+json" set:html={JSON.stringify(seo.jsonLd)} />
     {registerServiceWorkerTag && <Fragment set:html={registerServiceWorkerTag} />}
-    <script define:vars={{ appVersion }}>
+    {enableVersioning && (
+      <script define:vars={{ appVersion }}>
       {`
         (() => {
           const storageKey = 'bboyarena-app-version';
@@ -364,7 +366,8 @@ const registerServiceWorkerTag = pwaInfo?.registerSW?.scriptTag;
           }
         })();
       `}
-    </script>
+      </script>
+    )}
   </head>
   <body
     class={`min-h-screen flex flex-col justify-between text-[#241f18] selection:bg-[#9fb55f] selection:text-white ${plainBackground ? 'manifesto-plain-bg' : ''}`}

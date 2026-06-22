@@ -1,0 +1,145 @@
+---
+import Layout from '../components/layout/Layout.astro';
+import PanoramaFallback from '../components/media/PanoramaFallback.astro';
+import { buildLocalizedAlternates, buildLocalizedPath, getLocaleCodeFromPath, getSiteCopy } from '../lib/i18n';
+import { buildPocketBaseDevlogRecordUrl, resolvePocketBaseDevlogPath } from '../lib/pocketbase';
+
+const resolvedPath = resolvePocketBaseDevlogPath(Astro.url.pathname);
+const locale = resolvedPath?.locale ?? getLocaleCodeFromPath(Astro.url.pathname.split('/').filter(Boolean)[0]);
+const copy = getSiteCopy(locale);
+const devlogBasePath = buildLocalizedPath(locale, '/news/devlog');
+const pocketBaseRecordUrl = resolvedPath ? buildPocketBaseDevlogRecordUrl(resolvedPath.slug) : null;
+---
+
+<Layout
+  title={copy.news.title}
+  description={copy.news.intro}
+  locale={locale}
+  pagePath="/404"
+  canonical={buildLocalizedPath(locale, '/404')}
+  alternateLinks={buildLocalizedAlternates('/404')}
+  noindex
+>
+  <div class="mx-auto flex w-full max-w-4xl flex-col gap-6">
+    <section class="street-panel rounded-[1.75rem] p-5 sm:p-7">
+      <p class="text-[10px] font-black uppercase tracking-[0.38em] text-[#756553]">404</p>
+      <h1 class="mt-3 text-4xl font-black uppercase leading-[0.92] tracking-[0.16em] text-[#2d261f] sm:text-5xl">
+        Page not found
+      </h1>
+      <p class="mt-4 max-w-3xl text-sm leading-relaxed text-[#54483b] sm:text-base" data-pb-404-copy>
+        The requested page does not exist here. If this is a devlog route, we will try to load it from PocketBase.
+      </p>
+    </section>
+
+    <section class="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+      <div class="street-dark rounded-[1.75rem] p-5 sm:p-7">
+        <p class="text-[10px] font-black uppercase tracking-[0.38em] text-[#d9c9b1]">Live fallback</p>
+        <div class="mt-4 space-y-4" data-pb-404-feed>
+          <PanoramaFallback
+            image="/equirectangular-01.png"
+          />
+        </div>
+      </div>
+
+      <aside class="street-panel rounded-[1.75rem] p-5 sm:p-7">
+        <p class="text-[10px] font-black uppercase tracking-[0.38em] text-[#756553]">What to do next</p>
+        <div class="mt-4 space-y-4 text-sm leading-relaxed text-[#54483b]">
+          <p>
+            Return to the
+            <a href={buildLocalizedPath(locale, '/news')} class="font-black uppercase tracking-[0.16em] text-[#7c8f4c]">
+              news hub
+            </a>
+            or jump back to the devlog archive.
+          </p>
+          <p>
+            If PocketBase has a matching record, you will see it below without rebuilding or pushing new code.
+          </p>
+          <div class="flex flex-wrap gap-3 pt-2 text-[10px] font-black uppercase tracking-[0.24em]">
+            <a href={buildLocalizedPath(locale, '/')} class="street-button rounded-full px-3 py-1.5 text-[#2d251d] transition hover:bg-[#f4ebdf]">
+              Home
+            </a>
+            <a href={buildLocalizedPath(locale, '/news/devlog')} class="text-[#7c8f4c] transition hover:text-[#5d6f39]">
+              Devlog archive
+            </a>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </div>
+
+  {pocketBaseRecordUrl && (
+    <script define:vars={{ pocketBaseRecordUrl, devlogBasePath, locale }}>
+      {`
+        (() => {
+          const feed = document.querySelector('[data-pb-404-feed]');
+          const copy = document.querySelector('[data-pb-404-copy]');
+          if (!feed) return;
+
+          const escapeHtml = (value) =>
+            String(value ?? '')
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#39;');
+
+          const renderRecord = (item) => {
+            const title = escapeHtml(item.title || 'Untitled devlog');
+            const excerpt = escapeHtml(item.excerpt || item.description || '');
+            const body = escapeHtml(Array.isArray(item.body) ? item.body.join(' ') : item.body || '');
+            const publishedTime = item.publishedTime || item.created || '';
+            const author = escapeHtml(item.author || 'PocketBase');
+            const image = item.image ? String(item.image) : '';
+            const imageAlt = escapeHtml(item.imageAlt || item.title || 'PocketBase devlog image');
+            const slug = String(item.slug || '').trim();
+
+            return \`
+              <article class="rounded-[1.25rem] border-2 border-[#4f4337] bg-[rgba(245,237,224,0.08)] p-4">
+                <div class="flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-[0.24em]">
+                  <span class="street-badge-passive rounded-full border-[#d9e2bf]/30 bg-[rgba(163,185,90,0.12)] px-2.5 py-1 text-[#d9e2bf]">Devlog</span>
+                  <span class="text-[#e8ddc6]">${publishedTime ? new Date(publishedTime).toLocaleDateString(locale) : ''}</span>
+                  <span class="text-[#bc613a]">${author}</span>
+                </div>
+                <h2 class="mt-3 text-lg font-black uppercase tracking-[0.12em] text-[#f8f1e7]">${title}</h2>
+                <p class="mt-2 text-sm leading-relaxed text-[#f8f1e7]">${excerpt || body}</p>
+                ${image ? \`
+                  <div class="mt-4 overflow-hidden rounded-[1rem] border border-[#6a5b4d] bg-[#1f1a15]">
+                    <img src="${image}" alt="${imageAlt}" class="h-auto w-full object-cover" loading="lazy" decoding="async" />
+                  </div>
+                \` : ''}
+                ${slug ? \`
+                  <div class="mt-4 text-[10px] font-black uppercase tracking-[0.24em]">
+                    <a href="${devlogBasePath}/${slug}" class="street-button rounded-full px-3 py-1.5 text-[#2d251d] transition hover:bg-[#f4ebdf]">
+                      Open devlog
+                    </a>
+                  </div>
+                \` : ''}
+              </article>
+            \`;
+          };
+
+          const loadPocketBaseDevlog = async () => {
+            try {
+              const response = await fetch(pocketBaseRecordUrl, { headers: { Accept: 'application/json' } });
+              if (!response.ok) return;
+
+              const payload = await response.json();
+              const record = Array.isArray(payload?.items) ? payload.items[0] : payload?.item ?? payload;
+              if (!record || !record.title) return;
+
+              if (copy) {
+                copy.textContent = 'This route exists in PocketBase. Showing the live version below.';
+              }
+
+              feed.innerHTML = renderRecord(record);
+            } catch {
+              // Keep the panorama fallback in place.
+            }
+          };
+
+          void loadPocketBaseDevlog();
+        })();
+      `}
+    </script>
+  )}
+</Layout>

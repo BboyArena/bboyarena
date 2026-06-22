@@ -41,7 +41,7 @@ export default defineConfig({
       includeHtmlHeadLinks: false,
       injectRegister: 'script-defer',
       devOptions: {
-        enabled: true,
+        enabled: false,
         type: 'module'
       },
       manifest: {
@@ -75,7 +75,8 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,webp,json}']
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,json}'],
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024
       }
     })
   ],

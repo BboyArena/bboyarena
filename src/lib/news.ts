@@ -64,43 +64,6 @@ export const NEWS_CATEGORIES: Record<NewsCategory, NewsCategoryMeta> = {
 
 const LOCAL_NEWS: LocalNewsItem[] = [
   {
-    category: 'devlog',
-    slug: 'lighting-pass-urban-court',
-    sourceKind: 'local',
-    title: 'Devlog 01: the urban court lighting pass',
-    description: 'We refined lighting, materials, and contrast to give the plaza a dirty but readable look.',
-    excerpt: 'The scene now reads the concrete, graffiti, and back-alley details better without losing the PS2 mood.',
-    publishedTime: '2026-06-18T09:00:00+02:00',
-    modifiedTime: '2026-06-18T09:30:00+02:00',
-    author: 'Breakdance 3D Team',
-    image: '/og-image.png',
-    imageAlt: 'Piazza urbana di Breakdance 3D',
-    tags: ['devlog', 'lighting', 'art-direction'],
-    body: [
-      'We made a dedicated pass on lighting and contrast to keep the look gritty but readable.',
-      'The focus is to make the battle circle, tags, and movement zones stand out without flattening the atmosphere.',
-      'The next step is aligning effects and HUD to sharpen the arcade feel.'
-    ]
-  },
-  {
-    category: 'devlog',
-    slug: 'hud-readability-pass',
-    sourceKind: 'local',
-    title: 'Devlog 02: a cleaner, more readable HUD',
-    description: 'We cleaned up the HUD layout to give combo, stamina, and timer more breathing room.',
-    excerpt: 'Less visual noise, more hierarchy: the UI still feels street, but it is much clearer in play.',
-    publishedTime: '2026-06-17T18:45:00+02:00',
-    author: 'Breakdance 3D Team',
-    image: '/og-image.png',
-    imageAlt: 'HUD di Breakdance 3D',
-    tags: ['devlog', 'hud', 'ux'],
-    body: [
-      'We shifted the focus toward visual hierarchy and contrast to keep the pace high without overwhelming the player.',
-      'The timer and combo are now easier to read in high-pressure moments.',
-      'The goal is for the UI to support gameplay instead of stealing space from it.'
-    ]
-  },
-  {
     category: 'app',
     slug: 'news-hub-structure',
     sourceKind: 'local',
