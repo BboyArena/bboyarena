@@ -64,8 +64,9 @@ export default function PanoramaViewer({ image }: PanoramaViewerProps) {
           navbar: false,
           mousewheel: false,
           mousewheelCtrlKey: true,
-          touchmoveTwoFingers: true,
+          touchmoveTwoFingers: false,
           keyboard: false,
+          moveSpeed: 1,
           defaultYaw: '0deg',
           defaultPitch: '-5deg',
           defaultZoomLvl: 40,
@@ -97,5 +98,12 @@ export default function PanoramaViewer({ image }: PanoramaViewerProps) {
     return stop;
   }, [image]);
 
-  return <div ref={mountRef} className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url('${image}')` }} data-psv-panorama-container />;
+  return (
+    <div
+      ref={mountRef}
+      className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url('${image}')`, touchAction: 'none', overscrollBehavior: 'contain' }}
+      data-psv-panorama-container
+    />
+  );
 }
