@@ -12,6 +12,8 @@ interface ImportMetaEnv {
   readonly PUBLIC_POCKETBASE_URL?: string;
   readonly PUBLIC_POCKETBASE_DEVLOGS_COLLECTION?: string;
   readonly PUBLIC_POCKETBASE_DEVLOGS_FILTER?: string;
+  readonly PUBLIC_ANALYTICS_SCRIPT_URL?: string;
+  readonly PUBLIC_ANALYTICS_WEBSITE_ID?: string;
   readonly PUBLIC_SEO_SITE_NAME?: string;
   readonly PUBLIC_SEO_TITLE?: string;
   readonly PUBLIC_SEO_DESCRIPTION?: string;

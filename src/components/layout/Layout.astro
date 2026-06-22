@@ -90,6 +90,8 @@ const githubRepository = process.env.GITHUB_REPOSITORY ?? 'giorgionetg/bboyarena
 const githubHref = import.meta.env.PUBLIC_GITHUB_URL?.trim() ?? `https://github.com/${githubRepository}`;
 const githubLabel = githubRepository.split('/').pop() ?? 'GitHub';
 const sameAs = [instagramHref, discordHref, githubHref].filter((value): value is string => Boolean(value));
+const analyticsScriptUrl = import.meta.env.PUBLIC_ANALYTICS_SCRIPT_URL?.trim();
+const analyticsWebsiteId = import.meta.env.PUBLIC_ANALYTICS_WEBSITE_ID?.trim();
 const footerLinks = [
   { label: copy.footer.manifesto, href: buildLocalizedPath(locale, '/manifesto') },
   { label: copy.footer.privacy, href: buildLocalizedPath(locale, '/privacy') },
@@ -280,6 +282,13 @@ const manifestLinkTag =
       </style>
     )}
     <script type="application/ld+json" set:html={JSON.stringify(seo.jsonLd)} />
+    {analyticsScriptUrl && analyticsWebsiteId && (
+      <script
+        defer
+        src={analyticsScriptUrl}
+        data-website-id={analyticsWebsiteId}
+      ></script>
+    )}
     {enableVersioning && (
       <script is:inline>
         {`
