@@ -1,4 +1,4 @@
-import { buildLocalizedPath, type LocaleCode, SUPPORTED_LOCALES } from './i18n';
+import { buildLocalizedPath, type LocaleCode, SUPPORTED_LOCALES } from '../i18n';
 
 export interface ManifestoCardCopy {
   label: string;

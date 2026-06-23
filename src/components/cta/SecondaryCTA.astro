@@ -9,6 +9,7 @@ interface Props {
   external?: boolean;
   buttonPlacement?: 'inline' | 'bottom';
   buttonWidth?: 'auto' | 'full';
+  minHeight?: 'compact' | 'default' | 'none';
   class?: string;
 }
 
@@ -22,15 +23,21 @@ const {
   external = false,
   buttonPlacement = 'inline',
   buttonWidth = 'auto',
+  minHeight = 'default',
   class: className = ''
 } = Astro.props as Props;
 const isBottom = buttonPlacement === 'bottom';
 const buttonWidthClass = buttonWidth === 'full' ? 'w-full' : 'w-auto';
+const minHeightClass = {
+  compact: 'secondary-cta--compact',
+  default: 'secondary-cta--default',
+  none: 'secondary-cta--no-min-height'
+}[minHeight];
 ---
 
-<section class={`rounded-[1.35rem] border-2 border-[#4f4337] bg-[rgba(247,240,229,0.96)] p-4 shadow-[0_10px_0_rgba(95,82,69,0.34)] sm:p-5 ${className}`}>
-  <div class="flex items-center gap-4">
-    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-[#4f4337] bg-[#8f8371] text-white shadow-[0_4px_0_rgba(95,82,69,0.22)]">
+<section class={`secondary-cta ${minHeightClass} rounded-[1.35rem] border-2 border-[#4f4337] bg-[rgba(247,240,229,0.96)] p-4 shadow-[0_10px_0_rgba(95,82,69,0.34)] sm:p-5 ${className}`}>
+  <div class={`secondary-cta__layout ${isBottom ? 'secondary-cta__layout--bottom' : ''}`}>
+    <div class="secondary-cta__icon flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-[#4f4337] bg-[#8f8371] text-white shadow-[0_4px_0_rgba(95,82,69,0.22)]">
       {icon === 'discord' && (
         <svg viewBox="0 0 24 24" class="h-7 w-7" aria-hidden="true">
           <path
@@ -65,10 +72,10 @@ const buttonWidthClass = buttonWidth === 'full' ? 'w-full' : 'w-auto';
       )}
     </div>
 
-    <div class="min-w-0 flex-1">
+    <div class="secondary-cta__body min-w-0 flex-1">
       <p class="text-[10px] font-black uppercase tracking-[0.32em] text-[#756553]">{label}</p>
-      <div class={`mt-2 ${isBottom ? 'flex flex-col gap-4' : 'flex items-center gap-4'}`}>
-        <div class="min-w-0">
+      <div class={`secondary-cta__content mt-2 ${isBottom ? 'secondary-cta__content--bottom' : 'secondary-cta__content--inline'}`}>
+        <div class="secondary-cta__copy min-w-0">
           <h2 class="text-lg font-black uppercase leading-[0.92] tracking-[0.12em] text-[#2d261f] sm:text-xl">
             {title}
           </h2>
@@ -77,7 +84,7 @@ const buttonWidthClass = buttonWidth === 'full' ? 'w-full' : 'w-auto';
           </p>
         </div>
 
-        <div class={isBottom ? 'mt-1' : 'shrink-0'}>
+        <div class="secondary-cta__action">
           {href ? (
             <a
               href={href}
@@ -101,3 +108,116 @@ const buttonWidthClass = buttonWidth === 'full' ? 'w-full' : 'w-auto';
     </div>
   </div>
 </section>
+
+<style>
+  .secondary-cta {
+    container-type: inline-size;
+    container-name: secondary-cta;
+    display: flex;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .secondary-cta--default {
+    min-height: 20rem;
+  }
+
+  .secondary-cta--compact {
+    min-height: 13rem;
+  }
+
+  .secondary-cta--no-min-height {
+    min-height: 0;
+  }
+
+  .secondary-cta__layout {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 1rem;
+    min-width: 0;
+  }
+
+  .secondary-cta__layout--bottom {
+    align-items: stretch;
+  }
+
+  .secondary-cta__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .secondary-cta__content {
+    display: flex;
+    align-items: flex-start;
+    flex: 1;
+    gap: 1rem;
+    min-height: 0;
+  }
+
+  .secondary-cta__content--bottom {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .secondary-cta__copy {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .secondary-cta__action {
+    display: flex;
+    align-items: flex-end;
+    margin-top: 1rem;
+  }
+
+  .secondary-cta__content--bottom .secondary-cta__action {
+    margin-top: auto;
+    padding-top: 1rem;
+    width: 100%;
+  }
+
+  @container secondary-cta (max-width: 18rem) {
+    .secondary-cta--default {
+      min-height: 21.5rem;
+    }
+
+    .secondary-cta--compact {
+      min-height: 15rem;
+    }
+
+    .secondary-cta__layout {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.9rem;
+    }
+
+    .secondary-cta__icon {
+      align-self: center;
+      width: 3rem;
+      height: 3rem;
+    }
+
+    .secondary-cta__body {
+      flex: 1;
+      text-align: center;
+    }
+
+    .secondary-cta__content {
+      flex-direction: column;
+      flex: 1;
+      align-items: stretch;
+      gap: 0.9rem;
+    }
+
+    .secondary-cta__action {
+      width: 100%;
+    }
+
+    .secondary-cta__action > * {
+      width: 100%;
+    }
+  }
+</style>

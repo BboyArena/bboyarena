@@ -5,16 +5,143 @@ import PanoramaViewer from './PanoramaViewer';
 interface Props {
   image: string;
   fillParent?: boolean;
+  overlayTitle?: string;
+  overlayDescription?: string;
+  overlayCtaHref?: string;
+  overlayCtaLabel?: string;
 }
 
-const { image, fillParent = false } = Astro.props as Props;
+const {
+  image,
+  fillParent = false,
+  overlayTitle,
+  overlayDescription,
+  overlayCtaHref,
+  overlayCtaLabel
+} = Astro.props as Props;
 const resolvedImage = withBasePath(image);
+const hasOverlay = Boolean(overlayTitle || overlayDescription || (overlayCtaHref && overlayCtaLabel));
 ---
 
 <div
-  class={`relative w-full overflow-hidden bg-[#1f1a15] ${
+  class={`panorama-fallback relative w-full overflow-hidden bg-[#1f1a15] ${
     fillParent ? 'flex h-full min-h-0 flex-1 self-stretch' : 'aspect-[16/9]'
   }`}
 >
   <PanoramaViewer client:load image={resolvedImage} />
+  {hasOverlay && (
+    <article class="panorama-fallback__overlay" aria-label={overlayTitle}>
+      <div class="panorama-fallback__copy">
+        {overlayTitle && (
+          <h2 class="panorama-fallback__title">{overlayTitle}</h2>
+        )}
+        {overlayDescription && (
+          <p class="panorama-fallback__description">{overlayDescription}</p>
+        )}
+      </div>
+      {overlayCtaHref && overlayCtaLabel && (
+        <a class="panorama-fallback__button" href={overlayCtaHref}>
+          {overlayCtaLabel}
+        </a>
+      )}
+    </article>
+  )}
 </div>
+
+<style>
+  .panorama-fallback__overlay {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.95rem;
+    border-top: 1px solid rgba(248, 241, 231, 0.3);
+    background:
+      linear-gradient(180deg, rgba(32, 25, 18, 0.72), rgba(18, 14, 10, 0.9));
+    box-shadow:
+      0 16px 36px rgba(0, 0, 0, 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    padding: 1.2rem 1.35rem;
+    color: #f8f1e7;
+    pointer-events: auto;
+    backdrop-filter: blur(10px);
+  }
+
+  .panorama-fallback__copy {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .panorama-fallback__title {
+    margin: 0;
+    max-width: 34rem;
+    color: #fff8eb;
+    font-size: clamp(1.08rem, 2.6vw, 1.55rem);
+    font-weight: 900;
+    line-height: 1.02;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+  }
+
+  .panorama-fallback__description {
+    margin: 0.45rem 0 0;
+    max-width: 34rem;
+    color: rgba(248, 241, 231, 0.86);
+    font-size: 0.875rem;
+    line-height: 1.55;
+  }
+
+  .panorama-fallback__button {
+    display: inline-flex;
+    min-height: 2.75rem;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(55, 47, 39, 0.95);
+    border-radius: 999rem;
+    background: linear-gradient(180deg, #efe1cf, #d7c0a1);
+    box-shadow:
+      0 4px 0 rgba(55, 47, 39, 0.95),
+      inset 0 1px 0 rgba(255, 255, 255, 0.42);
+    color: #2d251d;
+    padding: 0.65rem 1rem;
+    font-size: 0.625rem;
+    font-weight: 900;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition:
+      transform 160ms ease,
+      background 160ms ease;
+  }
+
+  .panorama-fallback__button:hover {
+    background: linear-gradient(180deg, #f4eadc, #e0cdb3);
+    transform: translateY(-2px);
+  }
+
+  .panorama-fallback__button:focus-visible {
+    outline: 2px solid #d9e2bf;
+    outline-offset: 4px;
+  }
+
+  @media (max-width: 640px) {
+    .panorama-fallback__overlay {
+      gap: 0.8rem;
+      padding: 1rem;
+    }
+
+    .panorama-fallback__description {
+      font-size: 0.8125rem;
+    }
+
+    .panorama-fallback__button {
+      min-height: 2.6rem;
+    }
+  }
+</style>

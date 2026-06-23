@@ -5,6 +5,7 @@ import TailwindShowcase from '../dev-pages/tailwind-showcase.astro';
 import ComponentLab from '../dev-pages/component-lab.astro';
 import UiDemo from '../dev-pages/ui-demo.astro';
 import DevPlay from '../dev-pages/play.astro';
+import GameUiDemo from '../dev-pages/game-ui.astro';
 import DevLeaderboard from '../dev-pages/leaderboard.astro';
 
 export function getStaticPaths() {
@@ -16,6 +17,7 @@ export function getStaticPaths() {
     { params: { dev: '__dev/tailwind-showcase' } },
     { params: { dev: '__dev/component-lab' } },
     { params: { dev: '__dev/ui-demo' } },
+    { params: { dev: '__dev/game-ui' } },
     { params: { dev: '__dev/play' } },
     { params: { dev: '__dev/leaderboard' } }
   ];
@@ -30,6 +32,8 @@ const route = Astro.params.dev;
   <ComponentLab />
 ) : route === '__dev/ui-demo' ? (
   <UiDemo />
+) : route === '__dev/game-ui' ? (
+  <GameUiDemo />
 ) : route === '__dev/play' ? (
   <DevPlay />
 ) : (

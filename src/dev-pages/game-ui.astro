@@ -1,0 +1,146 @@
+---
+import Layout from '../components/layout/Layout.astro';
+import GameUIDemoScene from '../game/ui/GameUIDemoScene';
+---
+
+<Layout
+  title="BboyArena - Game UI Demo"
+  description="Internal 2D HUD demo scene for game panels, buttons and card states."
+  locale="en-US"
+  pagePath="/__dev/game-ui"
+  noindex
+>
+  <div class="dev-play-presenter mx-auto flex w-full max-w-7xl flex-1 flex-col gap-4">
+    <section class="dev-play-intro">
+      <div>
+        <p class="dev-play-kicker">Dev UI</p>
+        <h1 class="dev-play-title">2D HUD component atlas</h1>
+        <p class="dev-play-copy">
+          Internal game scene for checking cards, panels, buttons, HUD widgets and AAA-style surface states.
+        </p>
+      </div>
+
+      <div class="dev-play-tags" aria-label="Presenter notes">
+        <span>Panels</span>
+        <span>Buttons</span>
+        <span>HUD cards</span>
+        <span>Touch safe</span>
+      </div>
+    </section>
+
+    <section class="dev-play-stage" aria-label="Game UI demo stage">
+      <GameUIDemoScene client:only="react" />
+    </section>
+
+    <div class="dev-play-footer-note">
+      Internal test space only.
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .dev-play-presenter {
+    position: relative;
+    isolation: isolate;
+    padding: 0.25rem 0 0.5rem;
+  }
+
+  .dev-play-presenter::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(circle at 50% 14%, rgba(244, 190, 36, 0.12), transparent 26%),
+      radial-gradient(circle at 50% 82%, rgba(197, 106, 65, 0.14), transparent 24%),
+      linear-gradient(180deg, #030303 0%, #050505 42%, #090909 100%);
+  }
+
+  .dev-play-intro {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.5rem;
+    background:
+      linear-gradient(180deg, rgba(18, 18, 20, 0.94), rgba(10, 10, 12, 0.88)),
+      radial-gradient(circle at top, rgba(244, 190, 36, 0.1), transparent 42%);
+    box-shadow:
+      0 20px 60px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    padding: 1rem 1.15rem;
+    color: #f4efe7;
+  }
+
+  .dev-play-kicker {
+    margin: 0;
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 0.42em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: rgba(244, 190, 36, 0.92);
+  }
+
+  .dev-play-title {
+    margin: 0.55rem 0 0;
+    font-size: clamp(1.35rem, 2.8vw, 2.2rem);
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    line-height: 0.95;
+    text-transform: uppercase;
+  }
+
+  .dev-play-copy {
+    margin: 0.65rem 0 0;
+    max-width: 40rem;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: rgba(244, 239, 231, 0.78);
+  }
+
+  .dev-play-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .dev-play-tags span,
+  .dev-play-footer-note {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.45rem 0.8rem;
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.26em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: rgba(248, 241, 231, 0.86);
+    box-shadow: 0 8px 0 rgba(0, 0, 0, 0.28);
+  }
+
+  .dev-play-stage {
+    position: relative;
+    min-height: 68vh;
+    overflow: hidden;
+    border-radius: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    background:
+      radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.08), transparent 24%),
+      linear-gradient(180deg, rgba(5, 5, 5, 0.95), rgba(0, 0, 0, 0.98));
+    box-shadow:
+      0 30px 80px rgba(0, 0, 0, 0.66),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      inset 0 -18px 40px rgba(0, 0, 0, 0.45);
+  }
+
+  .dev-play-stage :global(#bboyarena-game-root) {
+    min-height: 68vh;
+  }
+
+  .dev-play-footer-note {
+    align-self: center;
+  }
+</style>

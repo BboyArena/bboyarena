@@ -1,4 +1,4 @@
-import { buildLocalizedPath, getLocaleConfig, SUPPORTED_LOCALES, type LocaleCode } from './i18n';
+import { buildLocalizedPath, getLocaleConfig, SUPPORTED_LOCALES, type LocaleCode } from '../i18n';
 
 export const LEGAL_LAST_UPDATED = 'June 2026';
 export const LEGAL_MAIN_EMAIL = import.meta.env.PUBLIC_CONTACT_EMAIL?.trim() || 'info@bboyarena.org';

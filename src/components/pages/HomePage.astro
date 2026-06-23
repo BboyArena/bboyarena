@@ -4,7 +4,7 @@ import SecondaryCTA from '../cta/SecondaryCTA.astro';
 import PanoramaFallback from '../media/PanoramaFallback.astro';
 import { buildLocalizedAlternates, buildLocalizedPath, getSiteCopy, type LocaleCode } from '../../lib/i18n';
 import { getRecentNewsItems } from '../../lib/news';
-import { getHomeCopy } from '../../lib/home';
+import { getHomeCopy } from '../../lib/pages/home';
 import { buildPocketBaseDevlogListUrl } from '../../lib/pocketbase';
 
 interface Props {
@@ -121,7 +121,14 @@ const hasLocalDevlogs = devlogs.length > 0;
           </>
         ) : (
           <div class="flex min-h-[64svh] flex-1 flex-col gap-4 lg:min-h-0" data-pb-devlog-feed>
-            <PanoramaFallback image="/equirectangular-01.png" fillParent />
+            <PanoramaFallback
+              image="/equirectangular-01.png"
+              fillParent
+              overlayTitle={copy.devlogsTitle}
+              overlayDescription={copy.devlogsLead}
+              overlayCtaHref={devlogArchiveHref}
+              overlayCtaLabel={copy.devlogCardCta}
+            />
           </div>
         )}
       </aside>

@@ -2,8 +2,8 @@
 import Layout from '../layout/Layout.astro';
 import SecondaryCTA from '../cta/SecondaryCTA.astro';
 import { buildLocalizedPath, type LocaleCode } from '../../lib/i18n';
-import { getHomeCopy } from '../../lib/home';
-import { getManifestoAlternates, getManifestoCopy, getManifestoSwitcherLinks, MANIFESTO_PATH } from '../../lib/manifesto';
+import { getHomeCopy } from '../../lib/pages/home';
+import { getManifestoAlternates, getManifestoCopy, getManifestoSwitcherLinks, MANIFESTO_PATH } from '../../lib/pages/manifesto';
 
 interface Props {
   locale: LocaleCode;
@@ -91,6 +91,7 @@ const secondaryCtasHref = '#manifesto-secondary-ctas';
         external={Boolean(discordHref)}
         buttonPlacement="bottom"
         buttonWidth="full"
+        minHeight="compact"
       />
       <SecondaryCTA
         label={homeCopy.githubLabel}
@@ -102,6 +103,7 @@ const secondaryCtasHref = '#manifesto-secondary-ctas';
         external={!import.meta.env.PUBLIC_GITHUB_URL?.trim() && Boolean(process.env.GITHUB_REPOSITORY)}
         buttonPlacement="bottom"
         buttonWidth="full"
+        minHeight="compact"
       />
       <SecondaryCTA
         label={homeCopy.newsletterLabel}
@@ -113,6 +115,7 @@ const secondaryCtasHref = '#manifesto-secondary-ctas';
         external={Boolean(import.meta.env.PUBLIC_NEWSLETTER_URL?.trim())}
         buttonPlacement="bottom"
         buttonWidth="full"
+        minHeight="compact"
         class="lg:col-span-2"
       />
     </section>

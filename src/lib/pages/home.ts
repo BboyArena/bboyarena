@@ -1,4 +1,4 @@
-import type { LocaleCode } from './i18n';
+import type { LocaleCode } from '../i18n';
 
 export interface HomeDevlogCard {
   label: string;
@@ -46,10 +46,10 @@ export const HOME_COPY: Record<LocaleCode, HomeCopy> = {
     seoTitle: 'BboyArena.org',
     seoDescription:
       'BboyArena.org is an independent, community-driven project about breaking culture, creative movement, and experimental game development, built with open development and privacy-friendly design.',
-    heroLabel: 'Public launch',
-    heroTitle: 'A small public surface, a moving project behind it.',
+    heroLabel: 'Bboying or DIE!',
+    heroTitle: 'FROM THE CYPHER TO THE BROWSER. A COMMUNITY PROJECT GAME FOR BREAKING CULTURE.',
     heroLead:
-      'This is the launch base: a simple page to follow the work, read the manifesto, and jump into the latest dev logs without exposing unfinished features.',
+      'BBoyArena is not just a game page. It is a place to keep the spirit of breaking alive: the practice, the style, the battles, the injuries, the obsession, the music, and the people who never really stopped being part of the culture.',
     devlogsTitle: 'Latest devlogs',
     devlogsLead: 'The most recent build notes from the project, kept public and easy to scan.',
     manifestoLabel: 'Manifesto',
@@ -83,31 +83,31 @@ export const HOME_COPY: Record<LocaleCode, HomeCopy> = {
     seoDescription:
       'BboyArena.org è un progetto indipendente e community-driven dedicato alla cultura breaking, al movimento creativo e allo sviluppo sperimentale, con open development e design privacy-friendly.',
     heroLabel: 'Lancio pubblico',
-    heroTitle: 'BBoyArena è un progetto aperto, appena nato, costruito per evolversi nel tempo.',
+    heroTitle: 'DALLA STRADA AL WEB. UN PROGETTO COMUNITARIO PER LA CULTURA BREAKING.',
     heroLead:
-      'Questa è la base di lancio: una pagina semplice per seguire il lavoro, leggere il manifesto e raggiungere gli ultimi devlog senza esporre feature incomplete.',
+      'BBoyArena non è solo una pagina di gioco. È un luogo per mantenere vivo lo spirito del breaking: la pratica, lo stile, le battle, gli infortuni, l\'ossessione, la musica e le persone che non hanno mai smesso di far parte della cultura. Un modo per dire grazie negli anni in cui mi ha salvato.',
     devlogsTitle: 'Ultimi devlog',
     devlogsLead: 'Gli appunti più recenti del progetto, pubblici e facili da leggere.',
     manifestoLabel: 'Manifesto',
     manifestoTitle: 'Motivazioni',
     manifestoDescription:
       'Questo è browser game (open source) costruito dalla cultura breaking. Ho vissuto il Breaking in prima persona dagli anni \'90, la rispetto ancora oggi e voglio che il progetto sia un tributo a questa cultura, portandone avanti la verità.',
-    manifestoCta: 'Apri manifesto',
+    manifestoCta: 'Manifesto',
     manifestoSecondaryCta: 'Leggi il manifesto completo',
     discordLabel: 'Discord',
-    discordTitle: 'Entra nella chat della community',
+    discordTitle: 'Discuti e Proponi',
     discordDescription: 'Condividi feedback, segui i progressi e parla con la crew mentre il progetto continua a evolversi.',
     discordCta: 'Apri Discord',
     instagramLabel: 'Instagram',
-    instagramTitle: 'Segui il feed visuale',
+    instagramTitle: 'Segui il flow',
     instagramDescription: 'Vedi artwork, screenshot, aggiornamenti brevi e il linguaggio visivo che tiene il progetto in movimento.',
     instagramCta: 'Apri Instagram',
     githubLabel: 'GitHub',
-    githubTitle: 'Sfoglia il sorgente',
+    githubTitle: 'Open Source',
     githubDescription: 'Controlla il codice, segui i cambiamenti e il lato open development del progetto.',
     githubCta: 'Apri GitHub',
     newsletterLabel: 'Newsletter',
-    newsletterTitle: 'Ricevi gli aggiornamenti',
+    newsletterTitle: 'Iscrizione libera',
     newsletterDescription: 'Iscriviti per ricevere note di rilascio, devlog e aggiornamenti importanti del progetto.',
     newsletterCta: 'Iscriviti',
     archiveCta: 'Vedi archivio devlog',
