@@ -2,6 +2,7 @@ import { useGameStore, type GamePlayMode } from '../state/useGameStore';
 import type { GameCopy } from '../copy';
 import GameButton from './GameButton';
 import GamePanel from './GamePanel';
+import GameScrollArea from './GameScrollArea';
 
 interface GameHudProps {
   copy: GameCopy;
@@ -190,21 +191,23 @@ export default function GameHUD({ copy }: GameHudProps) {
             <span className="game-section-shell__tag">{copy.prototypePanel}</span>
           </div>
 
-          <div className="game-settings-grid">
-            {settingsCards.map((item) => (
-              <GamePanel key={item.label} variant="light" className="game-settings-card">
-                <div className="game-settings-card__top">
-                  <p className="game-panel__label">{item.label}</p>
-                  <span>{item.meta}</span>
-                </div>
-                <div className="game-panel__title">{item.title}</div>
-                <p className="game-panel__description">{item.description}</p>
-                <div className="game-meter" aria-hidden="true">
-                  <span style={{ width: item.meter }} />
-                </div>
-              </GamePanel>
-            ))}
-          </div>
+          <GameScrollArea className="game-section-shell__body">
+            <div className="game-settings-grid">
+              {settingsCards.map((item) => (
+                <GamePanel key={item.label} variant="light" overflow="auto" className="game-settings-card">
+                  <div className="game-settings-card__top">
+                    <p className="game-panel__label">{item.label}</p>
+                    <span>{item.meta}</span>
+                  </div>
+                  <div className="game-panel__title">{item.title}</div>
+                  <p className="game-panel__description">{item.description}</p>
+                  <div className="game-meter" aria-hidden="true">
+                    <span style={{ width: item.meter }} />
+                  </div>
+                </GamePanel>
+              ))}
+            </div>
+          </GameScrollArea>
 
           <div className="game-section-shell__footer">
             <GameButton variant="secondary" onClick={openMainMenu}>
@@ -230,18 +233,20 @@ export default function GameHUD({ copy }: GameHudProps) {
             <span className="game-section-shell__tag">{copy.openSource}</span>
           </div>
 
-          <div className="game-credits-grid">
-            {creditCards.map((item) => (
-              <GamePanel key={item.label} variant="light" className="game-credits-card">
-                <div className="game-settings-card__top">
-                  <p className="game-panel__label">{item.label}</p>
-                  <span>{item.meta}</span>
-                </div>
-                <div className="game-panel__title">{item.title}</div>
-                <p className="game-panel__description">{item.description}</p>
-              </GamePanel>
-            ))}
-          </div>
+          <GameScrollArea className="game-section-shell__body">
+            <div className="game-credits-grid">
+              {creditCards.map((item) => (
+                <GamePanel key={item.label} variant="light" overflow="auto" className="game-credits-card">
+                  <div className="game-settings-card__top">
+                    <p className="game-panel__label">{item.label}</p>
+                    <span>{item.meta}</span>
+                  </div>
+                  <div className="game-panel__title">{item.title}</div>
+                  <p className="game-panel__description">{item.description}</p>
+                </GamePanel>
+              ))}
+            </div>
+          </GameScrollArea>
 
           <div className="game-section-shell__footer">
             <GameButton variant="secondary" onClick={openMainMenu}>

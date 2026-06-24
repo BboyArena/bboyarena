@@ -1,31 +1,28 @@
-#bboyarena-game-root {
+@reference "../standalone.css";
+
+@layer base {
+  #bboyarena-game-root {
   all: initial;
-  display: block;
-  position: relative;
-  width: 100%;
-  height: auto;
-  min-height: 0;
+  @apply relative block h-auto min-h-0 w-full overflow-hidden bg-game-bg text-white antialiased;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 16px;
   line-height: 1.5;
-  color: #ffffff;
-  background: #050505;
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
+  }
+
+  #bboyarena-game-root *,
+  #bboyarena-game-root *::before,
+  #bboyarena-game-root *::after {
+    box-sizing: border-box;
+  }
+
+  #bboyarena-game-root:fullscreen,
+  #bboyarena-game-root:fullscreen * {
+    cursor: none !important;
+  }
 }
 
-#bboyarena-game-root *,
-#bboyarena-game-root *::before,
-#bboyarena-game-root *::after {
-  box-sizing: border-box;
-}
-
-#bboyarena-game-root:fullscreen,
-#bboyarena-game-root:fullscreen * {
-  cursor: none !important;
-}
-
+@layer components {
 .bboy-game-root {
   --game-space-1: 0.25rem;
   --game-space-2: 0.5rem;
@@ -38,31 +35,45 @@
   --game-panel-pad-y: var(--game-space-4);
   --game-button-pad-x: var(--game-space-4);
   --game-button-pad-y: var(--game-space-3);
-  --game-bg: #050505;
-  --game-bg-accent: #0f1013;
-  --game-gold: #f4be24;
-  --game-gold-hot: #ffd95c;
-  --game-red: #c84d31;
-  --game-cyan: #7de3ff;
-  --game-surface: rgba(14, 14, 18, 0.9);
-  --game-surface-soft: rgba(22, 22, 28, 0.84);
-  --game-surface-strong: rgba(250, 245, 236, 0.97);
-  --game-surface-warm: rgba(243, 225, 199, 0.98);
-  --game-border: rgba(255, 255, 255, 0.14);
-  --game-border-dark: rgba(0, 0, 0, 0.55);
-  --game-shadow: 0 14px 0 rgba(0, 0, 0, 0.5), 0 24px 50px rgba(0, 0, 0, 0.35);
-  --game-shadow-soft: 0 8px 0 rgba(0, 0, 0, 0.4), 0 18px 36px rgba(0, 0, 0, 0.32);
-  --game-shadow-paper: 0 7px 0 rgba(0, 0, 0, 0.34), 0 16px 30px rgba(0, 0, 0, 0.24);
-  --game-text: #f7f5ef;
-  --game-text-muted: #b6b2aa;
-  --game-text-dark: #2d261f;
-  --game-primary: #9fb55f;
-  --game-primary-strong: #b4cb62;
-  --game-secondary: #c56a41;
-  --game-secondary-soft: #e9c4af;
-  --game-lime: #d6e59a;
-  --game-stone: #6c6053;
+  --game-bg: var(--color-game-bg);
+  --game-bg-accent: var(--color-game-bg-accent);
+  --game-gold: var(--color-game-gold);
+  --game-gold-hot: var(--color-game-gold-hot);
+  --game-red: var(--color-game-red);
+  --game-cyan: var(--color-game-cyan);
+  --game-surface: var(--color-game-surface);
+  --game-surface-soft: var(--color-game-surface-soft);
+  --game-surface-strong: var(--color-game-surface-strong);
+  --game-surface-warm: var(--color-game-surface-warm);
+  --game-border: var(--color-game-border);
+  --game-border-dark: var(--color-game-border-dark);
+  --game-shadow: var(--shadow-game-hard);
+  --game-shadow-soft: var(--shadow-game-soft);
+  --game-shadow-paper: var(--shadow-game-paper);
+  --game-text: var(--color-game-paper);
+  --game-text-muted: var(--color-game-muted);
+  --game-text-dark: var(--color-game-ink);
+  --game-primary: var(--color-game-primary);
+  --game-primary-strong: var(--color-game-primary-strong);
+  --game-secondary: var(--color-game-secondary);
+  --game-secondary-soft: var(--color-game-secondary-soft);
+  --game-lime: var(--color-game-lime);
+  --game-stone: var(--color-game-stone);
   --game-ring: rgba(255, 255, 255, 0.1);
+  --game-cursor-default: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M5 3 22 14 14 16 10 25 7 24 10 16 3 20z' fill='%23f4be24' stroke='%23050505' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M8 6 18 13 12 14 9 21' fill='none' stroke='%23fff0a7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 5 3, auto;
+  --game-cursor-action: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23050505' stroke-width='5'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23ffd95c' stroke-width='2'/%3E%3Cpath d='M16 2v7M16 23v7M2 16h7M23 16h7' stroke='%23ffd95c' stroke-width='2' stroke-linecap='square'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%23fff0a7' stroke='%23050505' stroke-width='1.5'/%3E%3C/svg%3E") 16 16, pointer;
+  --game-cursor-disabled: not-allowed;
+  cursor: var(--game-cursor-default);
+}
+
+.bboy-game-root :where(button, a, input, select, textarea, summary, [role="button"], [tabindex]:not([tabindex="-1"])),
+.bboy-game-root :where(.game-mode-button, .game-button, .game-status-pill--interactive, .game-currency-card__plus, .game-fullscreen-toggle__button) {
+  cursor: var(--game-cursor-action);
+}
+
+.bboy-game-root :where(button, input, select, textarea, [role="button"]):disabled,
+.bboy-game-root :where(button, input, select, textarea, [role="button"])[aria-disabled="true"] {
+  cursor: var(--game-cursor-disabled);
 }
 
 .bboy-game-root .game-shell {
@@ -835,6 +846,7 @@
   max-height: 100%;
   min-height: 0;
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: var(--game-space-5);
   padding: clamp(1.05rem, 2.2vw, 1.5rem);
   background:
@@ -842,8 +854,7 @@
     radial-gradient(circle at top left, rgba(244, 190, 36, 0.13), transparent 32%);
   border-color: rgba(255, 255, 255, 0.14);
   box-shadow: 0 12px 0 rgba(0, 0, 0, 0.55), 0 28px 70px rgba(0, 0, 0, 0.42);
-  overflow: auto;
-  overscroll-behavior: contain;
+  overflow: hidden;
 }
 
 .bboy-game-root .game-section-shell__header {
@@ -853,6 +864,75 @@
   gap: var(--game-space-5);
   padding-bottom: var(--game-space-4);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bboy-game-root .game-section-shell__body {
+  min-height: 0;
+}
+
+.bboy-game-root .game-scroll-area {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.bboy-game-root .game-scroll-area::before,
+.bboy-game-root .game-scroll-area::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0.7rem;
+  z-index: 2;
+  height: 1.15rem;
+  pointer-events: none;
+}
+
+.bboy-game-root .game-scroll-area::before {
+  top: 0;
+  background: linear-gradient(180deg, rgba(13, 13, 16, 0.94), rgba(13, 13, 16, 0));
+}
+
+.bboy-game-root .game-scroll-area::after {
+  bottom: 0;
+  background: linear-gradient(0deg, rgba(9, 9, 11, 0.96), rgba(9, 9, 11, 0));
+}
+
+.bboy-game-root .game-scroll-area__viewport {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.1rem 0.15rem 0.15rem 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(244, 190, 36, 0.78) rgba(255, 255, 255, 0.08);
+}
+
+.bboy-game-root .game-scroll-area__viewport::-webkit-scrollbar {
+  width: 0.55rem;
+}
+
+.bboy-game-root .game-scroll-area__viewport::-webkit-scrollbar-track {
+  background:
+    linear-gradient(180deg, rgba(244, 190, 36, 0.12), rgba(255, 255, 255, 0.04)),
+    rgba(0, 0, 0, 0.32);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(0, 0, 0, 0.45);
+}
+
+.bboy-game-root .game-scroll-area__viewport::-webkit-scrollbar-thumb {
+  border: 1px solid rgba(22, 18, 12, 0.78);
+  background:
+    linear-gradient(180deg, var(--game-gold-hot), var(--game-gold) 46%, var(--game-secondary)),
+    var(--game-gold);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.24),
+    0 0 10px rgba(244, 190, 36, 0.18);
+}
+
+.bboy-game-root .game-scroll-area__viewport::-webkit-scrollbar-thumb:hover {
+  background:
+    linear-gradient(180deg, #fff0a7, var(--game-gold-hot) 44%, var(--game-secondary)),
+    var(--game-gold-hot);
 }
 
 .bboy-game-root .game-section-shell__footer {
@@ -1025,6 +1105,15 @@
   box-shadow: var(--game-shadow-soft);
   backdrop-filter: blur(10px);
   padding: var(--game-panel-pad-y) var(--game-panel-pad-x);
+}
+
+.bboy-game-root .game-panel[data-overflow="auto"] {
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.bboy-game-root .game-panel[data-overflow="visible"] {
+  overflow: visible;
 }
 
 .bboy-game-root .game-panel::before {
@@ -1982,4 +2071,5 @@
   .bboy-game-root .game-section-shell {
     max-height: calc(var(--game-viewport-height, 100svh) - 4rem);
   }
+}
 }

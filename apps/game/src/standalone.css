@@ -3,32 +3,48 @@
 @theme {
   --color-game-bg: #050505;
   --color-game-bg-accent: #0f1013;
+  --color-game-surface: rgba(14, 14, 18, 0.9);
+  --color-game-surface-soft: rgba(22, 22, 28, 0.84);
+  --color-game-surface-strong: rgba(250, 245, 236, 0.97);
+  --color-game-surface-warm: rgba(243, 225, 199, 0.98);
   --color-game-paper: #f7f5ef;
   --color-game-paper-warm: #eae0d0;
   --color-game-ink: #2d261f;
+  --color-game-muted: #b6b2aa;
   --color-game-gold: #f4be24;
   --color-game-gold-hot: #ffd95c;
+  --color-game-red: #c84d31;
+  --color-game-cyan: #7de3ff;
+  --color-game-primary: #9fb55f;
+  --color-game-primary-strong: #b4cb62;
+  --color-game-secondary: #c56a41;
+  --color-game-secondary-soft: #e9c4af;
+  --color-game-lime: #d6e59a;
+  --color-game-stone: #6c6053;
+  --color-game-border: rgba(255, 255, 255, 0.14);
+  --color-game-border-dark: rgba(0, 0, 0, 0.55);
   --font-game: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --shadow-game-hard: 0 14px 0 rgba(0, 0, 0, 0.5), 0 24px 50px rgba(0, 0, 0, 0.35);
+  --shadow-game-soft: 0 8px 0 rgba(0, 0, 0, 0.4), 0 18px 36px rgba(0, 0, 0, 0.32);
+  --shadow-game-paper: 0 7px 0 rgba(0, 0, 0, 0.34), 0 16px 30px rgba(0, 0, 0, 0.24);
 }
 
-html,
-body,
-#bboyarena-game-standalone {
-  width: 100%;
-  min-width: 320px;
-  min-height: 100%;
-  margin: 0;
-}
+@layer base {
+  html,
+  body,
+  #bboyarena-game-standalone {
+    @apply m-0 min-h-full w-full min-w-80;
+  }
 
-body {
-  background: #050505;
-  overflow: hidden;
-}
+  body {
+    @apply overflow-hidden bg-game-bg;
+  }
 
-#bboyarena-game-standalone {
-  min-height: 100vh;
-}
+  #bboyarena-game-standalone {
+    @apply min-h-screen;
+  }
 
-#bboyarena-game-standalone #bboyarena-game-root {
-  min-height: 100vh;
+  #bboyarena-game-standalone #bboyarena-game-root {
+    @apply min-h-screen;
+  }
 }
