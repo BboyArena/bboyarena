@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+@theme {
+  --color-game-bg: #050505;
+  --color-game-bg-accent: #0f1013;
+  --color-game-paper: #f7f5ef;
+  --color-game-paper-warm: #eae0d0;
+  --color-game-ink: #2d261f;
+  --color-game-gold: #f4be24;
+  --color-game-gold-hot: #ffd95c;
+  --font-game: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+}
+
+html,
+body,
+#bboyarena-game-standalone {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #050505;
+  overflow: hidden;
+}
+
+#bboyarena-game-standalone {
+  min-height: 100vh;
+}
+
+#bboyarena-game-standalone #bboyarena-game-root {
+  min-height: 100vh;
+}

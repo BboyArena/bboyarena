@@ -1,0 +1,14 @@
+---
+import PlayTheGamePage from '../../components/pages/PlayTheGamePage.astro';
+import { getLocaleCodeFromPath, SUPPORTED_LOCALES } from '../../lib/i18n';
+
+export async function getStaticPaths() {
+  return SUPPORTED_LOCALES.filter((locale) => locale !== 'en-US').map((locale) => ({
+    params: { locale: locale === 'pt-BR' ? 'pt-br' : locale === 'zh-Hans' ? 'zh' : locale === 'it-IT' ? 'it' : 'es' }
+  }));
+}
+
+const locale = getLocaleCodeFromPath(Astro.params.locale);
+---
+
+<PlayTheGamePage locale={locale} />

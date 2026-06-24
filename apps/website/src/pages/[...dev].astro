@@ -1,0 +1,32 @@
+---
+import '../styles/global.css';
+import TailwindShowcase from '../dev-pages/tailwind-showcase.astro';
+import ComponentLab from '../dev-pages/component-lab.astro';
+import UiDemo from '../dev-pages/ui-demo.astro';
+import DevLeaderboard from '../dev-pages/leaderboard.astro';
+
+export function getStaticPaths() {
+  if (!import.meta.env.DEV) {
+    return [];
+  }
+
+  return [
+    { params: { dev: '__dev/tailwind-showcase' } },
+    { params: { dev: '__dev/component-lab' } },
+    { params: { dev: '__dev/ui-demo' } },
+    { params: { dev: '__dev/leaderboard' } }
+  ];
+}
+
+const route = Astro.params.dev;
+---
+
+{route === '__dev/tailwind-showcase' ? (
+  <TailwindShowcase />
+) : route === '__dev/component-lab' ? (
+  <ComponentLab />
+) : route === '__dev/ui-demo' ? (
+  <UiDemo />
+) : (
+  <DevLeaderboard />
+)}

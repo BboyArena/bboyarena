@@ -45,6 +45,9 @@ jobs:
       PUBLIC_NEWS_EXTERNAL_FEED_URL: ${{ vars.PUBLIC_NEWS_EXTERNAL_FEED_URL }}
       PUBLIC_NEWS_EXTERNAL_SOURCE_NAME: ${{ vars.PUBLIC_NEWS_EXTERNAL_SOURCE_NAME }}
       PUBLIC_NEWS_EXTERNAL_SOURCE_URL: ${{ vars.PUBLIC_NEWS_EXTERNAL_SOURCE_URL }}
+      PUBLIC_GAME_URL: ${{ vars.PUBLIC_GAME_URL }}
+      PUBLIC_GAME_EMBED_URL: ${{ vars.PUBLIC_GAME_EMBED_URL }}
+      PUBLIC_GAME_BASE: ${{ vars.PUBLIC_GAME_BASE }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -68,11 +71,44 @@ jobs:
             echo "PUBLIC_SITE_URL=https://bboyarena.org/" >> "$GITHUB_ENV"
           fi
 
+      - name: Compute public game URL
+        shell: bash
+        run: |
+          resolved_game_url="${PUBLIC_GAME_URL:-https://bboyarena.org.com/game}"
+          resolved_game_embed_url="${PUBLIC_GAME_EMBED_URL:-$resolved_game_url}"
+
+          if [ -n "${PUBLIC_GAME_URL:-}" ]; then
+            echo "Using configured PUBLIC_GAME_URL=$PUBLIC_GAME_URL"
+          else
+            echo "PUBLIC_GAME_URL=$resolved_game_url" >> "$GITHUB_ENV"
+          fi
+
+          if [ -n "${PUBLIC_GAME_EMBED_URL:-}" ]; then
+            echo "Using configured PUBLIC_GAME_EMBED_URL=$PUBLIC_GAME_EMBED_URL"
+          else
+            echo "PUBLIC_GAME_EMBED_URL=$resolved_game_embed_url" >> "$GITHUB_ENV"
+          fi
+
+          if [ -n "${PUBLIC_GAME_BASE:-}" ]; then
+            echo "Using configured PUBLIC_GAME_BASE=$PUBLIC_GAME_BASE"
+          else
+            echo "PUBLIC_GAME_BASE=/game/" >> "$GITHUB_ENV"
+          fi
+
       - name: Install dependencies
         run: npm ci
 
-      - name: Build site
+      - name: Build website
         run: npm run build
+
+      - name: Build game
+        run: npm run game:build
+
+      - name: Add game build to website dist
+        shell: bash
+        run: |
+          mkdir -p dist/game
+          cp -R dist-game/. dist/game/
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
