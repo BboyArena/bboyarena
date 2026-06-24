@@ -74,7 +74,7 @@ jobs:
       - name: Compute public game URL
         shell: bash
         run: |
-          resolved_game_url="${PUBLIC_GAME_URL:-https://bboyarena.org.com/game}"
+          resolved_game_url="${PUBLIC_GAME_URL:-https://bboyarena.org/game}"
           resolved_game_embed_url="${PUBLIC_GAME_EMBED_URL:-$resolved_game_url}"
 
           if [ -n "${PUBLIC_GAME_URL:-}" ]; then

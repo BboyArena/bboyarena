@@ -7,7 +7,7 @@ interface Props {
 }
 
 const { locale = 'en-US' } = Astro.props;
-const defaultGameEmbedUrl = import.meta.env.DEV ? 'http://localhost:4322/' : 'https://bboyarena.org.com/game/';
+const defaultGameEmbedUrl = import.meta.env.DEV ? 'http://localhost:4322/' : 'https://bboyarena.org/game/';
 const gameEmbedUrl = import.meta.env.PUBLIC_GAME_EMBED_URL?.trim() || defaultGameEmbedUrl;
 const hasGameEmbed = Boolean(gameEmbedUrl);
 
