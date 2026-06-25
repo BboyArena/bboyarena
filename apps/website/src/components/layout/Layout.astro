@@ -89,10 +89,10 @@ const isDevRoute = logicalPath.startsWith('/__dev');
 const devlogsPath = buildLocalizedPath(locale, '/news/devlog');
 const discordHref = import.meta.env.PUBLIC_DISCORD_URL?.trim();
 const instagramHref = import.meta.env.PUBLIC_INSTAGRAM_URL?.trim();
+const youtubeHref = import.meta.env.PUBLIC_YOUTUBE_URL?.trim();
 const githubRepository = process.env.GITHUB_REPOSITORY ?? 'giorgionetg/bboyarena';
 const githubHref = import.meta.env.PUBLIC_GITHUB_URL?.trim() ?? `https://github.com/${githubRepository}`;
 const githubLabel = githubRepository.split('/').pop() ?? 'GitHub';
-const sameAs = [instagramHref, discordHref, githubHref].filter((value): value is string => Boolean(value));
 const analyticsScriptUrl = import.meta.env.PUBLIC_ANALYTICS_SCRIPT_URL?.trim();
 const analyticsWebsiteId = import.meta.env.PUBLIC_ANALYTICS_WEBSITE_ID?.trim();
 const footerLinks = [
@@ -116,8 +116,10 @@ const footerSocialLinks = [
     ? [{ label: 'Instagram', href: instagramHref, external: true, icon: 'instagram' as const }]
     : []),
   ...(discordHref ? [{ label: copy.footer.discord, href: discordHref, external: true, icon: 'discord' as const }] : []),
-  ...(githubHref ? [{ label: copy.footer.github, href: githubHref, external: true, icon: 'github' as const }] : [])
+  ...(githubHref ? [{ label: copy.footer.github, href: githubHref, external: true, icon: 'github' as const }] : []),
+  ...(youtubeHref ? [{ label: copy.footer.youtube, href: youtubeHref, external: true, icon: 'youtube' as const }] : [])
 ];
+const sameAs = [instagramHref, discordHref, githubHref, youtubeHref].filter((value): value is string => Boolean(value));
 
 const seo = buildSeoData({
   siteUrl: site,
@@ -506,6 +508,14 @@ const manifestLinkTag =
                       <svg viewBox="0 0 24 24" class="h-4.5 w-4.5" aria-hidden="true">
                         <path
                           d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.1 6.8 9.4.5.1.7-.2.7-.5v-1.8c-2.8.6-3.4-1.2-3.4-1.2-.5-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 0 1.5 1 1.5 1 1 .1 1.5.7 1.7 1 .4.8 1 1.1 1.4 1.2.1-.7.4-1.1.7-1.4-2.3-.3-4.7-1.1-4.7-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.4.1-2.8 0 0 .8-.3 2.7 1a9.2 9.2 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.5.1 2.8.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.7 5 .4.3.8.9.8 1.8v2.7c0 .3.2.6.7.5A10 10 0 0 0 22 12C22 6.5 17.5 2 12 2Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    )}
+                    {link.icon === 'youtube' && (
+                      <svg viewBox="0 0 24 24" class="h-4.5 w-4.5" aria-hidden="true">
+                        <path
+                          d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8ZM10.2 15.2V8.8l5.6 3.2-5.6 3.2Z"
                           fill="currentColor"
                         />
                       </svg>

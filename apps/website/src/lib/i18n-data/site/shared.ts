@@ -60,7 +60,8 @@ export const FOOTER_COPY: Record<LocaleCode, SiteCopy['footer']> = {
     openSource: 'Open Source',
     participate: 'Participate',
     discord: 'Discord',
-    github: 'GitHub'
+    github: 'GitHub',
+    youtube: 'YouTube'
   },
   'it-IT': {
     ready: 'PWA pronta',
@@ -73,7 +74,8 @@ export const FOOTER_COPY: Record<LocaleCode, SiteCopy['footer']> = {
     openSource: 'Open Source',
     participate: 'Partecipa',
     discord: 'Discord',
-    github: 'GitHub'
+    github: 'GitHub',
+    youtube: 'YouTube'
   },
   'es-419': {
     ready: 'PWA lista',
@@ -86,7 +88,8 @@ export const FOOTER_COPY: Record<LocaleCode, SiteCopy['footer']> = {
     openSource: 'Open source',
     participate: 'Participar',
     discord: 'Discord',
-    github: 'GitHub'
+    github: 'GitHub',
+    youtube: 'YouTube'
   },
   'pt-BR': {
     ready: 'PWA pronta',
@@ -99,7 +102,8 @@ export const FOOTER_COPY: Record<LocaleCode, SiteCopy['footer']> = {
     openSource: 'Open Source',
     participate: 'Participar',
     discord: 'Discord',
-    github: 'GitHub'
+    github: 'GitHub',
+    youtube: 'YouTube'
   },
   'zh-Hans': {
     ready: 'PWA 就绪',
@@ -112,7 +116,8 @@ export const FOOTER_COPY: Record<LocaleCode, SiteCopy['footer']> = {
     openSource: '开源',
     participate: '参与',
     discord: 'Discord',
-    github: 'GitHub'
+    github: 'GitHub',
+    youtube: 'YouTube'
   }
 };
 

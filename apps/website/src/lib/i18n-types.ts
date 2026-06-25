@@ -42,6 +42,7 @@ export interface SiteCopy {
     participate: string;
     discord: string;
     github: string;
+    youtube: string;
   };
   switcher: {
     label: string;

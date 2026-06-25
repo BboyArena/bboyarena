@@ -3,6 +3,11 @@ import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
 import AstroPWA from '@vite-pwa/astro';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const configDir = dirname(fileURLToPath(import.meta.url));
+const envDir = resolve(configDir, '../..');
 
 const repoName = process.env.GITHUB_REPOSITORY?.split('/')[1];
 const publicSiteUrl = process.env.PUBLIC_SITE_URL;
@@ -88,6 +93,7 @@ export default defineConfig({
   // Deploy statically
   output: 'static',
   vite: {
+    envDir,
     plugins: [tailwindcss()]
   }
 });
