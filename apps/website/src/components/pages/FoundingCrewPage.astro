@@ -1,0 +1,335 @@
+---
+import Layout from '../layout/Layout.astro';
+import { buildLocalizedAlternates, buildLocalizedPath, getLocaleSwitcherLinks, type LocaleCode } from '../../lib/i18n';
+
+interface Props {
+  locale: LocaleCode;
+}
+
+const { locale } = Astro.props as Props;
+const pagePath = '/founding-crew';
+const discordHref = import.meta.env.PUBLIC_DISCORD_URL?.trim() ?? buildLocalizedPath(locale, '/contact');
+const discordExternal = Boolean(import.meta.env.PUBLIC_DISCORD_URL?.trim());
+const manifestoHref = buildLocalizedPath(locale, '/manifesto');
+const githubHref =
+  import.meta.env.PUBLIC_GITHUB_URL?.trim() ??
+  (process.env.GITHUB_REPOSITORY ? `https://github.com/${process.env.GITHUB_REPOSITORY}` : '#');
+const githubExternal = githubHref !== '#';
+
+const roles = [
+  {
+    title: 'Bboys / Bgirls',
+    label: 'Cypher truth',
+    description: 'Bring real battle instinct, training habits, footwork language, and the feeling that only comes from the floor.'
+  },
+  {
+    title: 'Developers',
+    label: 'Code',
+    description: 'Build gameplay systems, web tools, open source workflows, performance fixes, and the rough edges that make early builds stronger.'
+  },
+  {
+    title: '3D Artists',
+    label: 'Shape',
+    description: 'Create characters, venues, props, clothing, textures, and the visual grit that makes the arena feel lived in.'
+  },
+  {
+    title: 'Animators',
+    label: 'Motion',
+    description: 'Help movement read with weight, rhythm, impact, recovery, flow, and style instead of empty poses.'
+  },
+  {
+    title: 'Musicians & DJs',
+    label: 'Sound',
+    description: 'Advise on breaks, tempo, battle energy, menu loops, sound cues, and how the game should breathe with music.'
+  },
+  {
+    title: 'Movement Advisors',
+    label: 'Realism',
+    description: 'Check transitions, balance, freezes, power, timing, fatigue, and what should never look fake.'
+  },
+  {
+    title: 'Testers',
+    label: 'Feedback',
+    description: 'Play early builds, catch bugs, stress strange inputs, and say clearly when something feels off.'
+  },
+  {
+    title: 'Community Leaders',
+    label: 'Scene',
+    description: 'Connect local crews, events, schools, jams, and voices that should be part of the project from day one.'
+  },
+  {
+    title: 'Designers',
+    label: 'Feel',
+    description: 'Improve menus, training flows, HUD clarity, onboarding, accessibility, and the whole browser-game experience.'
+  },
+  {
+    title: 'Content Creators',
+    label: 'Signal',
+    description: 'Document progress, share builds, tell the story, make clips, and help more heads find the project.'
+  }
+];
+
+const contributionWays = [
+  'Test early builds',
+  'Validate movement realism',
+  'Suggest gameplay improvements',
+  'Improve training systems',
+  'Create assets',
+  'Contribute code',
+  'Improve documentation',
+  'Report bugs',
+  'Organize community events',
+  'Share the project'
+];
+
+const receiveItems = [
+  'Public credits connected to the work you actually shaped',
+  'Founder recognition as part of the first wave around BboyArena',
+  'Early access to playable builds, experiments, and internal direction',
+  'Direct influence on game feel, movement priorities, tools, and community decisions',
+  'Community visibility for your craft, scene, crew, or creative practice',
+  'A hand in preserving and evolving breaking culture through an open project'
+];
+
+const notItems = [
+  'This is not a job offer.',
+  'There are no promises of equity.',
+  'There are no promises of royalties.',
+  'No ownership is transferred through contributions.',
+  'Collaborations requiring compensation will always be handled separately before the work starts.'
+];
+
+const wallGroups = [
+  { title: 'Bboys', slots: ['First wave slot', 'Crew rep slot', 'Movement voice slot'] },
+  { title: 'Developers', slots: ['Gameplay slot', 'Web tools slot', 'Docs slot'] },
+  { title: 'Artists', slots: ['Character slot', 'Arena slot', 'Props slot'] },
+  { title: 'Music', slots: ['DJ slot', 'Sound slot', 'Breaks slot'] },
+  { title: 'Community', slots: ['Jam host slot', 'Local scene slot', 'Creator slot'] },
+  { title: 'Design', slots: ['UX slot', 'UI slot', 'Accessibility slot'] }
+];
+---
+
+<Layout
+  title="Join the Founding Crew | BboyArena"
+  description="BboyArena is an open source browser-game project built with the breaking community. Join the founding crew and help shape the game, platform, and culture around it."
+  locale={locale}
+  pagePath={pagePath}
+  canonical={buildLocalizedPath(locale, pagePath)}
+  alternateLinks={buildLocalizedAlternates(pagePath)}
+  localeSwitcherLinks={getLocaleSwitcherLinks(pagePath)}
+  fullBleedMain={true}
+  tags={['breaking', 'open source', 'community', 'browser game']}
+>
+  <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
+    <section class="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+      <div class="street-panel flex min-h-[34rem] flex-col justify-between rounded-[1.75rem] p-5 sm:p-7">
+        <div>
+          <div class="flex flex-wrap gap-2">
+            <span class="street-badge-passive rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.28em] text-[#5f5346]">Open source</span>
+            <span class="street-badge-passive rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.28em] text-[#5f5346]">Breaking culture</span>
+          </div>
+
+          <p class="mt-8 text-[11px] font-black uppercase tracking-[0.42em] text-[#6a5b4d]">BboyArena community call</p>
+          <h1 class="mt-3 max-w-3xl text-4xl font-black uppercase leading-[0.86] tracking-[0.14em] text-[#2d261f] sm:text-6xl lg:text-7xl">
+            Join the Founding Crew
+          </h1>
+          <p class="mt-5 max-w-2xl text-base leading-relaxed text-[#4f4538] sm:text-lg">
+            BboyArena is an open source project built together with the breaking community. The goal is simple: make a game and platform shaped by the people who live the culture, not by a company talking over it.
+          </p>
+        </div>
+
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a
+            href={discordHref}
+            class="street-button street-button-primary inline-flex min-h-12 items-center justify-center rounded-[1.25rem] px-6 py-3 text-center text-xs font-black uppercase tracking-[0.28em] transition hover:-translate-y-0.5"
+            target={discordExternal ? '_blank' : undefined}
+            rel={discordExternal ? 'noreferrer noopener' : undefined}
+          >
+            Join Discord
+          </a>
+          <a
+            href={manifestoHref}
+            class="street-button inline-flex min-h-12 items-center justify-center rounded-[1.25rem] px-6 py-3 text-center text-xs font-black uppercase tracking-[0.24em] text-[#2d251d] transition hover:-translate-y-0.5"
+          >
+            Read Manifesto
+          </a>
+        </div>
+      </div>
+
+      <aside class="street-dark flex min-h-[28rem] flex-col justify-between overflow-hidden rounded-[1.75rem] border-2 border-[#4f4337] p-5 shadow-[0_10px_0_rgba(77,67,56,0.5)] sm:p-7">
+        <div>
+          <p class="text-[10px] font-black uppercase tracking-[0.36em] text-[#d9e2bf]">No gatekeeping</p>
+          <p class="mt-4 text-3xl font-black uppercase leading-[0.9] tracking-[0.12em] text-[#f8f1e7] sm:text-5xl">
+            No gatekeeping.<br />
+            No fake promises.<br />
+            Just people building something for the culture.
+          </p>
+        </div>
+        <div class="mt-8 grid grid-cols-3 gap-3 text-center">
+          <div class="rounded-[1rem] border border-[#e8ddc6]/25 bg-[#f4ebdf]/10 p-3">
+            <p class="text-xl font-black text-[#d9e2bf]">01</p>
+            <p class="mt-1 text-[10px] font-black uppercase tracking-[0.2em] text-[#f8f1e7]">Play</p>
+          </div>
+          <div class="rounded-[1rem] border border-[#e8ddc6]/25 bg-[#f4ebdf]/10 p-3">
+            <p class="text-xl font-black text-[#d9e2bf]">02</p>
+            <p class="mt-1 text-[10px] font-black uppercase tracking-[0.2em] text-[#f8f1e7]">Build</p>
+          </div>
+          <div class="rounded-[1rem] border border-[#e8ddc6]/25 bg-[#f4ebdf]/10 p-3">
+            <p class="text-xl font-black text-[#d9e2bf]">03</p>
+            <p class="mt-1 text-[10px] font-black uppercase tracking-[0.2em] text-[#f8f1e7]">Share</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="street-panel rounded-[1.75rem] p-5 sm:p-7">
+      <div class="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+        <div>
+          <p class="text-[10px] font-black uppercase tracking-[0.36em] text-[#756553]">Why join</p>
+          <h2 class="mt-3 text-3xl font-black uppercase leading-[0.9] tracking-[0.12em] text-[#2d261f] sm:text-4xl">
+            Build it from the cypher outward
+          </h2>
+        </div>
+        <p class="text-base leading-relaxed text-[#4f4538] sm:text-lg">
+          This is a chance to help build a browser game and platform that belongs to the community around it. The code is open, the process is visible, and the best ideas should come from dancers, makers, crews, DJs, artists, testers, and scene people who care about how breaking is represented.
+        </p>
+      </div>
+    </section>
+
+    <section class="space-y-4">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p class="text-[10px] font-black uppercase tracking-[0.36em] text-[#f8f1e7] drop-shadow">Who we're looking for</p>
+          <h2 class="mt-2 text-3xl font-black uppercase leading-[0.92] tracking-[0.12em] text-[#fffaf0] drop-shadow sm:text-4xl">
+            Every role has a lane
+          </h2>
+        </div>
+        <a
+          href={githubHref}
+          class="street-button street-button-secondary inline-flex min-h-11 items-center justify-center rounded-[1.25rem] px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] transition hover:-translate-y-0.5"
+          target={githubExternal ? '_blank' : undefined}
+          rel={githubExternal ? 'noreferrer noopener' : undefined}
+        >
+          View GitHub
+        </a>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        {roles.map((role) => (
+          <article class="flex min-h-[14rem] flex-col rounded-[1.25rem] border-2 border-[#4f4337] bg-[rgba(247,240,229,0.96)] p-4 shadow-[0_8px_0_rgba(95,82,69,0.34)]">
+            <span class="w-fit rounded-full border border-[#4f4337]/40 bg-[#e8ddc6] px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-[#5f5346]">{role.label}</span>
+            <h3 class="mt-4 text-lg font-black uppercase leading-[0.92] tracking-[0.12em] text-[#2d261f]">{role.title}</h3>
+            <p class="mt-3 text-sm leading-relaxed text-[#54483b]">{role.description}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+      <div class="street-dark rounded-[1.75rem] border-2 border-[#4f4337] p-5 shadow-[0_10px_0_rgba(77,67,56,0.5)] sm:p-7">
+        <p class="text-[10px] font-black uppercase tracking-[0.36em] text-[#d9e2bf]">Ways to contribute</p>
+        <h2 class="mt-3 text-3xl font-black uppercase leading-[0.9] tracking-[0.12em] text-[#f8f1e7] sm:text-4xl">
+          Small moves stack up
+        </h2>
+        <p class="mt-4 text-sm leading-relaxed text-[#e8ddc6] sm:text-base">
+          You do not need to arrive with a perfect portfolio or a big title. Bring taste, honesty, skills, scene knowledge, and feedback that makes the project harder to fake.
+        </p>
+      </div>
+
+      <div class="grid gap-3 sm:grid-cols-2">
+        {contributionWays.map((item, index) => (
+          <div class="street-chip min-h-14 rounded-[1rem] px-4 py-3 text-sm font-black uppercase tracking-[0.16em] text-[#2d251d]">
+            <span class="text-[#7f9246]">{String(index + 1).padStart(2, '0')}</span>
+            <span>{item}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="grid gap-6 lg:grid-cols-2">
+      <div class="street-panel rounded-[1.75rem] p-5 sm:p-7">
+        <p class="text-[10px] font-black uppercase tracking-[0.36em] text-[#756553]">What you receive</p>
+        <h2 class="mt-3 text-3xl font-black uppercase leading-[0.9] tracking-[0.12em] text-[#2d261f] sm:text-4xl">
+          Recognition, access, influence
+        </h2>
+        <ul class="mt-6 space-y-3">
+          {receiveItems.map((item) => (
+            <li class="flex gap-3 text-sm leading-relaxed text-[#54483b] sm:text-base">
+              <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#a3b95a] shadow-[0_0_0_2px_rgba(79,67,55,0.35)]" aria-hidden="true"></span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="rounded-[1.75rem] border-2 border-[#4f4337] bg-[#f4ebdf] p-5 shadow-[0_10px_0_rgba(95,82,69,0.34)] sm:p-7">
+        <p class="text-[10px] font-black uppercase tracking-[0.36em] text-[#a94f2c]">What this is not</p>
+        <h2 class="mt-3 text-3xl font-black uppercase leading-[0.9] tracking-[0.12em] text-[#2d261f] sm:text-4xl">
+          Clear lines, clean trust
+        </h2>
+        <ul class="mt-6 space-y-3">
+          {notItems.map((item) => (
+            <li class="flex gap-3 text-sm leading-relaxed text-[#54483b] sm:text-base">
+              <span class="mt-1 text-[#a94f2c]" aria-hidden="true">/</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <section class="space-y-4">
+      <div class="street-panel rounded-[1.75rem] p-5 sm:p-7">
+        <p class="text-[10px] font-black uppercase tracking-[0.36em] text-[#756553]">Founding Crew Wall</p>
+        <h2 class="mt-3 text-3xl font-black uppercase leading-[0.9] tracking-[0.12em] text-[#2d261f] sm:text-4xl">
+          First names go here
+        </h2>
+        <p class="mt-4 max-w-3xl text-sm leading-relaxed text-[#54483b] sm:text-base">
+          This wall is prepared for future contributors, grouped by the kind of work they bring into the arena. The placeholders below will become real people, crews, and credits as the founding crew takes shape.
+        </p>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {wallGroups.map((group) => (
+          <article class="rounded-[1.25rem] border-2 border-[#4f4337] bg-[rgba(247,240,229,0.96)] p-4 shadow-[0_8px_0_rgba(95,82,69,0.34)]">
+            <h3 class="text-lg font-black uppercase tracking-[0.14em] text-[#2d261f]">{group.title}</h3>
+            <div class="mt-4 grid gap-2">
+              {group.slots.map((slot) => (
+                <div class="flex items-center justify-between gap-3 rounded-[0.8rem] border border-[#4f4337]/35 bg-[#e8ddc6]/70 px-3 py-2">
+                  <span class="text-xs font-black uppercase tracking-[0.18em] text-[#54483b]">{slot}</span>
+                  <span class="rounded-full border border-[#4f4337]/30 px-2 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-[#756553]">Open</span>
+                </div>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="street-dark rounded-[1.75rem] border-2 border-[#4f4337] p-5 text-center shadow-[0_10px_0_rgba(77,67,56,0.5)] sm:p-8">
+      <p class="text-[10px] font-black uppercase tracking-[0.36em] text-[#d9e2bf]">Step into the room</p>
+      <h2 class="mx-auto mt-3 max-w-3xl text-3xl font-black uppercase leading-[0.9] tracking-[0.12em] text-[#f8f1e7] sm:text-5xl">
+        Introduce yourself and say how you want to contribute
+      </h2>
+      <p class="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[#e8ddc6] sm:text-base">
+        Join Discord, tell us your lane, and bring the thing only you can bring: movement, code, sound, art, critique, local scene energy, or straight-up honest testing.
+      </p>
+      <div class="mt-7 flex flex-wrap justify-center gap-3">
+        <a
+          href={discordHref}
+          class="street-button street-button-primary inline-flex min-h-12 items-center justify-center rounded-[1.25rem] px-6 py-3 text-center text-xs font-black uppercase tracking-[0.28em] transition hover:-translate-y-0.5"
+          target={discordExternal ? '_blank' : undefined}
+          rel={discordExternal ? 'noreferrer noopener' : undefined}
+        >
+          Join Discord
+        </a>
+        <a
+          href={manifestoHref}
+          class="street-button inline-flex min-h-12 items-center justify-center rounded-[1.25rem] px-6 py-3 text-center text-xs font-black uppercase tracking-[0.24em] text-[#2d251d] transition hover:-translate-y-0.5"
+        >
+          Read Manifesto
+        </a>
+      </div>
+    </section>
+  </div>
+</Layout>

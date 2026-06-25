@@ -34,7 +34,7 @@ const isActiveNavPath = (path: string) => {
   if (normalizedPath === '/') return normalizedPagePath === '/';
   return normalizedPagePath === normalizedPath || normalizedPagePath.startsWith(`${normalizedPath}/`);
 };
-const isPrimaryNavPath = (path: string) => path.replace(/\/+$/, '') === '/play-the-game';
+const isPrimaryNavPath = (path: string) => path.replace(/\/+$/, '') === '/founding-crew';
 ---
 
 <div class="flex flex-col gap-4">

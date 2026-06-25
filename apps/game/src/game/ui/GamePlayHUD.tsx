@@ -58,8 +58,8 @@ export default function GamePlayHUD({ gameState, send, onExit, copy }: GamePlayH
   const stamina = gameState === 'playing' ? Math.max(18, 100 - elapsedSeconds * 3 - Math.floor(score / 8)) : 100;
   const moves = [copy.topRock, copy.freeze, copy.swipe, copy.footwork];
   const activeMove = moves[elapsedSeconds % moves.length];
-
-  return (
+  return(<></>);
+  /*return (
     <div className="game-hud game-hud--play">
       <div className="game-hud__top">
         <GamePanel variant="light" className="game-play-banner">
@@ -199,5 +199,5 @@ export default function GamePlayHUD({ gameState, send, onExit, copy }: GamePlayH
         )}
       </div>
     </div>
-  );
+  );*/
 }

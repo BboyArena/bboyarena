@@ -3,7 +3,7 @@ import type { LocaleCode, SiteCopy } from '../../i18n-types';
 export const NAV_COPY: Record<LocaleCode, SiteCopy['nav']> = {
   'en-US': {
     menu: 'Menu',
-    play: 'Play',
+    play: 'Join Crew',
     manifesto: 'Manifesto',
     news: 'News',
     battle: 'Battle',
@@ -12,7 +12,7 @@ export const NAV_COPY: Record<LocaleCode, SiteCopy['nav']> = {
   },
   'it-IT': {
     menu: 'Menu',
-    play: 'Gioca',
+    play: 'Partecipa',
     manifesto: 'Manifesto',
     news: 'News',
     battle: 'Battaglia',
@@ -21,7 +21,7 @@ export const NAV_COPY: Record<LocaleCode, SiteCopy['nav']> = {
   },
   'es-419': {
     menu: 'Menú',
-    play: 'Jugar',
+    play: 'Únete',
     manifesto: 'Manifiesto',
     news: 'Noticias',
     battle: 'Batalla',
@@ -30,7 +30,7 @@ export const NAV_COPY: Record<LocaleCode, SiteCopy['nav']> = {
   },
   'pt-BR': {
     menu: 'Menu',
-    play: 'Jogar',
+    play: 'Participar',
     manifesto: 'Manifesto',
     news: 'Notícias',
     battle: 'Batalha',
@@ -39,7 +39,7 @@ export const NAV_COPY: Record<LocaleCode, SiteCopy['nav']> = {
   },
   'zh-Hans': {
     menu: '菜单',
-    play: '游玩',
+    play: '加入团队',
     manifesto: '宣言',
     news: '新闻',
     battle: '对战',

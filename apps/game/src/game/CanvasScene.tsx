@@ -136,7 +136,7 @@ export default function CanvasScene({ gameState }: CanvasSceneProps) {
         <pointLight position={[-4, 2.8, -1]} intensity={0.75} color="#8ea14a" />
         <pointLight position={[4, 2.5, 1]} intensity={0.55} color="#bc613a" />
 
-        <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow> 
           <planeGeometry args={[30, 30]} />
           <meshStandardMaterial color="#9d907d" roughness={1} metalness={0} />
         </mesh>

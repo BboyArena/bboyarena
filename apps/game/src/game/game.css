@@ -368,6 +368,20 @@
   pointer-events: auto;
 }
 
+.bboy-game-root :where(
+  .game-panel[data-overflow="auto"],
+  .game-scroll-area__viewport,
+  .game-mainmenu__nav,
+  .game-hud--menu,
+  .game-hud--splash,
+  .game-hud__top,
+  .game-ui-demo
+) {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
 .bboy-game-root .game-mode-button {
   appearance: none;
   position: relative;
@@ -902,6 +916,7 @@
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  pointer-events: auto;
   padding: 0.1rem 0.15rem 0.15rem 0;
   scrollbar-width: thin;
   scrollbar-color: rgba(244, 190, 36, 0.78) rgba(255, 255, 255, 0.08);
@@ -1549,6 +1564,31 @@
 
 .bboy-game-root .game-battle-button {
   min-width: min(100%, 11rem);
+}
+
+.bboy-game-root .game-touch-joystick {
+  position: absolute;
+  left: clamp(0.75rem, 4vw, 1.5rem);
+  bottom: clamp(4rem, 9vw, 5.5rem);
+  z-index: 24;
+  width: min(42vw, 10rem);
+  height: min(42vw, 10rem);
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.bboy-game-root .game-touch-joystick::before {
+  content: "";
+  position: absolute;
+  inset: 18%;
+  border: 1px dashed rgba(255, 217, 92, 0.32);
+  background: rgba(5, 5, 5, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+}
+
+.bboy-game-root .game-touch-joystick[data-touch-controls="hidden"] {
+  display: none;
 }
 
 .bboy-game-root .game-score-grid {
