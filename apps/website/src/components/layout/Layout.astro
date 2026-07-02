@@ -304,6 +304,17 @@ const manifestLinkTag =
         data-website-id={analyticsWebsiteId}
       ></script>
     )}
+    {analyticsScriptUrl && analyticsWebsiteId && (
+      <script>
+        import { initializePwaAnalytics } from '../../lib/pwa-analytics';
+
+        const appVersion = document
+          .querySelector('meta[name="bboyarena-app-version"]')
+          ?.getAttribute('content') ?? 'unknown';
+
+        initializePwaAnalytics({ appVersion });
+      </script>
+    )}
     {enableVersioning && (
       <script is:inline>
         {`

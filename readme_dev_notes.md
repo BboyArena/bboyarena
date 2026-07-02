@@ -369,6 +369,30 @@ Obiettivo:
 
 - rendere il gioco installabile e fruibile offline per ciò che è già statico/cached
 
+### Escludere la propria attività da Umami
+
+Per evitare che l'attività di sviluppo o amministrazione finisca nelle analytics di produzione, apri `bboyarena.org` nel browser che usi, apri la console degli strumenti per sviluppatori ed esegui:
+
+```js
+localStorage.setItem('umami.disabled', '1');
+```
+
+Ricarica la pagina. Umami smetterà di registrare sia le pageview sia gli eventi PWA personalizzati provenienti da quel browser. L'impostazione vale per il singolo sito e profilo browser, quindi va ripetuta su ogni browser o dispositivo da escludere. La PWA installata normalmente condivide questa preferenza quando usa lo stesso profilo browser e la stessa origine.
+
+Per verificare lo stato:
+
+```js
+localStorage.getItem('umami.disabled');
+```
+
+Il risultato deve essere `"1"`. Per riattivare il tracciamento:
+
+```js
+localStorage.removeItem('umami.disabled');
+```
+
+La preferenza riguarda soltanto l'attività futura e non elimina dati già raccolti. La cancellazione dei dati locali del sito rimuove anche questa impostazione.
+
 ## Build e deployment
 
 ### Script npm
