@@ -1,0 +1,175 @@
+---
+import type { LocaleCode } from '../../lib/i18n';
+import MarkdownBody from './MarkdownBody.astro';
+
+interface Props {
+  gateId: string;
+  locale?: LocaleCode;
+  body: string[] | string;
+}
+
+const { gateId, locale = 'en-US', body } = Astro.props;
+
+const splitBodyAtPreview = (value: string[] | string): [string[] | string, string[] | string] => {
+  if (Array.isArray(value)) {
+    const previewCount = Math.max(1, Math.ceil(value.length * 0.25));
+    return [value.slice(0, previewCount), value.slice(previewCount)];
+  }
+
+  const blocks = value.split(/\n\s*\n/).filter((block) => block.trim().length > 0);
+  if (blocks.length > 1) {
+    const previewCount = Math.max(1, Math.ceil(blocks.length * 0.25));
+    return [blocks.slice(0, previewCount).join('\n\n'), blocks.slice(previewCount).join('\n\n')];
+  }
+
+  const words = value.trim().split(/\s+/);
+  const previewCount = Math.max(1, Math.ceil(words.length * 0.25));
+  return [words.slice(0, previewCount).join(' '), words.slice(previewCount).join(' ')];
+};
+
+const [previewBody, lockedBody] = splitBodyAtPreview(body);
+
+const messages: Record<LocaleCode, { eyebrow: string; title: string; description: string; install: string; fallback: string }> = {
+  'en-US': {
+    eyebrow: 'PWA exclusive',
+    title: 'Install the app to read the full devlog',
+    description: 'Devlog notes are available inside the installed BboyArena app. Install it, then open it from your home screen or app launcher.',
+    install: 'Install app',
+    fallback: 'Use your browser menu and choose “Install app” or “Add to Home Screen”.'
+  },
+  'it-IT': {
+    eyebrow: 'Esclusiva PWA',
+    title: 'Installa l’app per leggere il devlog completo',
+    description: 'Le note di sviluppo sono disponibili nell’app BboyArena installata. Installala, poi aprila dalla schermata Home o dal launcher.',
+    install: 'Installa l’app',
+    fallback: 'Apri il menu del browser e scegli “Installa app” o “Aggiungi alla schermata Home”.'
+  },
+  'es-419': {
+    eyebrow: 'Exclusivo de la PWA',
+    title: 'Instala la app para leer el devlog completo',
+    description: 'Las notas de desarrollo están disponibles en la app BboyArena instalada. Instálala y ábrela desde la pantalla de inicio o el lanzador.',
+    install: 'Instalar la app',
+    fallback: 'Abre el menú del navegador y elige “Instalar app” o “Agregar a la pantalla de inicio”.'
+  },
+  'pt-BR': {
+    eyebrow: 'Exclusivo da PWA',
+    title: 'Instale o app para ler o devlog completo',
+    description: 'As notas de desenvolvimento estão disponíveis no app BboyArena instalado. Instale-o e abra pela tela inicial ou pelo launcher.',
+    install: 'Instalar o app',
+    fallback: 'Abra o menu do navegador e escolha “Instalar app” ou “Adicionar à tela inicial”.'
+  },
+  'zh-Hans': {
+    eyebrow: 'PWA 专属内容',
+    title: '安装应用以阅读完整开发日志',
+    description: '开发日志仅在已安装的 BboyArena 应用中完整开放。安装后，请从主屏幕或应用启动器打开。',
+    install: '安装应用',
+    fallback: '打开浏览器菜单，选择“安装应用”或“添加到主屏幕”。'
+  }
+};
+
+const copy = messages[locale];
+---
+
+<div data-devlog-pwa-root={gateId}>
+  <div data-devlog-pwa-preview>
+    <MarkdownBody body={previewBody} />
+  </div>
+
+  <div data-devlog-pwa-content hidden>
+    <MarkdownBody body={lockedBody} />
+  </div>
+
+  <section
+    data-devlog-pwa-lock
+    class="mt-6 rounded-[1.25rem] border-2 border-[#d9c9b1] bg-[rgba(246,239,228,0.08)] p-5 text-center sm:p-7"
+    aria-labelledby={`${gateId}-title`}
+  >
+    <p class="text-[10px] font-black uppercase tracking-[0.36em] text-[#d9c9b1]">{copy.eyebrow}</p>
+    <h2 id={`${gateId}-title`} class="mt-3 text-xl font-black uppercase leading-tight tracking-[0.12em] text-[#f8f1e7] sm:text-2xl">
+      {copy.title}
+    </h2>
+    <p class="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[#e5d8c5]">{copy.description}</p>
+    <button
+      type="button"
+      data-devlog-pwa-install
+      class="street-button street-button-primary mt-5 flex min-h-12 w-full items-center justify-center rounded-full px-5 text-center text-[10px] font-black uppercase tracking-[0.24em]"
+      aria-expanded="false"
+    >
+      {copy.install}
+    </button>
+    <p data-devlog-pwa-fallback hidden class="mx-auto mt-4 max-w-xl text-xs leading-relaxed text-[#d9c9b1]">{copy.fallback}</p>
+  </section>
+</div>
+
+<script>
+  interface InstallPromptEvent extends Event {
+    prompt: () => Promise<void>;
+    userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+  }
+
+  const roots = document.querySelectorAll<HTMLElement>('[data-devlog-pwa-root]');
+
+  roots.forEach((root) => {
+    if (root.dataset.pwaGateReady === 'true') return;
+    root.dataset.pwaGateReady = 'true';
+
+    const displayModeQuery = window.matchMedia('(display-mode: standalone)');
+    const content = root.querySelector<HTMLElement>('[data-devlog-pwa-content]');
+    const lock = root.querySelector<HTMLElement>('[data-devlog-pwa-lock]');
+    const installButton = root.querySelector<HTMLButtonElement>('[data-devlog-pwa-install]');
+    const fallback = root.querySelector<HTMLElement>('[data-devlog-pwa-fallback]');
+
+    const syncGate = () => {
+      const isStandalone =
+        displayModeQuery.matches ||
+        (navigator as Navigator & { standalone?: boolean }).standalone === true;
+
+      if (!isStandalone) return;
+
+      content?.removeAttribute('hidden');
+      lock?.setAttribute('hidden', '');
+
+      if (root.dataset.pwaGateUnlocked !== 'true') {
+        root.dataset.pwaGateUnlocked = 'true';
+        window.umami?.track('devlog-pwa-unlocked', { source: 'devlog-paywall' });
+      }
+    };
+
+    syncGate();
+    window.addEventListener('pageshow', syncGate);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') syncGate();
+    });
+    displayModeQuery.addEventListener?.('change', syncGate);
+    window.requestAnimationFrame(syncGate);
+    window.setTimeout(syncGate, 500);
+
+    let installPrompt: InstallPromptEvent | undefined;
+
+    window.addEventListener(
+      'beforeinstallprompt',
+      (event) => {
+        event.preventDefault();
+        installPrompt = event as InstallPromptEvent;
+      },
+      { once: true }
+    );
+
+    installButton?.addEventListener('click', async () => {
+      if (!installPrompt) {
+        fallback?.removeAttribute('hidden');
+        installButton.setAttribute('aria-expanded', 'true');
+        window.umami?.track('pwa-install-instructions-opened', { source: 'devlog-paywall' });
+        return;
+      }
+
+      window.umami?.track('pwa-install-prompt-opened', { source: 'devlog-paywall' });
+      await installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      window.umami?.track(`pwa-install-${outcome}`, { source: 'devlog-paywall' });
+      installPrompt = undefined;
+      fallback?.removeAttribute('hidden');
+      installButton.setAttribute('aria-expanded', 'true');
+    });
+  });
+</script>

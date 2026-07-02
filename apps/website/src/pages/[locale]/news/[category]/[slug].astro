@@ -1,6 +1,7 @@
 ---
 import Layout from '../../../../components/layout/Layout.astro';
 import MarkdownBody from '../../../../components/news/MarkdownBody.astro';
+import DevlogPwaGate from '../../../../components/news/DevlogPwaGate.astro';
 import {
   NEWS_CATEGORIES,
   getNewsCategoryPath,
@@ -108,6 +109,8 @@ if (!item) {
                 The original version lives on the external source, and this page deliberately stays aligned with `noindex` to avoid SEO duplication.
               </p>
             </>
+          ) : item.category === 'devlog' ? (
+            <DevlogPwaGate gateId={`devlog-pwa-${item.slug}`} locale={locale} body={item.body} />
           ) : (
             <MarkdownBody body={item.body} />
           )}

@@ -24,6 +24,10 @@ export interface ManifestoCopy {
   isNotItems: string[];
   closingTitle: string;
   closing: string[];
+  installTitle: string;
+  installDescription: string;
+  installCta: string;
+  installFallback: string;
   cards: [ManifestoCardCopy, ManifestoCardCopy];
   sponsorSubject: string;
 }
@@ -55,21 +59,19 @@ export const getManifestoSwitcherLinks = () =>
 export const MANIFESTO_COPY: Record<LocaleCode, ManifestoCopy> = {
   'en-US': {
     seoTitle: 'BboyArena.org',
-    seoDescription:
-      'An independent, community-driven project dedicated to breaking culture, creative movement, and experimental game development, with open development, respect for the scene, and privacy-friendly analytics.',
+    seoDescription: 'BboyArena is a free-to-play, open-community breaking game built in public, one movement and one release at a time.',
     heroLabel: 'Manifesto',
-    heroTitle: 'Breaking has no age.',
-    heroLead:
-      'This is a statement about a browser game built from real breaking culture, not from distance. I lived this culture, I still respect it, and I want the project to carry that truth forward.',
+    heroTitle: 'We are building the infrastructure of Breaking.',
+    heroLead: 'Not just a game: an open, free-to-play digital space built in public with the people who live and care about breaking culture.',
     followCta: 'Follow the project',
     communityCta: 'Join the community',
     readCta: 'Read the manifesto',
     manifesto: [
-      'I am building this game because I love breaking. That love is personal, lived, and long-standing. I was a b-boy. I danced for years. I still carry that history with me, and I still feel connected to the culture.',
-      'I do not want to appropriate breaking. I do not want to pretend I own it. I want to build something that respects the people, the history, the energy of battle, and the emotional truth of the floor.',
-      'Breaking has no age limit. I can call myself a retired b-boy and still remain part of the culture. The love does not expire, and the respect does not expire either.',
-      'The goal is not to copy existing games or brands. The goal is to extend the spirit of older breaking games into something modern, multiplayer, social, and community-driven.',
-      'This project is independent. It is inspired by breaking culture and by my own lived experience. It is not affiliated with any brand, league, or existing game.'
+      'BboyArena starts as a free-to-play, open-community project. Development happens in public: every build adds logic, movement, rhythm, and another piece of the 3D engine.',
+      'The code is only the beginning. The goal is to turn breaking knowledge, memory, battles, and community into a digital space that can grow without claiming ownership of the culture.',
+      'Want to test the next feature first? Follow the lognotes and keep the app installed. You will see experiments become systems and code become movement.',
+      'The project is independent and shaped through visible work, honest limitations, and community feedback. It is not affiliated with any brand, league, or existing game.',
+      'Stay connected to the build. This is a living construction site, and every release is another step onto the floor.'
     ],
     isTitle: 'What this project is',
     isItems: [
@@ -87,9 +89,13 @@ export const MANIFESTO_COPY: Record<LocaleCode, ManifestoCopy> = {
     ],
     closingTitle: 'Closing note',
     closing: [
-      'If you are a b-boy, a b-girl, or someone close to the culture, I hope you can feel the difference between appropriation and respect.',
-      'This manifesto says one simple thing: the project is built with care, not claim, and with love, not distance.'
+      'BboyArena is built with care, not claim; with visible work, not distance.',
+      'Install the PWA for direct access to the construction site. Push updates will join this channel when they are ready.'
     ],
+    installTitle: 'Stay connected to the build',
+    installDescription: 'Install the PWA for direct access to devlogs, experiments, and every new feature as it comes online.',
+    installCta: 'Install PWA & follow development',
+    installFallback: 'Use your browser menu and choose “Install app” or “Add to Home Screen”.',
     cards: [
       {
         label: 'Community',
@@ -110,21 +116,19 @@ export const MANIFESTO_COPY: Record<LocaleCode, ManifestoCopy> = {
   },
   'it-IT': {
     seoTitle: 'BboyArena.org',
-    seoDescription:
-      'Un progetto indipendente e community-driven dedicato alla cultura breaking, al movimento creativo e allo sviluppo sperimentale, con open development, rispetto per la scena e analytics privacy-friendly.',
+    seoDescription: 'BboyArena è un gioco Free2Play e Open-Community costruito in pubblico, un movimento e una release alla volta.',
     heroLabel: 'Manifesto',
-    heroTitle: 'Il breaking non ha età.',
-    heroLead:
-      'Questo è uno statement su un videogioco browser costruito dalla cultura breaking vissuta davvero, non da distanza. Ho vissuto questa cultura, la rispetto ancora oggi e voglio che il progetto porti avanti quella verità.',
+    heroTitle: 'Stiamo costruendo l’infrastruttura del Breaking.',
+    heroLead: 'Non soltanto un gioco: uno spazio digitale aperto e Free2Play, costruito in pubblico insieme a chi vive e rispetta la cultura breaking.',
     followCta: 'Segui il progetto',
     communityCta: 'Entra nella community',
     readCta: 'Leggi il manifesto',
     manifesto: [
-      'Sto costruendo questo gioco perché amo il breaking. È un amore personale, vissuto e duraturo. Sono stato un b-boy, ho ballato per anni e quella storia mi accompagna ancora oggi.',
-      'Non voglio appropriarmi del breaking. Non voglio fingere di possederlo. Voglio costruire qualcosa che rispetti le persone, la storia, l’energia della battle e la verità emotiva del floor.',
-      'Il breaking non ha età. Posso considerarmi un b-boy in pensione e restare comunque parte della cultura. L’amore non scade, e nemmeno il rispetto.',
-      'L’obiettivo non è copiare giochi o brand esistenti. L’obiettivo è estendere lo spirito dei vecchi giochi di breaking in una forma moderna, multiplayer, sociale e community-driven.',
-      'Questo progetto è indipendente. Nasce dalla cultura breaking e dal mio vissuto personale. Non è affiliato a brand, leghe o giochi esistenti.'
+      'BboyArena nasce come progetto Free2Play e Open-Community. Lo sviluppo avviene in pubblico: ogni build aggiunge logica, movimento, ritmo e un nuovo pezzo del motore 3D.',
+      'Il codice è solo l’inizio. L’obiettivo è trasformare conoscenza, memoria, battle e community in uno spazio digitale che possa crescere senza pretendere di possedere la cultura.',
+      'Vuoi essere il primo a testare la prossima feature? Segui le lognotes e tieni l’app installata: vedrai gli esperimenti diventare sistemi e il codice trasformarsi in movimento.',
+      'Il progetto è indipendente e prende forma attraverso lavoro visibile, limiti dichiarati e feedback della community. Non è affiliato a brand, leghe o giochi esistenti.',
+      'Resta connesso alla build. Questo è un cantiere vivo, e ogni release è un altro passo sul floor.'
     ],
     isTitle: 'Cosa è questo progetto',
     isItems: [
@@ -142,9 +146,13 @@ export const MANIFESTO_COPY: Record<LocaleCode, ManifestoCopy> = {
     ],
     closingTitle: 'Chiusura',
     closing: [
-      'Se sei un b-boy, una b-girl o qualcuno vicino alla cultura, spero tu possa sentire la differenza tra appropriazione e rispetto.',
-      'Questo manifesto dice una cosa semplice: il progetto è costruito con cura, non con pretesa, e con amore, non con distanza.'
+      'BboyArena è costruito con cura, non con pretesa; con lavoro visibile, non da lontano.',
+      'Installa la PWA per avere accesso diretto al cantiere. Le notifiche push entreranno in questo canale quando saranno pronte.'
     ],
+    installTitle: 'Resta connesso alla build',
+    installDescription: 'Installa la PWA per accedere direttamente a lognotes, esperimenti e nuove funzioni mentre vanno online.',
+    installCta: 'Installa PWA & segui lo sviluppo',
+    installFallback: 'Apri il menu del browser e scegli “Installa app” o “Aggiungi alla schermata Home”.',
     cards: [
       {
         label: 'Community',
@@ -168,18 +176,17 @@ export const MANIFESTO_COPY: Record<LocaleCode, ManifestoCopy> = {
     seoDescription:
       'Un proyecto independiente y guiado por la comunidad dedicado a la cultura breaking, el movimiento creativo y el desarrollo experimental, con open development, respeto por la escena y analytics respetuosos con la privacidad.',
     heroLabel: 'Manifiesto',
-    heroTitle: 'El breaking no tiene edad.',
-    heroLead:
-      'Esto es una declaración sobre un juego de navegador construido desde la cultura breaking real, no desde la distancia. Viví esta cultura, sigo respetándola y quiero que el proyecto lleve esa verdad hacia adelante.',
+    heroTitle: 'Estamos construyendo la infraestructura del Breaking.',
+    heroLead: 'No solo un juego: un espacio digital abierto y Free2Play, construido en público con quienes viven y respetan la cultura breaking.',
     followCta: 'Seguir el proyecto',
     communityCta: 'Entrar a la comunidad',
     readCta: 'Leer el manifiesto',
     manifesto: [
-      'Estoy construyendo este juego porque amo el breaking. Ese amor es personal, vivido y duradero. Fui b-boy, bailé durante años y todavía llevo esa historia conmigo.',
-      'No quiero apropiarme del breaking. No quiero fingir que lo poseo. Quiero construir algo que respete a la gente, la historia, la energía de la batalla y la verdad emocional del piso.',
-      'El breaking no tiene límite de edad. Puedo considerarme un b-boy retirado y seguir siendo parte de la cultura. El amor no caduca, y el respeto tampoco.',
-      'El objetivo no es copiar juegos o marcas existentes. El objetivo es extender el espíritu de los viejos juegos de breaking en una forma moderna, multijugador, social y guiada por la comunidad.',
-      'Este proyecto es independiente. Nace de la cultura breaking y de mi propia experiencia vivida. No está afiliado a ninguna marca, liga o juego existente.'
+      'BboyArena nace como un proyecto Free2Play y Open-Community. El desarrollo ocurre en público: cada build suma lógica, movimiento, ritmo y una nueva parte del motor 3D.',
+      'El código es solo el comienzo. Queremos transformar conocimiento, memoria, battles y comunidad en un espacio digital que crezca sin pretender poseer la cultura.',
+      '¿Quieres probar primero la próxima función? Sigue las lognotes y mantén la app instalada: verás cómo los experimentos se convierten en sistemas y el código en movimiento.',
+      'El proyecto es independiente y toma forma mediante trabajo visible, límites honestos y feedback de la comunidad. No está afiliado a ninguna marca, liga o juego existente.',
+      'Mantente conectado con la build. Este es un sitio de construcción vivo y cada release es otro paso sobre el floor.'
     ],
     isTitle: 'Qué es este proyecto',
     isItems: [
@@ -200,6 +207,10 @@ export const MANIFESTO_COPY: Record<LocaleCode, ManifestoCopy> = {
       'Si eres un b-boy, una b-girl o alguien cercano a la cultura, espero que puedas sentir la diferencia entre apropiación y respeto.',
       'Este manifiesto dice una sola cosa: el proyecto está construido con cuidado, no con reclamo, y con amor, no con distancia.'
     ],
+    installTitle: 'Mantente conectado con la build',
+    installDescription: 'Instala la PWA para acceder directamente a las lognotes, los experimentos y las nuevas funciones.',
+    installCta: 'Instalar PWA y seguir el desarrollo',
+    installFallback: 'Abre el menú del navegador y elige “Instalar app” o “Agregar a la pantalla de inicio”.',
     cards: [
       {
         label: 'Comunidad',
@@ -223,18 +234,17 @@ export const MANIFESTO_COPY: Record<LocaleCode, ManifestoCopy> = {
     seoDescription:
       'Um projeto independente e guiado pela comunidade dedicado à cultura breaking, ao movimento criativo e ao desenvolvimento experimental, com open development, respeito à cena e analytics privacy-friendly.',
     heroLabel: 'Manifesto',
-    heroTitle: 'Breaking não tem idade.',
-    heroLead:
-      'Esta é uma declaração sobre um jogo de navegador construído a partir da cultura breaking real, não de longe. Eu vivi essa cultura, continuo respeitando-a e quero que o projeto carregue essa verdade adiante.',
+    heroTitle: 'Estamos construindo a infraestrutura do Breaking.',
+    heroLead: 'Não apenas um jogo: um espaço digital aberto e Free2Play, construído em público com quem vive e respeita a cultura breaking.',
     followCta: 'Seguir o projeto',
     communityCta: 'Entrar na comunidade',
     readCta: 'Ler o manifesto',
     manifesto: [
-      'Estou construindo este jogo porque amo o breaking. Esse amor é pessoal, vivido e duradouro. Fui b-boy, dancei por anos e ainda carrego essa história comigo.',
-      'Não quero me apropriar do breaking. Não quero fingir que sou dono dele. Quero construir algo que respeite as pessoas, a história, a energia da battle e a verdade emocional do chão.',
-      'O breaking não tem limite de idade. Posso me considerar um b-boy aposentado e ainda fazer parte da cultura. O amor não expira, e o respeito também não.',
-      'O objetivo não é copiar jogos ou marcas existentes. O objetivo é estender o espírito dos antigos jogos de breaking em uma forma moderna, multiplayer, social e guiada pela comunidade.',
-      'Este projeto é independente. Nasce da cultura breaking e da minha própria experiência vivida. Não é afiliado a nenhuma marca, liga ou jogo existente.'
+      'BboyArena nasce como um projeto Free2Play e Open-Community. O desenvolvimento acontece em público: cada build adiciona lógica, movimento, ritmo e uma nova parte do motor 3D.',
+      'O código é apenas o começo. Queremos transformar conhecimento, memória, battles e comunidade em um espaço digital que cresça sem tentar possuir a cultura.',
+      'Quer testar a próxima funcionalidade primeiro? Acompanhe as lognotes e mantenha o app instalado: você verá experimentos virarem sistemas e código virar movimento.',
+      'O projeto é independente e ganha forma por meio de trabalho visível, limites honestos e feedback da comunidade. Não é afiliado a nenhuma marca, liga ou jogo existente.',
+      'Fique conectado à build. Este é um canteiro vivo, e cada release é mais um passo no floor.'
     ],
     isTitle: 'O que este projeto é',
     isItems: [
@@ -255,6 +265,10 @@ export const MANIFESTO_COPY: Record<LocaleCode, ManifestoCopy> = {
       'Se você é um b-boy, uma b-girl ou alguém próximo da cultura, espero que consiga sentir a diferença entre apropriação e respeito.',
       'Este manifesto diz uma coisa simples: o projeto é construído com cuidado, não com pretensão, e com amor, não com distância.'
     ],
+    installTitle: 'Fique conectado à build',
+    installDescription: 'Instale a PWA para acessar diretamente lognotes, experimentos e novas funcionalidades.',
+    installCta: 'Instalar PWA e acompanhar o desenvolvimento',
+    installFallback: 'Abra o menu do navegador e escolha “Instalar app” ou “Adicionar à tela inicial”.',
     cards: [
       {
         label: 'Comunidade',
@@ -278,18 +292,17 @@ export const MANIFESTO_COPY: Record<LocaleCode, ManifestoCopy> = {
     seoDescription:
       '一个独立、由社区驱动的项目，围绕 breaking 文化、创意动作与实验性游戏开发展开，并采用开放开发、尊重现场文化与隐私友好的分析方式。',
     heroLabel: '宣言',
-    heroTitle: 'Breaking 没有年龄。',
-    heroLead:
-      '这是一份关于浏览器游戏的声明，它来自真实的 breaking 文化，而不是远距离的想象。我真正经历过这份文化，如今依然尊重它，也希望项目能继续传递这份真实。',
+    heroTitle: '我们正在构建 Breaking 的数字基础设施。',
+    heroLead: '这不只是一款游戏，而是一个开放、Free2Play、与 breaking 社群共同公开构建的数字空间。',
     followCta: '关注项目',
     communityCta: '加入社区',
     readCta: '阅读宣言',
     manifesto: [
-      '我在做这个游戏，是因为我真的热爱 breaking。这个热爱是个人的、真实经历过的，也是长久的。我曾经是 b-boy，跳了很多年，如今这段历史仍然跟着我。',
-      '我不想占有 breaking，也不想假装自己拥有它。我想做的是一个尊重人、尊重历史、尊重 battle 能量、也尊重地板上真实情感的作品。',
-      'Breaking 没有年龄限制。即使我可以算是退休的 b-boy，我仍然属于这个文化。热爱不会过期，尊重也不会过期。',
-      '目标不是复制已有的游戏或品牌，而是把旧时代 breaking 游戏的精神延伸成一种更现代、多玩家、社交化、社区驱动的形式。',
-      '这个项目是独立的。它来自 breaking 文化，也来自我自己的亲身经历。它不隶属于任何品牌、联盟或现有游戏。'
+      'BboyArena 从一开始就是 Free2Play、Open-Community 项目。开发过程完全公开：每个 build 都为 3D 引擎加入新的逻辑、动作与节奏。',
+      '代码只是起点。我们的目标是把知识、记忆、battle 与社区转化为持续成长的数字空间，而不是宣称拥有这份文化。',
+      '想最先测试下一项功能吗？关注 lognotes，并把应用保留在设备上；你会看到实验成为系统，代码成为动作。',
+      '项目保持独立，通过可见的工作、坦诚的限制和社区反馈不断成形。它不隶属于任何品牌、联盟或现有游戏。',
+      '与 build 保持连接。这是一个持续运转的工地，每次 release 都是在 floor 上迈出的新一步。'
     ],
     isTitle: '这个项目是什么',
     isItems: [
@@ -310,6 +323,10 @@ export const MANIFESTO_COPY: Record<LocaleCode, ManifestoCopy> = {
       '如果你是 b-boy、b-girl，或任何接近这份文化的人，我希望你能感受到“占有”和“尊重”之间的区别。',
       '这份宣言只想说明一件事：这个项目是带着认真、不是带着占有欲；是带着爱，而不是距离。'
     ],
+    installTitle: '与构建进程保持连接',
+    installDescription: '安装 PWA，直接访问开发日志、实验内容与陆续上线的新功能。',
+    installCta: '安装 PWA 并关注开发',
+    installFallback: '打开浏览器菜单，选择“安装应用”或“添加到主屏幕”。',
     cards: [
       {
         label: '社区',

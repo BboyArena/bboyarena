@@ -80,6 +80,25 @@ const secondaryCtasHref = '#manifesto-secondary-ctas';
       {copy.closing.map((paragraph) => <p>{paragraph}</p>)}
     </section>
 
+    <section class="street-dark rounded-[1.75rem] p-5 sm:p-7" data-manifesto-install>
+      <p class="text-[10px] font-black uppercase tracking-[0.36em] text-[#d9c9b1]">Build in public</p>
+      <h2 class="mt-3 text-2xl font-black uppercase leading-tight tracking-[0.12em] text-[#f8f1e7] sm:text-3xl">
+        {copy.installTitle}
+      </h2>
+      <p class="mt-4 max-w-2xl text-sm leading-relaxed text-[#e5d8c5] sm:text-base">{copy.installDescription}</p>
+      <button
+        type="button"
+        data-manifesto-install-button
+        class="street-button street-button-primary mt-6 flex min-h-12 w-full items-center justify-center rounded-full px-5 text-center text-[10px] font-black uppercase tracking-[0.22em]"
+        aria-expanded="false"
+      >
+        {copy.installCta}
+      </button>
+      <p data-manifesto-install-fallback hidden class="mt-4 text-center text-xs leading-relaxed text-[#d9c9b1]">
+        {copy.installFallback}
+      </p>
+    </section>
+
     <section id="manifesto-secondary-ctas" class="grid gap-4 pt-0 lg:grid-cols-2 lg:pt-8 xl:pt-10">
       <SecondaryCTA
         label={homeCopy.discordLabel}
@@ -120,4 +139,42 @@ const secondaryCtasHref = '#manifesto-secondary-ctas';
       />
     </section>
   </article>
+
+  <script>
+    interface InstallPromptEvent extends Event {
+      prompt: () => Promise<void>;
+      userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+    }
+
+    const installRoot = document.querySelector<HTMLElement>('[data-manifesto-install]');
+    const installButton = installRoot?.querySelector<HTMLButtonElement>('[data-manifesto-install-button]');
+    const installFallback = installRoot?.querySelector<HTMLElement>('[data-manifesto-install-fallback]');
+    let installPrompt: InstallPromptEvent | undefined;
+
+    window.addEventListener(
+      'beforeinstallprompt',
+      (event) => {
+        event.preventDefault();
+        installPrompt = event as InstallPromptEvent;
+      },
+      { once: true }
+    );
+
+    installButton?.addEventListener('click', async () => {
+      if (!installPrompt) {
+        installFallback?.removeAttribute('hidden');
+        installButton.setAttribute('aria-expanded', 'true');
+        window.umami?.track('pwa-install-instructions-opened', { source: 'manifesto' });
+        return;
+      }
+
+      window.umami?.track('pwa-install-prompt-opened', { source: 'manifesto' });
+      await installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      window.umami?.track(`pwa-install-${outcome}`, { source: 'manifesto' });
+      installPrompt = undefined;
+      installFallback?.removeAttribute('hidden');
+      installButton.setAttribute('aria-expanded', 'true');
+    });
+  </script>
 </Layout>
