@@ -61,7 +61,10 @@ export const FOOTER_COPY: Record<LocaleCode, SiteCopy['footer']> = {
     participate: 'Participate',
     discord: 'Discord',
     github: 'GitHub',
-    youtube: 'YouTube'
+    youtube: 'YouTube',
+    supportTitle: 'Support the project',
+    supportDescription: 'Help BboyArena grow while keeping its development open and independent.',
+    supportCta: 'Support on'
   },
   'it-IT': {
     ready: 'PWA pronta',
@@ -75,7 +78,10 @@ export const FOOTER_COPY: Record<LocaleCode, SiteCopy['footer']> = {
     participate: 'Partecipa',
     discord: 'Discord',
     github: 'GitHub',
-    youtube: 'YouTube'
+    youtube: 'YouTube',
+    supportTitle: 'Sostieni il progetto',
+    supportDescription: 'Aiuta BboyArena a crescere mantenendo lo sviluppo aperto e indipendente.',
+    supportCta: 'Sostieni su'
   },
   'es-419': {
     ready: 'PWA lista',
@@ -89,7 +95,10 @@ export const FOOTER_COPY: Record<LocaleCode, SiteCopy['footer']> = {
     participate: 'Participar',
     discord: 'Discord',
     github: 'GitHub',
-    youtube: 'YouTube'
+    youtube: 'YouTube',
+    supportTitle: 'Apoya el proyecto',
+    supportDescription: 'Ayuda a BboyArena a crecer manteniendo su desarrollo abierto e independiente.',
+    supportCta: 'Apoya en'
   },
   'pt-BR': {
     ready: 'PWA pronta',
@@ -103,7 +112,10 @@ export const FOOTER_COPY: Record<LocaleCode, SiteCopy['footer']> = {
     participate: 'Participar',
     discord: 'Discord',
     github: 'GitHub',
-    youtube: 'YouTube'
+    youtube: 'YouTube',
+    supportTitle: 'Apoie o projeto',
+    supportDescription: 'Ajude o BboyArena a crescer, mantendo seu desenvolvimento aberto e independente.',
+    supportCta: 'Apoie no'
   },
   'zh-Hans': {
     ready: 'PWA 就绪',
@@ -117,7 +129,10 @@ export const FOOTER_COPY: Record<LocaleCode, SiteCopy['footer']> = {
     participate: '参与',
     discord: 'Discord',
     github: 'GitHub',
-    youtube: 'YouTube'
+    youtube: 'YouTube',
+    supportTitle: '支持项目',
+    supportDescription: '帮助 BboyArena 成长，同时保持开放和独立开发。',
+    supportCta: '支持平台'
   }
 };
 

@@ -8,6 +8,11 @@ interface ImportMetaEnv {
   readonly PUBLIC_DISCORD_URL?: string;
   readonly PUBLIC_INSTAGRAM_URL?: string;
   readonly PUBLIC_YOUTUBE_URL?: string;
+  readonly PUBLIC_SUPPORT_ENABLED?: string;
+  readonly PUBLIC_BUYMEACOFFEE_ENABLED?: string;
+  readonly PUBLIC_BUYMEACOFFEE_URL?: string;
+  readonly PUBLIC_PATREON_ENABLED?: string;
+  readonly PUBLIC_PATREON_URL?: string;
   readonly PUBLIC_CONTACT_EMAIL?: string;
   readonly PUBLIC_NEWSLETTER_URL?: string;
   readonly PUBLIC_POCKETBASE_URL?: string;

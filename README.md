@@ -75,6 +75,20 @@ If you want to follow or support BboyArena:
 - send feedback on the identity, wording, and direction;
 - report anything that feels unclear or broken.
 
+### Optional supporter links
+
+The global footer has a preconfigured support area for Buy Me a Coffee and Patreon. It is hidden by default. Configure the URLs in the deployment environment, then enable the master switch and either platform independently:
+
+```bash
+PUBLIC_SUPPORT_ENABLED=true
+PUBLIC_BUYMEACOFFEE_ENABLED=true
+PUBLIC_BUYMEACOFFEE_URL=https://buymeacoffee.com/your-handle
+PUBLIC_PATREON_ENABLED=false
+PUBLIC_PATREON_URL=https://www.patreon.com/c/your-handle
+```
+
+An enabled platform without a valid `http` or `https` URL remains hidden. Set `PUBLIC_SUPPORT_ENABLED=false` to hide the whole area without changing either platform configuration.
+
 ## Roadmap
 
 The roadmap is intentionally high level.

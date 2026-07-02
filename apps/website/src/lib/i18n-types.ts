@@ -43,6 +43,9 @@ export interface SiteCopy {
     discord: string;
     github: string;
     youtube: string;
+    supportTitle: string;
+    supportDescription: string;
+    supportCta: string;
   };
   switcher: {
     label: string;

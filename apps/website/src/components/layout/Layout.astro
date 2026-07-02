@@ -14,6 +14,8 @@ import {
 } from '../../lib/i18n';
 import HomeLogo from '../navigation/HomeLogo.astro';
 import SiteNavigation from '../navigation/SiteNavigation.astro';
+import SupportProject from '../support/SupportProject.astro';
+import { supportPlatforms } from '../../lib/support';
 
 interface Props {
   title?: string;
@@ -119,7 +121,9 @@ const footerSocialLinks = [
   ...(githubHref ? [{ label: copy.footer.github, href: githubHref, external: true, icon: 'github' as const }] : []),
   ...(youtubeHref ? [{ label: copy.footer.youtube, href: youtubeHref, external: true, icon: 'youtube' as const }] : [])
 ];
-const sameAs = [instagramHref, discordHref, githubHref, youtubeHref].filter((value): value is string => Boolean(value));
+const sameAs = [instagramHref, discordHref, githubHref, youtubeHref, ...supportPlatforms.map(({ href }) => href)].filter(
+  (value): value is string => Boolean(value)
+);
 
 const seo = buildSeoData({
   siteUrl: site,
@@ -472,7 +476,8 @@ const manifestLinkTag =
     <!-- Footer -->
     <footer class="w-full border-t-4 border-[#4f4337] bg-[#eae0d0] py-6 shadow-[0_-4px_0_rgba(95,82,69,0.55)] sm:py-7">
       <div class="mx-auto max-w-6xl px-4 text-[11px] text-[#5f5346] sm:text-[12px]">
-        <div class="grid gap-6 lg:grid-cols-[auto_1fr] lg:items-start">
+        <SupportProject locale={locale} />
+        <div class={`grid gap-6 lg:grid-cols-[auto_1fr] lg:items-start ${supportPlatforms.length > 0 ? 'mt-6' : ''}`}>
           <div class="flex flex-col items-center gap-3 text-center lg:items-start lg:text-left">
             <div class="flex justify-center lg:justify-start">
               <HomeLogo locale={locale} label="BboyArena home" />
