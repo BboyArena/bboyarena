@@ -61,7 +61,7 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
       <div className="game-shell">
         <div className="game-stage" data-scene={screen}>
           {screen === 'career' || screen === 'training' ? (
-            <GamePlayScene mode={selectedMode} copy={copy} rootRef={rootRef} />
+            <GamePlayScene mode={selectedMode} copy={copy} />
           ) : (
             <>
               {isDev ? (
@@ -75,9 +75,9 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
                 </button>
               ) : null}
               <GameHUD copy={copy} />
-              <GameFullscreenToggle targetRef={rootRef} />
             </>
           )}
+          <GameFullscreenToggle targetRef={rootRef} />
           <GameFullscreenReticle targetRef={rootRef} />
         </div>
       </div>

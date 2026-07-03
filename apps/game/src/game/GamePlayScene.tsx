@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useRef, type RefObject } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useMachine } from '@xstate/react';
 import { gameMachine } from './state/gameMachine';
 import { useGameStore, type GamePlayMode } from './state/useGameStore';
 import CanvasScene from './CanvasScene';
-import GameFullscreenToggle from './ui/GameFullscreenToggle';
 import GamePlayHUD from './ui/GamePlayHUD';
 import type { GameCopy } from './copy';
 import { GameInputProvider, useGameInputSnapshot } from './input/GameInputProvider';
@@ -16,7 +15,6 @@ import { createDefaultPlayerMotionState, type PlayerMotionState } from './state/
 interface GamePlaySceneProps {
   mode: GamePlayMode;
   copy: GameCopy;
-  rootRef: RefObject<HTMLDivElement | null>;
 }
 
 function GameInputSceneBindings({ gameState, send }: { gameState: string; send: (event: { type: string }) => void }) {
@@ -48,7 +46,7 @@ function GameInputSceneBindings({ gameState, send }: { gameState: string; send: 
   );
 }
 
-function GamePlaySceneContent({ mode, copy, rootRef }: GamePlaySceneProps) {
+function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const [state, send] = useMachine(gameMachine);
   const openMainMenu = useGameStore((store) => store.openMainMenu);
   const bpm = useGameStore((store) => store.bpm);
@@ -91,7 +89,6 @@ function GamePlaySceneContent({ mode, copy, rootRef }: GamePlaySceneProps) {
       </button>
       <CanvasScene gameState={gameState} playerMotionState={playerMotionState} />
       <GamePlayHUD mode={mode} gameState={gameState} send={send} onExit={openMainMenu} copy={copy} />
-      <GameFullscreenToggle targetRef={rootRef} />
     </>
   );
 }
