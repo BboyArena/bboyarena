@@ -5,6 +5,7 @@ import { gameMachine } from './state/gameMachine';
 import { useGameStore, type GamePlayMode } from './state/useGameStore';
 import CanvasScene from './CanvasScene';
 import GamePlayHUD from './ui/GamePlayHUD';
+import GameCanvasErrorBoundary from './ui/GameCanvasErrorBoundary';
 import type { GameCopy } from './copy';
 import { GameInputProvider, useGameInputSnapshot } from './input/GameInputProvider';
 import GamepadInputAdapter from './input/GamepadInputAdapter';
@@ -87,7 +88,9 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
       >
         {copy.playStatus} / {mode} / {gameState}
       </button>
-      <CanvasScene gameState={gameState} playerMotionState={playerMotionState} />
+      <GameCanvasErrorBoundary>
+        <CanvasScene gameState={gameState} playerMotionState={playerMotionState} />
+      </GameCanvasErrorBoundary>
       <GamePlayHUD mode={mode} gameState={gameState} send={send} onExit={openMainMenu} copy={copy} />
     </>
   );

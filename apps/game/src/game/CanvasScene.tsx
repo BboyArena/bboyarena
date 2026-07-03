@@ -1,4 +1,5 @@
-import { Canvas } from '@react-three/fiber';
+import { useEffect, useState } from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import Player from './Player';
@@ -10,13 +11,13 @@ interface CanvasSceneProps {
 }
 
 function ParquetFloor() {
-  const parquetTexture = useTexture('/parquet.png');
+  const parquetTexture = useTexture(`${import.meta.env.BASE_URL}parquet.png`);
 
   parquetTexture.colorSpace = THREE.SRGBColorSpace;
   parquetTexture.wrapS = THREE.RepeatWrapping;
   parquetTexture.wrapT = THREE.RepeatWrapping;
   parquetTexture.repeat.set(12, 12);
-  parquetTexture.anisotropy = 16;
+  parquetTexture.anisotropy = 4;
 
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
@@ -26,15 +27,45 @@ function ParquetFloor() {
   );
 }
 
+function WebGLContextGuard({ onContextLost }: { onContextLost: () => void }) {
+  const gl = useThree((state) => state.gl);
+
+  useEffect(() => {
+    const canvas = gl.domElement;
+    const handleContextLost = (event: Event) => {
+      event.preventDefault();
+      onContextLost();
+    };
+
+    canvas.addEventListener('webglcontextlost', handleContextLost);
+    return () => canvas.removeEventListener('webglcontextlost', handleContextLost);
+  }, [gl, onContextLost]);
+
+  return null;
+}
+
 export default function CanvasScene({ gameState, playerMotionState }: CanvasSceneProps) {
+  const [hasWebGLContext, setHasWebGLContext] = useState(true);
+
+  if (!hasWebGLContext) {
+    return (
+      <div className="game-canvas game-canvas--fallback" role="status">
+        <strong>3D rendering paused</strong>
+        <span>The device lost the WebGL context. Return to the menu and try again.</span>
+      </div>
+    );
+  }
+
   return (
     <div className="game-canvas">
       <Canvas
         className="game-canvas__surface"
         shadows
+        dpr={[1, 1.5]}
         camera={{ position: [0, 3.4, 8.5], fov: 42 }}
-        gl={{ antialias: true, alpha: false }}
+        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
       >
+        <WebGLContextGuard onContextLost={() => setHasWebGLContext(false)} />
         <color attach="background" args={['#070503']} />
         <fog attach="fog" args={['#070503', 6, 22]} />
 
@@ -50,8 +81,8 @@ export default function CanvasScene({ gameState, playerMotionState }: CanvasScen
           intensity={0.3}
           color="#ffe1bb"
           castShadow
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
+          shadow-mapSize-width={512}
+          shadow-mapSize-height={512}
         />
         <pointLight position={[-5, 2.6, -3]} intensity={0.08} color="#3d2a16" />
         <pointLight position={[4, 1.8, 4]} intensity={0.22} color="#9b6a32" />
@@ -65,8 +96,8 @@ export default function CanvasScene({ gameState, playerMotionState }: CanvasScen
           decay={1}
           color="#fff1d6"
           castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
           shadow-bias={-0.00008}
         />
 
