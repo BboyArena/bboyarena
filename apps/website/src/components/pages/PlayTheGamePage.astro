@@ -17,6 +17,38 @@ const earlyViewNotice: Record<LocaleCode, string> = {
   'pt-BR': 'Prévia pública · Recursos e controles ainda estão em desenvolvimento ativo.',
   'zh-Hans': '公开抢先体验 · 功能和操作仍在持续开发中。'
 };
+const pwaGateCopy: Record<LocaleCode, { title: string; text: string; install: string; fallback: string }> = {
+  'en-US': {
+    title: 'Install the app to unlock the game',
+    text: 'This public early test runs only inside the installed BboyArena PWA.',
+    install: 'Install BboyArena',
+    fallback: 'Use your browser menu and choose “Install app” or “Add to Home Screen”, then open BboyArena from the installed app.'
+  },
+  'it-IT': {
+    title: 'Installa l’app per sbloccare il gioco',
+    text: 'Questo test pubblico iniziale funziona solo nella PWA BboyArena installata.',
+    install: 'Installa BboyArena',
+    fallback: 'Dal menu del browser scegli “Installa app” o “Aggiungi a schermata Home”, poi apri BboyArena dall’app installata.'
+  },
+  'es-419': {
+    title: 'Instala la app para desbloquear el juego',
+    text: 'Esta prueba pública inicial funciona solo dentro de la PWA BboyArena instalada.',
+    install: 'Instalar BboyArena',
+    fallback: 'En el menú del navegador elige “Instalar aplicación” o “Agregar a pantalla de inicio” y abre BboyArena desde la app instalada.'
+  },
+  'pt-BR': {
+    title: 'Instale o app para desbloquear o jogo',
+    text: 'Este teste público inicial funciona somente dentro do PWA BboyArena instalado.',
+    install: 'Instalar BboyArena',
+    fallback: 'No menu do navegador, escolha “Instalar app” ou “Adicionar à tela inicial” e abra o BboyArena pelo app instalado.'
+  },
+  'zh-Hans': {
+    title: '安装应用以解锁游戏',
+    text: '此公开早期测试仅可在已安装的 BboyArena PWA 中运行。',
+    install: '安装 BboyArena',
+    fallback: '请从浏览器菜单选择“安装应用”或“添加到主屏幕”，然后从已安装的应用打开 BboyArena。'
+  }
+};
 
 const copy = {
   eyebrow: 'Browser game showroom',
@@ -84,7 +116,7 @@ const pagePath = '/play-the-game';
         <p>{copy.lead}</p>
       </div>
       {gameEmbedUrl && (
-        <a href={gameEmbedUrl} target="_blank" rel="noreferrer noopener" class="play-showroom__hero-link">
+        <a href={gameEmbedUrl} target="_blank" rel="noreferrer noopener" class="play-showroom__hero-link" data-pwa-game-access hidden>
           {copy.cta}
         </a>
       )}
@@ -101,15 +133,25 @@ const pagePath = '/play-the-game';
 
       <div class="play-showroom__screen">
         {hasGameEmbed ? (
-          <iframe
-            src={gameEmbedUrl}
-            title="BboyArena standalone game"
-            class="play-showroom__iframe"
-            loading="lazy"
-            allow="fullscreen; gamepad"
-            allowfullscreen
-            sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms allow-popups"
-          ></iframe>
+          <>
+            <iframe
+              data-src={gameEmbedUrl}
+              title="BboyArena standalone game"
+              class="play-showroom__iframe"
+              loading="lazy"
+              allow="fullscreen; gamepad"
+              allowfullscreen
+              sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms allow-popups"
+              data-pwa-game-frame
+              hidden
+            ></iframe>
+            <div class="play-showroom__pwa-gate" data-pwa-game-gate>
+              <p>{pwaGateCopy[locale].title}</p>
+              <span>{pwaGateCopy[locale].text}</span>
+              <button type="button" data-pwa-game-install>{pwaGateCopy[locale].install}</button>
+              <small data-pwa-game-fallback hidden>{pwaGateCopy[locale].fallback}</small>
+            </div>
+          </>
         ) : (
           <div class="play-showroom__missing">
             <p>{copy.missingTitle}</p>
@@ -146,6 +188,59 @@ const pagePath = '/play-the-game';
     </div>
   </section>
 </Layout>
+
+<script>
+  interface InstallPromptEvent extends Event {
+    prompt: () => Promise<void>;
+    userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+  }
+
+  const displayModeQuery = window.matchMedia('(display-mode: standalone)');
+  const frame = document.querySelector<HTMLIFrameElement>('[data-pwa-game-frame]');
+  const gate = document.querySelector<HTMLElement>('[data-pwa-game-gate]');
+  const installButton = document.querySelector<HTMLButtonElement>('[data-pwa-game-install]');
+  const fallback = document.querySelector<HTMLElement>('[data-pwa-game-fallback]');
+  const accessLinks = document.querySelectorAll<HTMLElement>('[data-pwa-game-access]');
+  let installPrompt: InstallPromptEvent | undefined;
+
+  const syncPwaGameAccess = () => {
+    const isStandalone =
+      displayModeQuery.matches ||
+      (navigator as Navigator & { standalone?: boolean }).standalone === true;
+
+    if (!isStandalone) return;
+
+    if (frame && !frame.src) {
+      frame.src = frame.dataset.src ?? '';
+    }
+    frame?.removeAttribute('hidden');
+    gate?.setAttribute('hidden', '');
+    accessLinks.forEach((link) => link.removeAttribute('hidden'));
+  };
+
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    installPrompt = event as InstallPromptEvent;
+  });
+
+  installButton?.addEventListener('click', async () => {
+    if (!installPrompt) {
+      fallback?.removeAttribute('hidden');
+      return;
+    }
+
+    await installPrompt.prompt();
+    await installPrompt.userChoice;
+    installPrompt = undefined;
+  });
+
+  syncPwaGameAccess();
+  window.addEventListener('pageshow', syncPwaGameAccess);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') syncPwaGameAccess();
+  });
+  displayModeQuery.addEventListener?.('change', syncPwaGameAccess);
+</script>
 
 <style>
   .play-showroom {
@@ -311,6 +406,56 @@ const pagePath = '/play-the-game';
     height: 100%;
     border: 0;
     background: #050505;
+  }
+
+  .play-showroom__iframe[hidden],
+  .play-showroom__hero-link[hidden],
+  .play-showroom__pwa-gate[hidden],
+  .play-showroom__pwa-gate small[hidden] {
+    display: none !important;
+  }
+
+  .play-showroom__pwa-gate {
+    display: grid;
+    min-height: 20rem;
+    place-content: center;
+    justify-items: center;
+    gap: 1rem;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .play-showroom__pwa-gate p {
+    margin: 0;
+    color: #f8f1e7;
+    font-size: clamp(1.25rem, 3vw, 2.25rem);
+    font-weight: 950;
+    letter-spacing: 0.14em;
+    line-height: 1.05;
+    text-transform: uppercase;
+  }
+
+  .play-showroom__pwa-gate span,
+  .play-showroom__pwa-gate small {
+    max-width: 38rem;
+    color: #d8c8ad;
+    line-height: 1.65;
+  }
+
+  .play-showroom__pwa-gate button {
+    min-height: 3rem;
+    border: 2px solid #f8f1e7;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #f5d35a, #d59b13);
+    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.72);
+    color: #211a14;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.7rem;
+    font-weight: 950;
+    letter-spacing: 0.2em;
+    padding: 0.8rem 1.2rem;
+    text-transform: uppercase;
   }
 
   .play-showroom__missing {
