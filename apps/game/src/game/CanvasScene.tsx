@@ -2,9 +2,11 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import Player from './Player';
+import type { PlayerMotionState } from './state/playerMotionState';
 
 interface CanvasSceneProps {
   gameState: string;
+  playerMotionState: PlayerMotionState;
 }
 
 function ParquetFloor() {
@@ -24,7 +26,7 @@ function ParquetFloor() {
   );
 }
 
-export default function CanvasScene({ gameState }: CanvasSceneProps) {
+export default function CanvasScene({ gameState, playerMotionState }: CanvasSceneProps) {
   return (
     <div className="game-canvas">
       <Canvas
@@ -71,7 +73,7 @@ export default function CanvasScene({ gameState }: CanvasSceneProps) {
         <ParquetFloor />
 
         <group position={[0, 0, 0]}>
-          <Player gameState={gameState} />
+          <Player gameState={gameState} playerMotionState={playerMotionState} />
         </group>
 
         <OrbitControls

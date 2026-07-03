@@ -3,7 +3,8 @@ import type { LocaleCode, SiteCopy } from '../../i18n-types';
 export const NAV_COPY: Record<LocaleCode, SiteCopy['nav']> = {
   'en-US': {
     menu: 'Menu',
-    play: 'Join Crew',
+    play: 'Play',
+    joinCrew: 'Join Crew',
     manifesto: 'Manifesto',
     news: 'News',
     battle: 'Battle',
@@ -12,7 +13,8 @@ export const NAV_COPY: Record<LocaleCode, SiteCopy['nav']> = {
   },
   'it-IT': {
     menu: 'Menu',
-    play: 'Partecipa',
+    play: 'Gioca',
+    joinCrew: 'Partecipa',
     manifesto: 'Manifesto',
     news: 'News',
     battle: 'Battaglia',
@@ -21,7 +23,8 @@ export const NAV_COPY: Record<LocaleCode, SiteCopy['nav']> = {
   },
   'es-419': {
     menu: 'Menú',
-    play: 'Únete',
+    play: 'Jugar',
+    joinCrew: 'Únete',
     manifesto: 'Manifiesto',
     news: 'Noticias',
     battle: 'Batalla',
@@ -30,7 +33,8 @@ export const NAV_COPY: Record<LocaleCode, SiteCopy['nav']> = {
   },
   'pt-BR': {
     menu: 'Menu',
-    play: 'Participar',
+    play: 'Jogar',
+    joinCrew: 'Participar',
     manifesto: 'Manifesto',
     news: 'Notícias',
     battle: 'Batalha',
@@ -39,7 +43,8 @@ export const NAV_COPY: Record<LocaleCode, SiteCopy['nav']> = {
   },
   'zh-Hans': {
     menu: '菜单',
-    play: '加入团队',
+    play: '开始游戏',
+    joinCrew: '加入团队',
     manifesto: '宣言',
     news: '新闻',
     battle: '对战',

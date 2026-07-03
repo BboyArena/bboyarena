@@ -10,6 +10,13 @@ const { locale = 'en-US' } = Astro.props;
 const defaultGameEmbedUrl = import.meta.env.DEV ? 'http://localhost:4322/' : 'https://bboyarena.org/game/';
 const gameEmbedUrl = import.meta.env.PUBLIC_GAME_EMBED_URL?.trim() || defaultGameEmbedUrl;
 const hasGameEmbed = Boolean(gameEmbedUrl);
+const earlyViewNotice: Record<LocaleCode, string> = {
+  'en-US': 'Public early view · Features and controls are still in active development.',
+  'it-IT': 'Anteprima pubblica · Funzionalità e controlli sono ancora in sviluppo attivo.',
+  'es-419': 'Vista previa pública · Las funciones y los controles siguen en desarrollo activo.',
+  'pt-BR': 'Prévia pública · Recursos e controles ainda estão em desenvolvimento ativo.',
+  'zh-Hans': '公开抢先体验 · 功能和操作仍在持续开发中。'
+};
 
 const copy = {
   eyebrow: 'Browser game showroom',
@@ -71,6 +78,7 @@ const pagePath = '/play-the-game';
   <section class="play-showroom mx-auto flex w-full max-w-7xl flex-col gap-6">
     <div class="play-showroom__hero">
       <div class="max-w-3xl">
+        <div class="play-showroom__early-notice">{earlyViewNotice[locale]}</div>
         <p class="play-showroom__eyebrow">{copy.eyebrow}</p>
         <h1>{copy.title}</h1>
         <p>{copy.lead}</p>
@@ -170,6 +178,21 @@ const pagePath = '/play-the-game';
     font-size: 0.68rem;
     font-weight: 900;
     letter-spacing: 0.34em;
+    text-transform: uppercase;
+  }
+
+  .play-showroom__early-notice {
+    display: inline-flex;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(79, 67, 55, 0.42);
+    border-radius: 999px;
+    background: rgba(163, 185, 90, 0.22);
+    color: #4d5928;
+    font-size: 0.62rem;
+    font-weight: 950;
+    letter-spacing: 0.12em;
+    line-height: 1.4;
+    padding: 0.5rem 0.75rem;
     text-transform: uppercase;
   }
 

@@ -1,17 +1,31 @@
+import { useState } from 'react';
 import { useGameStore, type GamePlayMode } from '../state/useGameStore';
 import type { GameCopy } from '../copy';
 import GameButton from './GameButton';
 import GamePanel from './GamePanel';
 import GameScrollArea from './GameScrollArea';
+import { useConnectedGamepads } from '../input/useConnectedGamepads';
+import type { GameInputButtonId } from '../input/gameInputTypes';
 
 interface GameHudProps {
   copy: GameCopy;
 }
 
 export default function GameHUD({ copy }: GameHudProps) {
+  const [selectedSettingsTab, setSelectedSettingsTab] = useState<'audio' | 'display' | 'controls' | 'accessibility'>('controls');
   const logoSrc = `${import.meta.env.BASE_URL}logo-bboyarena.svg`;
-  const scene = useGameStore((state) => state.scene);
+  const screen = useGameStore((state) => state.screen);
   const selectedMode = useGameStore((state) => state.selectedMode);
+  const preferredInputMode = useGameStore((state) => state.preferredInputMode);
+  const activeInputSource = useGameStore((state) => state.activeInputSource);
+  const setPreferredInputMode = useGameStore((state) => state.setPreferredInputMode);
+  const selectedGamepadIndex = useGameStore((state) => state.selectedGamepadIndex);
+  const keyboardInputMap = useGameStore((state) => state.keyboardInputMap);
+  const gamepadInputMap = useGameStore((state) => state.gamepadInputMap);
+  const setSelectedGamepadIndex = useGameStore((state) => state.setSelectedGamepadIndex);
+  const setKeyboardBinding = useGameStore((state) => state.setKeyboardBinding);
+  const setGamepadBinding = useGameStore((state) => state.setGamepadBinding);
+  const connectedGamepads = useConnectedGamepads();
   const openMainMenu = useGameStore((state) => state.openMainMenu);
   const openSettings = useGameStore((state) => state.openSettings);
   const openCredits = useGameStore((state) => state.openCredits);
@@ -23,6 +37,7 @@ export default function GameHUD({ copy }: GameHudProps) {
   ];
   const settingsCards = [
     {
+      id: 'audio' as const,
       label: copy.audio,
       title: copy.soundMix,
       description: copy.soundMixDescription,
@@ -30,6 +45,7 @@ export default function GameHUD({ copy }: GameHudProps) {
       meter: '48%'
     },
     {
+      id: 'display' as const,
       label: copy.display,
       title: copy.visualSetup,
       description: copy.visualSetupDescription,
@@ -37,6 +53,7 @@ export default function GameHUD({ copy }: GameHudProps) {
       meter: '76%'
     },
     {
+      id: 'controls' as const,
       label: copy.controls,
       title: copy.inputMap,
       description: copy.inputMapDescription,
@@ -44,6 +61,7 @@ export default function GameHUD({ copy }: GameHudProps) {
       meter: '48%'
     },
     {
+      id: 'accessibility' as const,
       label: copy.accessibility,
       title: copy.assistOptions,
       description: copy.assistOptionsDescription,
@@ -71,8 +89,24 @@ export default function GameHUD({ copy }: GameHudProps) {
       meta: copy.style
     }
   ];
+  const inputModes: Array<{ id: typeof preferredInputMode; label: string; note: string }> = [
+    { id: 'auto', label: 'Auto', note: 'touch / gamepad / keyboard' },
+    { id: 'touch', label: 'Touch', note: 'virtual joystick' },
+    { id: 'gamepad', label: 'Gamepad', note: 'controller input' },
+    { id: 'keyboardMouse', label: 'Keyboard + Mouse', note: 'fallback input' }
+  ];
+  const selectedSettingsCard = settingsCards.find((item) => item.id === selectedSettingsTab) ?? settingsCards[2];
+  const inputActions: Array<{ id: GameInputButtonId; label: string }> = [
+    { id: 'primary', label: 'Primary' },
+    { id: 'secondary', label: 'Secondary' },
+    { id: 'modifierLeft', label: 'Left modifier' },
+    { id: 'modifierRight', label: 'Right modifier' },
+    { id: 'start', label: 'Start' },
+    { id: 'pause', label: 'Pause' }
+  ];
+  const keyboardOptions = ['Space', 'KeyJ', 'KeyK', 'KeyQ', 'KeyE', 'Enter', 'Escape', 'ShiftLeft', 'ShiftRight'];
 
-  if (scene === 'splashscreen') {
+  if (screen === 'splashscreen') {
     return (
       <div className="game-hud game-hud--splash">
         <div className="game-splash-layout">
@@ -96,7 +130,7 @@ export default function GameHUD({ copy }: GameHudProps) {
     );
   }
 
-  if (scene === 'mainMenu') {
+  if (screen === 'mainMenu') {
     return (
       <div className="game-hud game-hud--menu">
         <div className="game-mainmenu">
@@ -178,7 +212,7 @@ export default function GameHUD({ copy }: GameHudProps) {
     );
   }
 
-  if (scene === 'settings') {
+  if (screen === 'settings') {
     return (
       <div className="game-hud game-hud--section">
         <GamePanel variant="dark" className="game-section-shell">
@@ -194,7 +228,13 @@ export default function GameHUD({ copy }: GameHudProps) {
           <GameScrollArea className="game-section-shell__body">
             <div className="game-settings-grid">
               {settingsCards.map((item) => (
-                <GamePanel key={item.label} variant="light" overflow="auto" className="game-settings-card">
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`game-panel game-panel--light font-game game-settings-card game-settings-tab ${selectedSettingsTab === item.id ? 'is-active' : ''}`}
+                  onClick={() => setSelectedSettingsTab(item.id)}
+                  aria-pressed={selectedSettingsTab === item.id}
+                >
                   <div className="game-settings-card__top">
                     <p className="game-panel__label">{item.label}</p>
                     <span>{item.meta}</span>
@@ -204,9 +244,93 @@ export default function GameHUD({ copy }: GameHudProps) {
                   <div className="game-meter" aria-hidden="true">
                     <span style={{ width: item.meter }} />
                   </div>
-                </GamePanel>
+                </button>
               ))}
             </div>
+
+            <GamePanel variant="light" overflow="visible" className="game-settings-detail">
+              <div className="game-settings-card__top">
+                <p className="game-panel__label">{selectedSettingsCard.label}</p>
+                <span>{selectedSettingsTab === 'controls' ? activeInputSource : selectedSettingsCard.meta}</span>
+              </div>
+              <div className="game-panel__title">{selectedSettingsCard.title}</div>
+              <p className="game-panel__description">{selectedSettingsCard.description}</p>
+
+              {selectedSettingsTab === 'controls' ? (
+                <div className="game-input-mode-card">
+                  <p className="game-input-config__heading">Input source</p>
+                  <div className="game-input-mode-card__grid" role="group" aria-label={copy.inputMap}>
+                    {inputModes.map((mode) => (
+                      <GameButton
+                        key={mode.id}
+                        variant={preferredInputMode === mode.id ? 'primary' : 'secondary'}
+                        active={preferredInputMode === mode.id}
+                        className="game-input-mode-card__button"
+                        onClick={() => setPreferredInputMode(mode.id)}
+                      >
+                        <span className="game-input-mode-card__button-label">{mode.label}</span>
+                        <span className="game-input-mode-card__button-note">{mode.note}</span>
+                      </GameButton>
+                    ))}
+                  </div>
+
+                  <div className="game-input-config">
+                    <label className="game-input-config__field">
+                      <span>Game controller</span>
+                      <select
+                        value={selectedGamepadIndex ?? ''}
+                        onChange={(event) => setSelectedGamepadIndex(event.target.value === '' ? null : Number(event.target.value))}
+                      >
+                        <option value="">Automatic selection</option>
+                        {connectedGamepads.map((gamepad) => (
+                          <option key={gamepad.index} value={gamepad.index}>
+                            {gamepad.id || `Gamepad ${gamepad.index + 1}`}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <p className="game-input-config__status">
+                      {connectedGamepads.length > 0
+                        ? `${connectedGamepads.length} controller connected`
+                        : 'No game controller detected. Press a button after connecting it.'}
+                    </p>
+
+                    <p className="game-input-config__heading">Input map</p>
+                    <div className="game-input-map">
+                      {inputActions.map((action) => (
+                        <div className="game-input-map__row" key={action.id}>
+                          <span>{action.label}</span>
+                          <label>
+                            <span>Keyboard</span>
+                            <select
+                              value={keyboardInputMap[action.id]}
+                              onChange={(event) => setKeyboardBinding(action.id, event.target.value)}
+                            >
+                              {keyboardOptions.map((code) => <option key={code} value={code}>{code}</option>)}
+                            </select>
+                          </label>
+                          <label>
+                            <span>Gamepad</span>
+                            <select
+                              value={gamepadInputMap[action.id]}
+                              onChange={(event) => setGamepadBinding(action.id, Number(event.target.value))}
+                            >
+                              {Array.from({ length: 16 }, (_, index) => (
+                                <option key={index} value={index}>Button {index}</option>
+                              ))}
+                            </select>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="game-meter" aria-hidden="true">
+                  <span style={{ width: selectedSettingsCard.meter }} />
+                </div>
+              )}
+            </GamePanel>
           </GameScrollArea>
 
           <div className="game-section-shell__footer">
@@ -220,7 +344,7 @@ export default function GameHUD({ copy }: GameHudProps) {
     );
   }
 
-  if (scene === 'credits') {
+  if (screen === 'credits') {
     return (
       <div className="game-hud game-hud--section">
         <GamePanel variant="dark" className="game-section-shell">
@@ -258,7 +382,7 @@ export default function GameHUD({ copy }: GameHudProps) {
       </div>
     );
   }
-  console.log('GameHUD: unhandled scene', scene);
+  console.log('GameHUD: unhandled screen', screen);
   return (
     <div className="game-hud game-hud--splash">
       <div className="game-splash-layout">

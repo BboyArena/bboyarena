@@ -2,12 +2,14 @@ import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useGameStore } from './state/useGameStore';
 import * as THREE from 'three';
+import type { PlayerMotionState } from './state/playerMotionState';
 
 interface PlayerProps {
   gameState: string;
+  playerMotionState: PlayerMotionState;
 }
 
-export default function Player({ gameState }: PlayerProps) {
+export default function Player({ gameState, playerMotionState }: PlayerProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const selectedCharacter = useGameStore((state) => state.selectedCharacter);
   const bpm = useGameStore((state) => state.bpm);
@@ -18,24 +20,32 @@ export default function Player({ gameState }: PlayerProps) {
     const time = state.clock.getElapsedTime();
     const bps = bpm / 60;
     const rhythm = Math.sin(time * bps * Math.PI * 2);
+    const { currentMove, spinSpeed, balance, rotationAxis } = playerMotionState;
 
-    if (gameState === 'playing') {
+    if (currentMove === 'freeze') {
+      // Freeze state
+      meshRef.current.position.y = 1 + Math.sin(time) * 0.08 * balance;
+      meshRef.current.rotation.y = time * 0.2;
+      meshRef.current.scale.set(1, 1, 1);
+    } else if (gameState === 'playing') {
       // Dance moves: Spin, bounce and tilt matching the BPM
-      meshRef.current.position.y = 1 + Math.abs(rhythm) * 0.8;
-      meshRef.current.rotation.y = time * 3.5;
+      const movePulse = currentMove === 'spinStart' ? 1.12 : 1;
+      const spinDirection = rotationAxis.y === 0 ? 1 : Math.sign(rotationAxis.y);
+      meshRef.current.position.y = 1 + Math.abs(rhythm) * 0.8 * balance;
+      meshRef.current.rotation.y = time * spinSpeed * spinDirection;
       meshRef.current.rotation.x = Math.sin(time * 2) * 0.3;
       meshRef.current.rotation.z = Math.cos(time * 2.5) * 0.3;
 
-      const pulse = 1 + Math.abs(rhythm) * 0.12;
+      const pulse = (1 + Math.abs(rhythm) * 0.12) * movePulse;
       meshRef.current.scale.set(pulse, pulse, pulse);
     } else if (gameState === 'paused') {
       // Freeze state
-      meshRef.current.position.y = 1 + Math.sin(time) * 0.08;
+      meshRef.current.position.y = 1 + Math.sin(time) * 0.08 * balance;
       meshRef.current.rotation.y = time * 0.2;
       meshRef.current.scale.set(1, 1, 1);
     } else {
       // Idle breath bounce
-      meshRef.current.position.y = 1 + Math.sin(time * 2) * 0.04;
+      meshRef.current.position.y = 1 + Math.sin(time * 2) * 0.04 * balance;
       meshRef.current.rotation.y = time * 0.5;
       meshRef.current.rotation.x = 0;
       meshRef.current.rotation.z = 0;

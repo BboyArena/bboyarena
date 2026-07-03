@@ -1,6 +1,7 @@
 {
   "items": [
-    { "key": "play", "path": "/founding-crew" },
+    { "key": "play", "path": "/play-the-game" },
+    { "key": "joinCrew", "path": "/founding-crew" },
     { "key": "manifesto", "path": "/manifesto" },
     { "key": "news", "path": "/news/devlog" }
   ]

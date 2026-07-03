@@ -201,6 +201,20 @@ input {
   color: #fffaf0;
 }
 
+.nav-early-test-badge {
+  margin-left: 0.55rem;
+  border: 1px solid rgba(255, 250, 240, 0.45);
+  border-radius: 999px;
+  background: rgba(34, 29, 23, 0.24);
+  color: #fffaf0;
+  font-size: 0.48rem;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  padding: 0.3rem 0.4rem;
+  white-space: nowrap;
+}
+
 .street-link-nav:focus-visible,
 .street-link-secondary:focus-visible,
 .street-button:focus-visible {

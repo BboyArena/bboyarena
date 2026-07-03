@@ -1,45 +1,52 @@
-# Three.js e architettura scene
+# Three.js e architettura schermate
 
-Questa nota spiega come funziona oggi la parte game in `apps/game`, con focus su Three.js, React Three Fiber, scene di menu/play e sul dubbio: conviene usare React Router per selezionare le scene?
+Questa nota spiega come funziona oggi la parte game in `apps/game`, con focus su Three.js, React Three Fiber, schermate menu/play e sul dubbio: conviene usare React Router per selezionare le schermate?
 
 ## Mappa rapida
 
 File principali:
 
 - `src/main.tsx`: entry React standalone. Monta `GameApp` dentro `#bboyarena-game-standalone`.
-- `src/game/GameApp.tsx`: decide quale scena mostrare in base allo stato globale `scene`.
-- `src/game/state/useGameStore.ts`: store Zustand per navigazione interna game, mode selezionata, score, bpm, mute e dati condivisi.
-- `src/game/GamePlayScene.tsx`: wrapper della scena giocabile. Qui entra XState per lo stato del round.
+- `src/game/GameApp.tsx`: decide quale schermata mostrare in base allo stato globale `screen`.
+- `src/game/state/useGameStore.ts`: store Zustand per navigazione interna, mode, dati condivisi e preferenze input.
+- `src/game/GamePlayScene.tsx`: wrapper della scena giocabile. Qui entrano XState, provider input e costruzione del `PlayerMotionState`.
 - `src/game/state/gameMachine.ts`: macchina XState del round: `idle`, `playing`, `paused`, `gameOver`.
+- `src/game/state/playerMotionState.ts`: stato intermedio minimale che prepara il passaggio da input/gameplay a player controllabile.
+- `src/game/input/gameInputTypes.ts`: contratto comune per sorgenti, movimento, pulsanti, snapshot e mapping.
+- `src/game/input/GameInputController.ts`: normalizza gli aggiornamenti degli adapter in un solo snapshot osservabile.
+- `src/game/input/GameInputProvider.tsx`: espone controller e snapshot input al ramo gameplay.
+- `src/game/input/KeyboardMouseInputAdapter.tsx`, `GamepadInputAdapter.tsx`, `TouchInputAdapter.tsx`: traducono i dispositivi fisici nel contratto comune.
+- `src/game/input/useResolveActiveInputSource.ts`: risolve la sorgente attiva in base alla preferenza e ai dispositivi disponibili.
+- `src/game/input/useConnectedGamepads.ts`: mantiene l'elenco dei gamepad esposti dalla Gamepad API.
 - `src/game/CanvasScene.tsx`: scena React Three Fiber/Three.js.
 - `src/game/Player.tsx`: oggetto 3D animato con `useFrame`.
 - `src/game/ui/GameHUD.tsx`: menu 2D, splash, settings e credits.
 - `src/game/ui/GamePlayHUD.tsx`: HUD 2D sopra il canvas 3D durante il gameplay.
-- `src/game/game.css`: layout 16:9, background delle scene, canvas assoluto e overlay HUD.
+- `src/game/game.css`: layout 16:9, background delle schermate, canvas assoluto e overlay HUD.
 
 ## Il flusso attuale
 
 Il game ha due livelli di stato:
 
-1. Stato di scena/app, gestito con Zustand.
+1. Stato di schermata/app, gestito con Zustand.
 2. Stato del round giocabile, gestito con XState.
 
-Lo stato di scena vive in `useGameStore`:
+Lo stato di schermata vive in `useGameStore`:
 
 ```ts
-export type GameMenuScene = 'splashscreen' | 'mainMenu' | 'settings' | 'credits';
+export type GameMenuScreen = 'splashscreen' | 'mainMenu' | 'settings' | 'credits';
 export type GamePlayMode = 'career' | 'training';
-export type GameScene = GameMenuScene | GamePlayMode;
+export type GameScreen = GameMenuScreen | GamePlayMode;
 ```
 
-`GameApp` legge `scene` e decide il ramo principale:
+`GameApp` legge `screen` e decide il ramo principale:
 
 ```tsx
-{scene === 'career' || scene === 'training' ? (
-  <GamePlayScene mode={selectedMode} locale={locale} rootRef={rootRef} />
+{screen === 'career' || screen === 'training' ? (
+  <GamePlayScene mode={selectedMode} copy={copy} rootRef={rootRef} />
 ) : (
   <>
-    <GameHUD locale={locale} />
+    <GameHUD copy={copy} />
     <GameFullscreenToggle targetRef={rootRef} />
   </>
 )}
@@ -47,18 +54,18 @@ export type GameScene = GameMenuScene | GamePlayMode;
 
 Quindi:
 
-- `splashscreen`, `mainMenu`, `settings`, `credits` sono scene 2D.
-- `career` e `training` sono scene playable e montano Three.js.
+- `splashscreen`, `mainMenu`, `settings`, `credits` sono schermate 2D.
+- `career` e `training` sono schermate playable e montano Three.js.
 - Three.js non gira nei menu: il canvas viene creato solo dentro `GamePlayScene`.
 
-Questa scelta è importante perché un canvas WebGL costa memoria/GPU. Tenerlo spento nei menu riduce lavoro inutile e rende più chiara la separazione tra lobby 2D e gameplay 3D.
+Questa scelta è importante perché un canvas WebGL costa memoria e GPU. Tenerlo spento nei menu riduce lavoro inutile e rende più chiara la separazione tra lobby 2D e gameplay 3D.
 
-## Cosa fa il scene selector
+## Cosa fa il selector
 
 Il pulsante:
 
 ```tsx
-Scene selector / {scene}
+Scene selector / {screen}
 ```
 
 in `GameApp.tsx` cicla solo tra:
@@ -70,10 +77,10 @@ in `GameApp.tsx` cicla solo tra:
 È quindi più un controllo/debug provvisorio che un sistema completo di routing. Non seleziona direttamente `career` o `training`; quelle partono dal menu con:
 
 ```ts
-startMode: (selectedMode) => set({ scene: selectedMode, selectedMode })
+startMode: (selectedMode) => set({ screen: selectedMode, selectedMode })
 ```
 
-Nel prodotto finale probabilmente quel pulsante va rimosso o sostituito con una UI di dev visibile solo in development.
+Oggi quel pulsante è visibile solo in development con `import.meta.env.DEV`.
 
 ## Come funziona la scena Three.js
 
@@ -85,7 +92,7 @@ Il componente principale è:
 <Canvas
   className="game-canvas__surface"
   shadows
-  camera={{ position: [0, 3.1, 8.2], fov: 42 }}
+  camera={{ position: [0, 3.4, 8.5], fov: 42 }}
   gl={{ antialias: true, alpha: false }}
 >
 ```
@@ -96,7 +103,7 @@ Dentro il canvas vengono dichiarati oggetti Three.js come componenti React:
 - `<fog attach="fog" />` aggiunge profondità atmosferica.
 - `<ambientLight />`, `<hemisphereLight />`, `<directionalLight />`, `<pointLight />` illuminano la scena.
 - `<mesh />` rappresenta un oggetto renderizzabile.
-- `<boxGeometry />`, `<planeGeometry />`, `<ringGeometry />`, `<torusGeometry />`, `<capsuleGeometry />` definiscono forme.
+- `<planeGeometry />` definisce il pavimento.
 - `<meshStandardMaterial />` definisce colore, roughness, metalness e risposta alla luce.
 - `<OrbitControls />` permette di orbitare la camera durante il prototipo.
 
@@ -104,23 +111,18 @@ Esempio:
 
 ```tsx
 <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-  <planeGeometry args={[30, 30]} />
-  <meshStandardMaterial color="#9d907d" roughness={1} metalness={0} />
+  <planeGeometry args={[40, 40]} />
+  <meshStandardMaterial map={parquetTexture} roughness={0.96} metalness={0.02} />
 </mesh>
 ```
 
-Questo crea il pavimento: un piano ruotato di 90 gradi, largo 30x30, con materiale opaco.
+Questo crea il pavimento: un piano ruotato di 90 gradi, largo 40x40, con texture parquet.
 
 ## Componenti 3D locali
 
-In `CanvasScene.tsx` ci sono componenti 3D piccoli:
+La scena 3D è ancora piccola e intenzionalmente semplice: `CanvasScene.tsx` ospita il setup della stanza, il pavimento e il `Player`.
 
-- `GraffitiWall`
-- `Bench`
-- `Boombox`
-- `Hoop`
-
-Sono normali componenti React che ritornano `<group>` e `<mesh>`. Non sono scene separate: sono pezzi della stessa arena.
+Gli oggetti sono normali componenti React che ritornano `<group>` e `<mesh>`. Non sono scene separate: sono pezzi della stessa arena.
 
 Questa è una buona impostazione per il prototipo perché:
 
@@ -131,31 +133,128 @@ Questa è una buona impostazione per il prototipo perché:
 
 ## Player e animazione
 
-`Player.tsx` usa `useFrame`:
+`Player.tsx` usa `useFrame` e legge anche `playerMotionState`:
 
 ```tsx
 useFrame((state) => {
   const time = state.clock.getElapsedTime();
   const bps = bpm / 60;
   const rhythm = Math.sin(time * bps * Math.PI * 2);
+  const { currentMove, spinSpeed, balance, rotationAxis } = playerMotionState;
 });
 ```
 
 `useFrame` viene chiamato a ogni frame renderizzato. Qui serve ad animare il mesh principale del player in base a:
 
 - `gameState`, ricevuto da `GamePlayScene`;
+- `playerMotionState`, calcolato nel wrapper gameplay;
 - `bpm`, letto dallo store Zustand;
 - tempo trascorso del clock R3F.
 
 Quando `gameState === 'playing'`, il player:
 
 - rimbalza in verticale;
-- ruota più velocemente;
+- ruota in base a `spinSpeed` e `rotationAxis`;
 - inclina asse X/Z;
 - pulsa leggermente in scala;
 - aumenta un po' l'emissive del materiale.
 
-Quando è `paused`, entra in freeze leggero. Negli altri stati fa solo una piccola animazione idle.
+Quando `currentMove === 'freeze'` o `gameState === 'paused'`, entra in freeze leggero. Negli altri stati fa solo una piccola animazione idle.
+
+Il punto importante è che il `Player` non legge direttamente tastiera, gamepad o touch. Riceve invece un `PlayerMotionState` derivato dallo snapshot input normalizzato:
+
+```txt
+touch / gamepad / keyboard
+↓
+input adapter
+↓
+GameInputController snapshot
+↓
+GamePlayScene
+↓
+PlayerMotionState
+↓
+CanvasScene
+↓
+Player
+```
+
+Questa separazione evita di legare il componente Three.js a un dispositivo specifico. Per esempio, `snapshot.move` alimenta `moveIntent` e `rotationAxis`, mentre il pulsante logico `primary` seleziona la move `spinStart`: il risultato è identico qualunque sia il tasto o pulsante fisico associato.
+
+## Architettura input
+
+Il gameplay usa un contratto input unico. Ogni snapshot contiene:
+
+```ts
+type GameInputSnapshot = {
+  source: 'touch' | 'gamepad' | 'keyboardMouse';
+  move: { x: number; y: number };
+  buttons: Record<GameInputButtonId, {
+    pressed: boolean;
+    value: number;
+  }>;
+  updatedAt: number;
+};
+```
+
+Le azioni logiche disponibili sono:
+
+- `primary` e `secondary`;
+- `modifierLeft` e `modifierRight`;
+- `start` e `pause`;
+- il vettore bidimensionale `move`.
+
+`GameInputProvider` crea una sola istanza di `GameInputController` per la scena giocabile. Gli adapter scrivono nel controller, mentre `GamePlayScene` e `GamePlayHUD` leggono lo stesso snapshot tramite `useGameInputSnapshot()`.
+
+```txt
+KeyboardMouseInputAdapter ─┐
+GamepadInputAdapter       ─┼─> GameInputController ─> GameInputSnapshot
+TouchInputAdapter         ─┘              ├─> GamePlayScene / PlayerMotionState
+                                          └─> Training input HUD
+```
+
+### Risoluzione della sorgente
+
+La preferenza `preferredInputMode` può essere:
+
+- `auto`;
+- `touch`;
+- `gamepad`;
+- `keyboardMouse`.
+
+In modalità `auto`, `useResolveActiveInputSource` applica questo ordine:
+
+1. touch, se il dispositivo espone un puntatore coarse o supporto touch;
+2. gamepad, se la Gamepad API rileva almeno un controller;
+3. mouse e tastiera come fallback.
+
+Se l'utente sceglie esplicitamente una sorgente, quella preferenza ha precedenza sul rilevamento automatico. L'overlay touch viene mostrato solo quando la sorgente attiva è `touch`, salvo gli override di debug disponibili in development.
+
+### Selezione del gamepad e input map
+
+La schermata `Options > Controls > Input map` gestisce tre impostazioni distinte:
+
+1. famiglia di input preferita;
+2. gamepad preferito, identificato dal suo `Gamepad.index`;
+3. mapping delle azioni logiche per tastiera e gamepad.
+
+Lo store conserva:
+
+```ts
+selectedGamepadIndex: number | null;
+keyboardInputMap: Record<GameInputButtonId, string>;
+gamepadInputMap: Record<GameInputButtonId, number>;
+```
+
+`null` indica selezione automatica del primo gamepad disponibile. `useConnectedGamepads` aggiorna l'elenco quando un controller viene collegato o scollegato e mantiene anche un polling leggero, utile per browser che non emettono sempre gli eventi in modo affidabile.
+
+Il mapping non è soltanto descrittivo: `KeyboardMouseInputAdapter` risolve i `KeyboardEvent.code` usando `keyboardInputMap`, mentre `GamepadInputAdapter` legge gli indici configurati in `gamepadInputMap`. Cambiare un'associazione in Options modifica quindi il comportamento effettivo durante il gameplay.
+
+Il movimento conserva per ora mapping standard:
+
+- tastiera: WASD e frecce;
+- gamepad: assi `0` e `1`, con deadzone e normalizzazione;
+- touch: joystick virtuale basato su `nipplejs`.
 
 ## HUD sopra il canvas
 
@@ -192,18 +291,32 @@ Questo approccio è corretto per un browser game:
 - mondo 3D in WebGL;
 - interfaccia in DOM;
 - stato condiviso via store;
-- comandi gameplay via XState/store.
+- comandi gameplay via XState e stato intermedio del player.
+
+### HUD diagnostico Training
+
+In modalità `training`, `GamePlayHUD` mostra sempre un monitor input live. Il pannello visualizza:
+
+- sorgente attiva;
+- nome del gamepad selezionato o stato di attesa;
+- posizione normalizzata del direzionale;
+- stato `ON/OFF` di tutte le azioni logiche.
+
+Il monitor legge `GameInputSnapshot`, non gli eventi del dispositivo. Per questo funziona allo stesso modo con touch, gamepad e mouse/tastiera e riflette automaticamente il mapping configurato. In modalità touch resta inoltre montato `TouchControlsOverlay`, che scrive nello stesso controller degli altri adapter.
 
 ## Perché usare Zustand e XState insieme
 
 Zustand contiene stato globale e trasversale:
 
-- scena corrente;
+- schermata corrente;
 - mode selezionata;
 - personaggio;
 - score;
 - bpm;
 - mute.
+- preferenza e sorgente input attiva;
+- gamepad selezionato;
+- mapping tastiera e gamepad.
 
 XState contiene lo stato finito del round:
 
@@ -216,13 +329,13 @@ Sono due responsabilità diverse. Zustand risponde alla domanda "dove siamo nell
 
 Esempio: da `playing` posso andare a `paused`, `gameOver` o `idle` tramite reset. Da `idle` posso solo fare `START`. Questa logica è più sicura in una macchina a stati rispetto a booleani sparsi tipo `isPlaying`, `isPaused`, `isGameOver`.
 
-## React Router per selezionare le scene?
+## React Router per selezionare le schermate?
 
-Risposta breve: per questo livello di scena, non è obbligatorio. Può avere senso più avanti, ma non sostituirei automaticamente lo store con React Router.
+Risposta breve: per questo livello di schermata, non è obbligatorio. Può avere senso più avanti, ma non sostituirei automaticamente lo store con React Router.
 
 ### Quando NON conviene React Router
 
-Per scene interne al runtime di gioco:
+Per schermate interne al runtime di gioco:
 
 - `splashscreen`
 - `mainMenu`
@@ -236,7 +349,7 @@ lo store è più naturale. Sono stati interattivi, spesso temporanei, e non semp
 
 Esempio: non è detto che `paused` debba essere `/paused`. È uno stato del round, non una pagina.
 
-In più, il game è pensato come app standalone embeddabile dalla website tramite boundary/iframe/URL. Dentro quel boundary può comportarsi come runtime unico, senza trasformare ogni schermata in route.
+In più, il game è pensato come app standalone embeddabile dalla website tramite boundary o iframe. Dentro quel boundary può comportarsi come runtime unico, senza trasformare ogni schermata in route.
 
 ### Quando conviene React Router
 
@@ -244,7 +357,7 @@ React Router diventerebbe utile se vuoi:
 
 - deep link condivisibili, tipo `/game/settings` o `/game/training`;
 - back/forward del browser coerente con le schermate menu;
-- pagine game più indipendenti, con loader o layout diversi;
+- schermate game più indipendenti, con loader o layout diversi;
 - separare aree grandi: lobby, editor, inventory, shop, match replay;
 - analytics page-based;
 - refresh della pagina che ripristina una schermata specifica.
@@ -268,21 +381,22 @@ Dentro `/play/:mode`, XState continuerebbe a gestire `idle/playing/paused/gameOv
 
 Per ora terrei l'approccio attuale:
 
-- Zustand per le scene game interne.
+- Zustand per le schermate game interne.
 - XState per il round.
-- React Three Fiber solo nelle scene playable.
+- React Three Fiber solo nelle schermate playable.
 - HUD e menu in DOM/CSS.
-- `Scene selector` come dev tool temporaneo, non come architettura finale.
+- `Scene selector` come dev tool temporaneo visibile solo in development.
 
-Poi farei una piccola pulizia:
+I passi futuri più naturali sono:
 
-1. Rinominare mentalmente `scene` in `screen` o `gameScreen`, se il termine "scene" confonde con "Three.js scene".
-2. Rimuovere o proteggere il pulsante `Scene selector` in produzione.
-3. Introdurre React Router solo quando serve davvero URL/deep-link/back-button.
+1. Persistenza delle preferenze input e dei mapping tra sessioni.
+2. Rimappatura tramite cattura diretta del prossimo tasto o pulsante premuto.
+3. Profili separati per controller diversi, invece di un solo mapping gamepad globale.
+4. React Router solo quando servono davvero URL, deep link o back-button.
 
-Il punto più importante: in Three.js "scene" significa grafo 3D renderizzato. In questo codice `scene` nello store significa schermata del game. Sono due concetti diversi con lo stesso nome, ed è probabilmente da qui che nasce buona parte della confusione.
+Il punto più importante: in Three.js "scene" significa grafo 3D renderizzato. In questo codice `screen` nello store significa schermata del game. Sono due concetti diversi e conviene tenerli separati.
 
-## Come aggiungere una nuova scena
+## Come aggiungere una nuova schermata
 
 Per una nuova schermata 2D, ad esempio `inventory`:
 
@@ -291,9 +405,9 @@ Per una nuova schermata 2D, ad esempio `inventory`:
 3. Gestisci il rendering in `GameHUD.tsx`.
 4. Aggiungi lo styling in `game.css` con `data-scene="inventory"` se serve un background dedicato.
 
-Per una nuova scena playable, ad esempio `battle`:
+Per una nuova schermata playable, ad esempio `battle`:
 
-1. Aggiungi il mode o la scene nello store.
+1. Aggiungi il mode o la schermata nello store.
 2. Fai montare `GamePlayScene` o un nuovo wrapper equivalente da `GameApp`.
 3. Crea o parametrizza una `CanvasScene` diversa.
 4. Mantieni XState per gli stati del round.
@@ -312,7 +426,7 @@ Così `GameApp` non cresce con troppi `if`.
 
 ## Glossario
 
-- Scene store: valore Zustand che indica la schermata corrente del game.
+- Screen store: valore Zustand che indica la schermata corrente del game.
 - Three.js scene: mondo 3D interno a `<Canvas>`.
 - R3F: React Three Fiber, bridge tra React e Three.js.
 - Canvas: superficie WebGL in cui viene renderizzata la scena 3D.
@@ -322,3 +436,7 @@ Così `GameApp` non cresce con troppi `if`.
 - Group: contenitore trasformabile per più mesh.
 - useFrame: callback eseguita a ogni frame per animazioni e update.
 - HUD: interfaccia HTML/CSS sopra il canvas.
+- PlayerMotionState: stato intermedio minimale che prepara il player a diventare controllabile.
+- Input adapter: traduttore tra API del dispositivo e azioni logiche del gioco.
+- GameInputSnapshot: fotografia normalizzata e indipendente dal dispositivo dell'input corrente.
+- Preferred input mode: scelta dell'utente tra risoluzione automatica, touch, gamepad e mouse/tastiera.

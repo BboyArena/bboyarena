@@ -34,7 +34,14 @@ const isActiveNavPath = (path: string) => {
   if (normalizedPath === '/') return normalizedPagePath === '/';
   return normalizedPagePath === normalizedPath || normalizedPagePath.startsWith(`${normalizedPath}/`);
 };
-const isPrimaryNavPath = (path: string) => path.replace(/\/+$/, '') === '/founding-crew';
+const isPrimaryNavPath = (path: string) => path.replace(/\/+$/, '') === '/play-the-game';
+const earlyTestLabel: Record<LocaleCode, string> = {
+  'en-US': 'Public early test',
+  'it-IT': 'Test pubblico',
+  'es-419': 'Prueba pública',
+  'pt-BR': 'Teste público',
+  'zh-Hans': '公开测试'
+};
 ---
 
 <div class="flex flex-col gap-4">
@@ -49,7 +56,10 @@ const isPrimaryNavPath = (path: string) => path.replace(/\/+$/, '') === '/foundi
             class={`street-link-nav h-10 rounded-full px-3 transition ${isPrimaryNavPath(item.path) ? 'street-link-nav-primary px-4' : ''}`}
             aria-current={isActiveNavPath(item.path) ? 'page' : undefined}
           >
-            {item.label}
+            <span>{item.label}</span>
+            {isPrimaryNavPath(item.path) ? (
+              <span class="nav-early-test-badge">{earlyTestLabel[locale]}</span>
+            ) : null}
           </a>
         ))}
       </nav>
@@ -143,7 +153,10 @@ const isPrimaryNavPath = (path: string) => path.replace(/\/+$/, '') === '/foundi
               class={`street-link-nav rounded-[1rem] px-4 py-3 text-left text-sm font-black uppercase tracking-[0.24em] transition ${isPrimaryNavPath(item.path) ? 'street-link-nav-primary justify-center' : ''}`}
               aria-current={isActiveNavPath(item.path) ? 'page' : undefined}
             >
-              {item.label}
+              <span>{item.label}</span>
+              {isPrimaryNavPath(item.path) ? (
+                <span class="nav-early-test-badge">{earlyTestLabel[locale]}</span>
+              ) : null}
             </a>
           ))}
         </div>

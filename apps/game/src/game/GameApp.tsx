@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useGameStore, type GameMenuScene } from './state/useGameStore';
+import { useGameStore, type GameMenuScreen } from './state/useGameStore';
 import GameFullscreenToggle from './ui/GameFullscreenToggle';
 import GameFullscreenReticle from './ui/GameFullscreenReticle';
 import GameHUD from './ui/GameHUD';
@@ -15,15 +15,16 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [copy, setCopy] = useState<GameCopy>(() => getDefaultGameCopy());
   const [resolvedLocale, setResolvedLocale] = useState<LocaleCode>('en-US');
-  const scene = useGameStore((state) => state.scene);
+  const screen = useGameStore((state) => state.screen);
   const selectedMode = useGameStore((state) => state.selectedMode);
-  const setScene = useGameStore((state) => state.setScene);
+  const setScreen = useGameStore((state) => state.setScreen);
+  const isDev = import.meta.env.DEV;
 
-  const cycleScene = () => {
-    const menuScenes: GameMenuScene[] = ['splashscreen', 'mainMenu', 'settings', 'credits'];
-    const currentIndex = menuScenes.indexOf(scene as GameMenuScene);
-    const nextScene = menuScenes[(currentIndex + 1) % menuScenes.length];
-    setScene(nextScene);
+  const cycleScreen = () => {
+    const menuScreens: GameMenuScreen[] = ['splashscreen', 'mainMenu', 'settings', 'credits'];
+    const currentIndex = menuScreens.indexOf(screen as GameMenuScreen);
+    const nextScreen = menuScreens[(currentIndex + 1) % menuScreens.length];
+    setScreen(nextScreen);
   };
 
   useEffect(() => {
@@ -54,23 +55,25 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
     };
   }, [locale]);
 
-  console.log('GameApp: rendering scene', scene, 'with mode', selectedMode, 'and locale', resolvedLocale);
+  console.log('GameApp: rendering screen', screen, 'with mode', selectedMode, 'and locale', resolvedLocale);
   return (
     <div id="bboyarena-game-root" className="bboy-game-root" ref={rootRef}>
       <div className="game-shell">
-        <div className="game-stage" data-scene={scene}>
-          {scene === 'career' || scene === 'training' ? (
+        <div className="game-stage" data-scene={screen}>
+          {screen === 'career' || screen === 'training' ? (
             <GamePlayScene mode={selectedMode} copy={copy} rootRef={rootRef} />
           ) : (
             <>
-              <button
-                type="button"
-                className="game-status-pill game-status-pill--interactive"
-                onClick={cycleScene}
-                aria-label={copy.sceneSelector}
-              >
-                {copy.sceneSelector} / {scene}
-              </button>
+              {isDev ? (
+                <button
+                  type="button"
+                  className="game-status-pill game-status-pill--interactive"
+                  onClick={cycleScreen}
+                  aria-label={copy.sceneSelector}
+                >
+                  {copy.sceneSelector} / {screen}
+                </button>
+              ) : null}
               <GameHUD copy={copy} />
               <GameFullscreenToggle targetRef={rootRef} />
             </>
