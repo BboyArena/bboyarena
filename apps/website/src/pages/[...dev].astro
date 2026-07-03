@@ -4,6 +4,7 @@ import TailwindShowcase from '../dev-pages/tailwind-showcase.astro';
 import ComponentLab from '../dev-pages/component-lab.astro';
 import UiDemo from '../dev-pages/ui-demo.astro';
 import DevLeaderboard from '../dev-pages/leaderboard.astro';
+import LocalStorageInspector from '../dev-pages/localstorage-inspector.astro';
 
 export function getStaticPaths() {
   if (!import.meta.env.DEV) {
@@ -14,7 +15,8 @@ export function getStaticPaths() {
     { params: { dev: '__dev/tailwind-showcase' } },
     { params: { dev: '__dev/component-lab' } },
     { params: { dev: '__dev/ui-demo' } },
-    { params: { dev: '__dev/leaderboard' } }
+    { params: { dev: '__dev/leaderboard' } },
+    { params: { dev: '__dev/localstorage' } }
   ];
 }
 
@@ -27,6 +29,8 @@ const route = Astro.params.dev;
   <ComponentLab />
 ) : route === '__dev/ui-demo' ? (
   <UiDemo />
+) : route === '__dev/localstorage' ? (
+  <LocalStorageInspector />
 ) : (
   <DevLeaderboard />
 )}

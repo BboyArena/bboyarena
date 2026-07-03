@@ -22,6 +22,7 @@ File principali:
 - `src/game/Player.tsx`: oggetto 3D animato con `useFrame`.
 - `src/game/ui/GameHUD.tsx`: menu 2D, splash, settings e credits.
 - `src/game/ui/GamePlayHUD.tsx`: HUD 2D sopra il canvas 3D durante il gameplay.
+- `src/game/ui/GameCanvasErrorBoundary.tsx`: isola gli errori Three.js/R3F e mantiene viva l'interfaccia DOM.
 - `src/game/ui/GameFullscreenToggle.tsx`: controllo fullscreen persistente per l'intero runtime.
 - `src/game/ui/GameFullscreenReticle.tsx`: reticolo DOM mostrato durante il fullscreen.
 - `src/game/game.css`: layout 16:9, background delle schermate, canvas assoluto e overlay HUD.
@@ -94,8 +95,9 @@ Il componente principale è:
 <Canvas
   className="game-canvas__surface"
   shadows
+  dpr={[1, 1.5]}
   camera={{ position: [0, 3.4, 8.5], fov: 42 }}
-  gl={{ antialias: true, alpha: false }}
+  gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
 >
 ```
 
@@ -120,6 +122,14 @@ Esempio:
 
 Questo crea il pavimento: un piano ruotato di 90 gradi, largo 40x40, con texture parquet.
 
+La texture usa il base path Vite invece di un URL assoluto:
+
+```ts
+useTexture(`${import.meta.env.BASE_URL}parquet.png`)
+```
+
+Questo dettaglio è necessario perché in sviluppo il game vive su `/`, mentre nel deploy GitHub Pages viene copiato sotto `/game/`. Con `PUBLIC_GAME_BASE=/game/`, il bundle deve richiedere `/game/parquet.png`, non `/parquet.png` dalla root del sito.
+
 ## Componenti 3D locali
 
 La scena 3D è ancora piccola e intenzionalmente semplice: `CanvasScene.tsx` ospita il setup della stanza, il pavimento e il `Player`.
@@ -132,6 +142,35 @@ Questa è una buona impostazione per il prototipo perché:
 - gli oggetti sono riutilizzabili;
 - la scena resta leggibile;
 - si può poi spostare ogni oggetto in un file dedicato quando cresce.
+
+## Resilienza WebGL e mobile
+
+Il mount del canvas è il punto più costoso del passaggio da menu 2D a schermata playable. Per ridurre pressione su memoria e GPU, soprattutto su mobile, la configurazione corrente:
+
+- limita il device pixel ratio a `1–1.5`;
+- usa `powerPreference: 'high-performance'`;
+- limita l'anisotropia del parquet a `4`;
+- usa shadow map `512x512` per la directional light;
+- usa shadow map `1024x1024` per lo spotlight.
+
+`WebGLContextGuard` osserva l'evento `webglcontextlost` sul canvas. Se il browser perde il contesto, `CanvasScene` smonta il renderer e mostra un fallback DOM leggibile invece di lasciare una superficie nera.
+
+Inoltre `GamePlayScene` limita un eventuale errore R3F, Three.js, texture o shader al solo canvas:
+
+```tsx
+<GameCanvasErrorBoundary>
+  <CanvasScene gameState={gameState} playerMotionState={playerMotionState} />
+</GameCanvasErrorBoundary>
+```
+
+Il boundary non avvolge l'intera scena gameplay. Di conseguenza restano montati:
+
+- `GameInputProvider` e adapter;
+- pulsante di ritorno al menu;
+- `GamePlayHUD` e controlli touch;
+- root fullscreen persistente.
+
+Il fallback evita quindi che un problema WebGL elimini anche l'interfaccia necessaria per uscire o diagnosticare il problema.
 
 ## Player e animazione
 
@@ -329,20 +368,46 @@ L'uscita resta inoltre disponibile tramite i controlli nativi del browser, per e
 
 ### Standalone e iframe
 
-La stessa architettura funziona nei due contesti previsti:
+Il runtime supporta due contesti:
 
 - standalone: `document.fullscreenElement` è `#bboyarena-game-root`;
 - website: il documento esterno porta l'`iframe` in fullscreen e il documento interno conserva `#bboyarena-game-root` come proprio fullscreen element.
 
-La pagina website deve mantenere sul frame:
+La pagina website mantiene sul frame i permessi necessari:
 
 ```html
-<iframe allow="fullscreen; gamepad" allowfullscreen></iframe>
+<iframe
+  data-src="https://bboyarena.org/game/"
+  allow="fullscreen; gamepad"
+  allowfullscreen
+  hidden
+></iframe>
 ```
+
+Il pulsante navbar che porta a `/play-the-game` è visibile sia nel browser sia nella PWA. L'accesso al runtime, invece, è PWA-only:
+
+1. nel browser normale la pagina mostra un gate con istruzioni di installazione;
+2. l'iframe nasce senza attributo `src`, quindi il game non viene scaricato o eseguito;
+3. lo script rileva `display-mode: standalone`, con fallback iOS `navigator.standalone`;
+4. solo nella PWA installata copia `data-src` in `src`, nasconde il gate e mostra iframe e link standalone.
+
+Questa è una protezione di prodotto lato client, non un'autorizzazione di sicurezza: l'URL `/game/` rimane una risorsa statica pubblica e può essere aperto direttamente conoscendone l'indirizzo.
 
 La transizione `fullscreen → training` è stata verificata in Chrome sia direttamente sia dentro l'iframe: dopo il mount del canvas il root resta connesso, il fullscreen element resta presente e il monitor Training rimane nel DOM.
 
 In produzione, dopo un deploy, una PWA o una scheda già aperta può continuare temporaneamente a usare un vecchio HTML/service worker. Prima di diagnosticare una regressione già corretta conviene verificare la versione pubblicata, aggiornare la PWA e ricaricare senza cache.
+
+### Build e pubblicazione
+
+La pipeline GitHub Pages costruisce separatamente website e game:
+
+```txt
+npm run build       -> dist/
+npm run game:build  -> dist-game/
+copy dist-game/.    -> dist/game/
+```
+
+La variabile `PUBLIC_GAME_BASE` vale `/game/` in produzione. Asset importati o caricati a runtime devono quindi rispettare `import.meta.env.BASE_URL`; un path hardcoded come `/asset.png` cercherebbe erroneamente la risorsa nella root della website.
 
 ## Perché usare Zustand e XState insieme
 
@@ -470,6 +535,8 @@ Così `GameApp` non cresce con troppi `if`.
 - Three.js scene: mondo 3D interno a `<Canvas>`.
 - R3F: React Three Fiber, bridge tra React e Three.js.
 - Canvas: superficie WebGL in cui viene renderizzata la scena 3D.
+- WebGL context loss: perdita del contesto grafico da parte del browser, gestita con fallback DOM.
+- Error boundary canvas: confine React che impedisce a un errore 3D di smontare HUD e controlli.
 - Mesh: oggetto visibile composto da geometry e material.
 - Geometry: forma dell'oggetto.
 - Material: aspetto dell'oggetto.
@@ -480,3 +547,4 @@ Così `GameApp` non cresce con troppi `if`.
 - Input adapter: traduttore tra API del dispositivo e azioni logiche del gioco.
 - GameInputSnapshot: fotografia normalizzata e indipendente dal dispositivo dell'input corrente.
 - Preferred input mode: scelta dell'utente tra risoluzione automatica, touch, gamepad e mouse/tastiera.
+- PWA gate: controllo client che assegna il `src` all'iframe solo in display mode standalone.

@@ -9,10 +9,12 @@ interface UmamiTracker {
 declare global {
   interface Window {
     umami?: UmamiTracker;
+    doNotTrack?: string;
   }
 
   interface Navigator {
     standalone?: boolean;
+    globalPrivacyControl?: boolean;
   }
 }
 
@@ -26,6 +28,7 @@ const TRACKER_WAIT_MS = 10_000;
 const TRACKER_POLL_MS = 100;
 const FIRST_PWA_OPEN_KEY = 'bboyarena-pwa-seen';
 const SESSION_OPEN_KEY_PREFIX = 'bboyarena-launch';
+const NO_TRACKING_KEY = 'bboyarena-no-tracking';
 
 const getLaunchMode = (): LaunchMode =>
   window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true ? 'pwa' : 'browser';
@@ -58,6 +61,20 @@ const safeStorageSet = (storage: Storage, key: string): void => {
   }
 };
 
+export const shouldDisableTracking = (): boolean => {
+  try {
+    if (safeStorageGet(window.localStorage, NO_TRACKING_KEY) === '1') return true;
+  } catch {
+    // Ignore storage access issues and fall back to browser privacy signals.
+  }
+
+  return (
+    window.doNotTrack === '1' ||
+    navigator.doNotTrack === '1' ||
+    navigator.globalPrivacyControl === true
+  );
+};
+
 const waitForTracker = async (): Promise<UmamiTracker | undefined> => {
   if (window.umami) return window.umami;
 
@@ -74,6 +91,8 @@ const waitForTracker = async (): Promise<UmamiTracker | undefined> => {
 };
 
 export const initializePwaAnalytics = ({ appVersion }: PwaAnalyticsOptions): void => {
+  if (shouldDisableTracking()) return;
+
   const launchMode = getLaunchMode();
   const platform = getPlatform();
   const commonData: AnalyticsData = {

@@ -297,22 +297,24 @@ const manifestLinkTag =
       </style>
     )}
     <script type="application/ld+json" set:html={JSON.stringify(seo.jsonLd)} />
-    {analyticsScriptUrl && analyticsWebsiteId && (
-      <script
-        defer
-        src={analyticsScriptUrl}
-        data-website-id={analyticsWebsiteId}
-      ></script>
-    )}
-    {analyticsScriptUrl && analyticsWebsiteId && (
-      <script>
-        import { initializePwaAnalytics } from '../../lib/pwa-analytics';
+    {analyticsScriptUrl && analyticsWebsiteId && import.meta.env.PROD && (
+      <script type="module" define:vars={{ analyticsScriptUrl, analyticsWebsiteId }}>
+        import { initializePwaAnalytics, shouldDisableTracking } from '../../lib/pwa-analytics';
 
-        const appVersion = document
-          .querySelector('meta[name="bboyarena-app-version"]')
-          ?.getAttribute('content') ?? 'unknown';
+        if (!shouldDisableTracking()) {
+          const appVersion = document
+            .querySelector('meta[name="bboyarena-app-version"]')
+            ?.getAttribute('content') ?? 'unknown';
 
-        initializePwaAnalytics({ appVersion });
+          const trackerScript = document.createElement('script');
+          trackerScript.defer = true;
+          trackerScript.src = analyticsScriptUrl;
+          trackerScript.dataset.websiteId = analyticsWebsiteId;
+          trackerScript.addEventListener('load', () => {
+            initializePwaAnalytics({ appVersion });
+          });
+          document.head.appendChild(trackerScript);
+        }
       </script>
     )}
     {enableVersioning && (
