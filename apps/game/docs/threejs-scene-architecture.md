@@ -22,6 +22,8 @@ File principali:
 - `src/game/Player.tsx`: oggetto 3D animato con `useFrame`.
 - `src/game/ui/GameHUD.tsx`: menu 2D, splash, settings e credits.
 - `src/game/ui/GamePlayHUD.tsx`: HUD 2D sopra il canvas 3D durante il gameplay.
+- `src/game/ui/GameFullscreenToggle.tsx`: controllo fullscreen persistente per l'intero runtime.
+- `src/game/ui/GameFullscreenReticle.tsx`: reticolo DOM mostrato durante il fullscreen.
 - `src/game/game.css`: layout 16:9, background delle schermate, canvas assoluto e overlay HUD.
 
 ## Il flusso attuale
@@ -39,17 +41,17 @@ export type GamePlayMode = 'career' | 'training';
 export type GameScreen = GameMenuScreen | GamePlayMode;
 ```
 
-`GameApp` legge `screen` e decide il ramo principale:
+`GameApp` legge `screen` e decide il ramo principale. Fullscreen toggle e reticolo restano fuori dai due rami, così non vengono smontati quando si entra o si esce dal gameplay:
 
 ```tsx
-{screen === 'career' || screen === 'training' ? (
-  <GamePlayScene mode={selectedMode} copy={copy} rootRef={rootRef} />
+{isPlayableScreen ? (
+  <GamePlayScene mode={selectedMode} copy={copy} />
 ) : (
-  <>
-    <GameHUD copy={copy} />
-    <GameFullscreenToggle targetRef={rootRef} />
-  </>
+  <GameHUD copy={copy} />
 )}
+
+<GameFullscreenToggle targetRef={rootRef} />
+<GameFullscreenReticle targetRef={rootRef} />
 ```
 
 Quindi:
@@ -303,6 +305,44 @@ In modalità `training`, `GamePlayHUD` mostra sempre un monitor input live. Il p
 - stato `ON/OFF` di tutte le azioni logiche.
 
 Il monitor legge `GameInputSnapshot`, non gli eventi del dispositivo. Per questo funziona allo stesso modo con touch, gamepad e mouse/tastiera e riflette automaticamente il mapping configurato. In modalità touch resta inoltre montato `TouchControlsOverlay`, che scrive nello stesso controller degli altri adapter.
+
+## Fullscreen persistente
+
+Il target fullscreen è `#bboyarena-game-root`, conservato da `GameApp` tramite `rootRef`. Il controllo fullscreen è montato una sola volta come sibling del ramo menu/gameplay:
+
+```txt
+GameApp / #bboyarena-game-root
+└─ game-stage
+   ├─ GameHUD oppure GamePlayScene
+   ├─ GameFullscreenToggle   sempre montato
+   └─ GameFullscreenReticle sempre montato
+```
+
+Questa ownership è intenzionale. Il passaggio da `mainMenu` a `career` o `training` sostituisce il contenuto dello stage e monta il canvas R3F, ma non deve sostituire il componente che osserva `document.fullscreenElement`. Target DOM, listener `fullscreenchange` e controllo restano quindi stabili attraverso tutti i cambi di schermata.
+
+`GameFullscreenToggle` è l'unico componente che invoca:
+
+- `target.requestFullscreen()` per entrare;
+- `document.exitFullscreen()` per uscire esplicitamente.
+
+L'uscita resta inoltre disponibile tramite i controlli nativi del browser, per esempio `Esc` o Back. Il cambio di screen nello store non chiama mai `exitFullscreen()`.
+
+### Standalone e iframe
+
+La stessa architettura funziona nei due contesti previsti:
+
+- standalone: `document.fullscreenElement` è `#bboyarena-game-root`;
+- website: il documento esterno porta l'`iframe` in fullscreen e il documento interno conserva `#bboyarena-game-root` come proprio fullscreen element.
+
+La pagina website deve mantenere sul frame:
+
+```html
+<iframe allow="fullscreen; gamepad" allowfullscreen></iframe>
+```
+
+La transizione `fullscreen → training` è stata verificata in Chrome sia direttamente sia dentro l'iframe: dopo il mount del canvas il root resta connesso, il fullscreen element resta presente e il monitor Training rimane nel DOM.
+
+In produzione, dopo un deploy, una PWA o una scheda già aperta può continuare temporaneamente a usare un vecchio HTML/service worker. Prima di diagnosticare una regressione già corretta conviene verificare la versione pubblicata, aggiornare la PWA e ricaricare senza cache.
 
 ## Perché usare Zustand e XState insieme
 

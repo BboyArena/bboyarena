@@ -19,6 +19,7 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
   const selectedMode = useGameStore((state) => state.selectedMode);
   const setScreen = useGameStore((state) => state.setScreen);
   const isDev = import.meta.env.DEV;
+  const isPlayableScreen = screen === 'career' || screen === 'training';
 
   const cycleScreen = () => {
     const menuScreens: GameMenuScreen[] = ['splashscreen', 'mainMenu', 'settings', 'credits'];
@@ -60,7 +61,7 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
     <div id="bboyarena-game-root" className="bboy-game-root" ref={rootRef}>
       <div className="game-shell">
         <div className="game-stage" data-scene={screen}>
-          {screen === 'career' || screen === 'training' ? (
+          {isPlayableScreen ? (
             <GamePlayScene mode={selectedMode} copy={copy} />
           ) : (
             <>
