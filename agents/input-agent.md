@@ -1,5 +1,3 @@
-Ecco una versione più completa e pensata per essere usata direttamente da Codex.
-
 # Input Agent
 
 ## Mission

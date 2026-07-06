@@ -1,4 +1,4 @@
-# Dev UI Guide
+# Game UI Development Guide
 
 This file explains how to work on the 2D UI layer of BboyArena without fighting the layout.
 
@@ -11,7 +11,7 @@ The goal of the demo pages is simple:
 - keep components reusable
 - avoid letting the game shell and the site shell bleed into each other
 
-Use the demo page at `__dev/ui-demo` as the first place to test changes.
+Use the game-owned UI components as the source of truth. The website route `/__dev/ui-demo` is an Astro development sandbox and should not become a runtime dependency of the game.
 
 ## What to build from
 
@@ -83,7 +83,7 @@ Avoid:
 - making every button look primary
 - using margins as the main layout system
 
-## Demo Page Reference
+## Demo Reference
 
 The demo page shows:
 
@@ -93,7 +93,7 @@ The demo page shows:
 - a Tailwind code snippet
 - do / avoid / next-step guidance
 
-Use that page when you want to compare:
+Use the available demo surfaces when you want to compare:
 
 - padding
 - border strength
@@ -107,7 +107,7 @@ Use that page when you want to compare:
 2. Give the parent a `gap-*` value.
 3. Use `space-y-*` inside the card.
 4. Keep the title short and the body text readable.
-5. Test the result on the `__dev/ui-demo` page.
+5. Test the result in the standalone game and, where relevant, on `/__dev/ui-demo` while the website development server is running.
 
 ## Good Defaults
 
@@ -122,3 +122,9 @@ Use that page when you want to compare:
 If a section feels crowded, the fix is usually not more color. It is more spacing.
 If two things should feel related, keep their spacing smaller than the spacing between sections.
 If a block feels lost, give it a stronger border, a little more padding, and a tighter title hierarchy.
+
+## Related documentation
+
+- [Game README](../README.md)
+- [Game scene and screen architecture](./threejs-scene-architecture.md)
+- [Input Manager](../../../docs/input-manager.md)

@@ -1,5 +1,3 @@
-Ecco una versione che userei realmente nel repository.
-
 # Rendering Agent
 
 ## Mission

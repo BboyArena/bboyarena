@@ -1,5 +1,7 @@
 # Game Separation Plan
 
+> Archived completed plan. Paths and ownership statements below describe the migration state at the time of the audit. Use the [current architecture](../current-architecture.md) for active rules.
+
 ## Scope
 
 This document is a discovery and migration plan for separating the game runtime from the Astro website. It does not move existing source files and does not change gameplay, assets, Three.js logic, Zustand state, XState machines, or UX.

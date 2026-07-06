@@ -8,20 +8,17 @@ These documents are intended to be used as context for AI coding assistants (suc
 
 ---
 
-## Available Agents
+## Implemented Agents
 
-| Agent                  | Responsibility                                                            |
-| ---------------------- | ------------------------------------------------------------------------- |
-| Gameplay Agent         | Gameplay systems, player controller, game feel, core mechanics            |
-| Rendering Agent        | Three.js, React Three Fiber, rendering pipeline, performance              |
-| Input Agent            | Keyboard, touch, gamepad and unified input abstraction                    |
-| Animation Agent        | Motion system, moves, pose blending, timing and BPM                       |
-| Blender Pipeline Agent | Blender workflow, rigs, GLTF export, asset pipeline                       |
-| Website Agent          | Website, community pages, documentation and public communication          |
-| Devlog Agent           | Development logs, technical articles and social content                   |
-| Repo Hygiene Agent     | Repository organization, releases, documentation and CI                   |
-| Architecture Reviewer  | Technical reviews, architecture validation and overengineering prevention |
-| Product Roadmap Agent  | Milestones, priorities and long-term planning                             |
+| Agent | Charter | Responsibility |
+| --- | --- | --- |
+| Gameplay Agent | [`gameplay-agent.md`](./gameplay-agent.md) | Gameplay systems, player controller, game feel, and core mechanics |
+| Rendering Agent | [`rendering-agent.md`](./rendering-agent.md) | Three.js, React Three Fiber, rendering pipeline, and performance |
+| Input Agent | [`input-agent.md`](./input-agent.md) | Keyboard, touch, gamepad, and unified input abstraction |
+| Website & Community Agent | [`website-community-agent.md`](./website-community-agent.md) | Website, community pages, documentation, and public communication |
+| Devlog Agent | [`devlog-agent.md`](./devlog-agent.md) | Development logs, technical articles, and social content |
+
+Additional roles such as animation, Blender pipeline, repository hygiene, architecture review, and product roadmap may be added later. They are not available until a corresponding charter exists in this directory.
 
 ---
 
@@ -62,6 +59,62 @@ Whenever there is a choice between adding infrastructure or improving gameplay, 
 
 ---
 
+## Shared Project Context
+
+All agents operate on the same project and should use the shared documentation as their primary source of truth before starting any task.
+
+Unless explicitly instructed otherwise, every agent should read and respect the following documents:
+
+1. [`PROJECT_SPEC.md`](../PROJECT_SPEC.md) — canonical inventory, technical stack, conventions, routes, components, and current state.
+2. [`docs/current-architecture.md`](../docs/current-architecture.md) — runtime ownership and dependency boundaries.
+3. [`ROADMAP.md`](../ROADMAP.md) — accepted product and technical direction when priorities matter.
+4. [`agents/README.md`](./README.md) — shared role and collaboration rules.
+5. The specific agent charter being used for the current task.
+
+Agents should **not** re-analyze the entire project from scratch if the required information is already available in these documents.
+
+When project documentation and previous assumptions conflict, the documentation takes precedence.
+
+If documentation appears outdated, the agent should:
+
+1. clearly identify the inconsistency;
+2. explain why it may no longer reflect the current implementation;
+3. propose an update;
+4. avoid silently changing architectural decisions.
+
+---
+
+## Working Principles
+
+Before making significant changes, every agent should:
+
+* understand the current architecture;
+* identify the affected modules;
+* respect project boundaries;
+* keep changes incremental;
+* avoid unnecessary refactoring;
+* preserve backward compatibility whenever reasonable;
+* explain architectural decisions whenever introducing new patterns.
+
+Agents should optimize for long-term maintainability rather than short-term convenience.
+
+---
+
+## Documentation First
+
+Whenever a task introduces a new architectural concept, workflow, convention or reusable pattern, the responsible agent should also determine whether the shared documentation should be updated.
+
+Documentation is considered part of the implementation, not an optional extra.
+
+If appropriate, the agent should propose updates to:
+
+* [`PROJECT_SPEC.md`](../PROJECT_SPEC.md)
+* [`docs/current-architecture.md`](../docs/current-architecture.md)
+* the relevant agent charter
+* any related documentation under `docs/`
+
+Keeping documentation synchronized with the implementation is part of the development process.
+
 ## Usage
 
 Load the appropriate agent before starting a task.
@@ -71,7 +124,7 @@ Examples:
 * Use **Gameplay Agent** when implementing new mechanics.
 * Use **Rendering Agent** for Three.js or rendering improvements.
 * Use **Input Agent** when working on keyboard, touch or gamepad controls.
-* Use **Architecture Reviewer** before merging significant changes.
-* Use **Repo Hygiene Agent** before creating a release.
+* Perform an explicit architecture review before merging significant boundary changes.
+* Perform a repository-hygiene review before creating a release.
 
 Agents are designed to complement each other, not to replace human design decisions.

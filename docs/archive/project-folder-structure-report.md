@@ -1,5 +1,7 @@
 # Project Folder Structure Report
 
+> Archived report. This analysis predates the current application layout. Use the [project specification](../../PROJECT_SPEC.md) and [current architecture](../current-architecture.md) for active structure and rules.
+
 Date: 2026-06-24
 
 Scope: folder structure only. No files were moved, deleted, or refactored.

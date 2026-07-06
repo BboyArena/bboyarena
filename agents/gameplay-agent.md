@@ -1,5 +1,3 @@
-Ecco una versione più professionale, pensata per essere usata direttamente da Codex come `agents/gameplay-agent.md`.
-
 # Gameplay Agent
 
 ## Mission

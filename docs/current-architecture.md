@@ -1,309 +1,120 @@
 # Current Architecture
 
-Date: 2026-06-24
+This document defines the runtime boundaries and dependency rules between BboyArena applications. It intentionally does not repeat the complete stack, route catalog, environment-variable catalog, or product conventions maintained in the [project specification](../PROJECT_SPEC.md).
 
-This document describes the current repository architecture after separating the website and game into independent apps.
-
-## Repository Structure
+## System boundary
 
 ```text
-.
-├── apps
-│   ├── game
-│   │   ├── public
-│   │   ├── src
-│   │   │   ├── game
-│   │   │   ├── main.tsx
-│   │   │   └── standalone.css
-│   │   ├── index.html
-│   │   ├── README.md
-│   │   └── vite.config.mjs
-│   └── website
-│       ├── public
-│       ├── src
-│       │   ├── components
-│       │   ├── dev-pages
-│       │   ├── lib
-│       │   ├── pages
-│       │   └── styles
-│       └── astro.config.mjs
-├── docs
-├── package.json
-└── tsconfig.json
+                         build-time content
+                   ┌─────────────────────────┐
+                   │ PocketBase / news feeds │
+                   └────────────┬────────────┘
+                                │
+                                ▼
+┌───────────────┐      URL      ┌──────────────────┐
+│ Astro website │ ────────────► │ Standalone game  │
+│ apps/website  │    iframe     │ apps/game        │
+└───────┬───────┘               └──────────────────┘
+        │
+        │ optional browser clients
+        ▼
+┌──────────────────────────────────────────────┐
+│ Supabase / analytics / experimental Colyseus │
+└──────────────────────────────────────────────┘
 ```
 
-## Website Ownership
+The website and game are independent front-end applications. Their integration boundary is a URL rendered by the website's `/play-the-game` page. Neither application imports source code from the other.
 
-The website is owned by:
+## Ownership boundaries
 
-```text
-apps/website
-```
+| Boundary | Owner | May depend on | Must not depend on |
+| --- | --- | --- | --- |
+| Public website | `apps/website` | Astro integrations, website components and libraries, optional remote content clients | Game runtime modules or game CSS |
+| Standalone game | `apps/game` | React, Three.js/R3F, game state, input, UI, game-owned assets | Astro layout, website components, website global CSS |
+| Experimental multiplayer | `server/colyseus` | Colyseus server packages and its own runtime configuration | Front-end source modules |
+| Governance | `legal` | Other legal documents through relative links | Runtime implementation |
+| AI role prompts | `agents` | Canonical repository documentation | Authority over product or architecture truth |
 
-The Astro app lives in:
+## Website boundary
 
-- `apps/website/src/pages`
-- `apps/website/src/components`
-- `apps/website/src/lib`
-- `apps/website/src/styles`
-- `apps/website/public`
-- `apps/website/astro.config.mjs`
+The Astro application owns:
 
-Root `package.json` delegates website commands to this app with:
+- public and localized routes;
+- layout, navigation, footer, and website styling;
+- editorial, community, legal, privacy, SEO, and PWA behavior;
+- website data adapters and optional browser clients;
+- assets under `apps/website/public`.
 
-```bash
-astro <command> --root apps/website
-```
+It builds statically to root `dist/`. It can point to the game through `PUBLIC_GAME_EMBED_URL`, but it must treat that target as an external document.
 
-The website build still writes to root `dist` through:
+## Game boundary
 
-```js
-outDir: '../../dist'
-```
+The Vite application owns:
 
-This keeps GitHub Pages deployment simple because the deploy artifact remains:
+- the React entry point and game screen selector;
+- Three.js/React Three Fiber scenes;
+- player, gameplay, input, UI, and lifecycle state;
+- game localization and game-specific CSS;
+- assets under `apps/game/public`.
 
-```text
-./dist
-```
+It builds to root `dist-game/`. The game must remain runnable without Astro, website CSS, or a website development server.
 
-## Game Ownership
+## Server boundary
 
-The standalone game is owned by:
+`server/colyseus` is an experimental service, not a required dependency of the current static website or game shell. A future multiplayer feature may consume it through a network protocol; it must not create shared source imports between server and front-end applications.
 
-```text
-apps/game
-```
+## Permitted communication
 
-The game runtime lives in:
+- Website → game: iframe or navigation URL.
+- Front end → remote content/data service: HTTP client configured by environment variables.
+- Future game → Colyseus: WebSocket protocol.
+- Shared human-readable policy: repository documentation.
 
-```text
-apps/game/src/game
-```
+If typed runtime contracts eventually need to be shared, create a deliberately scoped package only after a concrete cross-application requirement exists. Do not use an ambiguous root `src/` directory as a shortcut.
 
-This folder owns:
+## Asset ownership
 
-- `GameApp`
-- `GamePlayScene`
-- `CanvasScene`
-- `Player`
-- game copy boundary
-- game CSS
-- Zustand game store
-- XState game machine
-- HUD and menu UI components
-- fullscreen controls
-- game UI demo scene
+Each application owns and deploys its own static directory. An asset may be duplicated between applications when both deployments require it. Remove duplication only after confirming that one app no longer references its copy.
 
-The standalone game entrypoint is:
+Asset URLs must respect the owning application's configured base path.
 
-```text
-apps/game/src/main.tsx
-```
+## Architectural invariants
 
-It imports the game directly from:
+1. New website source belongs under `apps/website`.
+2. New game source belongs under `apps/game`.
+3. Website code does not import game runtime code.
+4. Game code does not import website code or Astro-specific modules.
+5. The standalone game must build and run independently.
+6. Menu and HUD interfaces remain DOM-based unless 3D interaction provides a concrete benefit.
+7. Device APIs terminate in the input layer; gameplay consumes canonical intent.
+8. Multiplayer remains experimental until the product specification explicitly promotes it.
+9. Root `dist/` and `dist-game/` are outputs, never source directories.
 
-```ts
-import GameApp from './game/GameApp';
-```
+## Decision test for new code
 
-## Integration Boundary
+Ask these questions in order:
 
-The website no longer imports the game runtime.
+1. Is this public content, website navigation, SEO, legal, or community functionality? Put it in `apps/website`.
+2. Is this gameplay, rendering, game input, game state, or game UI? Put it in `apps/game`.
+3. Is it server-authoritative networking behavior? Put it in `server/colyseus`.
+4. Is it only documentation? Put it in the owning app's docs or repository `docs/`.
+5. Is it genuinely required by more than one runtime? Define the contract first; introduce shared code only when duplication is riskier than the new coupling.
 
-The website integrates the game through a browser boundary:
+## Verification
 
-```text
-iframe / URL
-```
-
-The player-facing showroom route is:
-
-```text
-/play-the-game
-```
-
-That page lives in:
-
-```text
-apps/website/src/components/pages/PlayTheGamePage.astro
-```
-
-It reads the game iframe URL from:
-
-```text
-PUBLIC_GAME_EMBED_URL
-```
-
-In development, if `PUBLIC_GAME_EMBED_URL` is not set, the page falls back to:
-
-```text
-http://localhost:4322/
-```
-
-This lets the two apps run side by side:
-
-```bash
-npm run game:dev
-npm run dev
-```
-
-## Removed Bridges
-
-The temporary website bridges have been removed:
-
-- `apps/website/src/game`
-- `apps/website/src/components/game`
-- `apps/website/src/dev-pages/play.astro`
-- `apps/website/src/dev-pages/game-ui.astro`
-
-The website dev router no longer exposes:
-
-- `/__dev/play`
-- `/__dev/game-ui`
-
-The old internal game demo routes are replaced by:
-
-- standalone game app: `http://localhost:4322/`
-- website iframe showroom: `http://localhost:4321/play-the-game`
-
-## Asset Ownership
-
-### Website Assets
-
-Website static assets live in:
-
-```text
-apps/website/public
-```
-
-This includes:
-
-- PWA icons
-- SEO/social images
-- `CNAME`
-- `robots.txt`
-- website panorama/banner imagery
-
-### Game Assets
-
-Game-owned static assets live in:
-
-```text
-apps/game/public
-```
-
-Current game-owned assets:
-
-- `game-menu-background.png`
-- `logo-bboyarena.svg`
-
-The standalone Vite config uses:
-
-```js
-publicDir: `${gameRoot}/public`
-```
-
-### Duplicated Assets
-
-Some assets currently exist in both apps by design:
-
-- `logo-bboyarena.svg`
-- `game-menu-background.png`
-
-This is acceptable because each app owns its own deployed static directory. A later cleanup can remove duplicated website assets only after every website reference is audited.
-
-## Commands
-
-### Run Website Dev Server
-
-```bash
-npm run dev
-```
-
-Runs Astro from `apps/website`.
-
-Default local URL:
-
-```text
-http://localhost:4321/
-```
-
-### Build Website
+Changes to an application boundary should pass the relevant independent build:
 
 ```bash
 npm run build
-```
-
-Builds the Astro website from `apps/website` into root `dist`.
-
-### Preview Website Build
-
-```bash
-npm run preview
-```
-
-Previews the website build from `dist`.
-
-### Run Standalone Game Dev Server
-
-```bash
-npm run game:dev
-```
-
-Starts the standalone Vite game app from `apps/game`.
-
-Default local URL:
-
-```text
-http://localhost:4322/
-```
-
-### Build Standalone Game
-
-```bash
 npm run game:build
 ```
 
-Builds the standalone game into `dist-game`.
+Also inspect imports when moving source across a boundary. A successful bundled build does not by itself prove that ownership remains clean.
 
-### Preview Standalone Game Build
+## Related documents
 
-```bash
-npm run game:preview
-```
-
-Previews the production game build.
-
-## What Not To Do Now
-
-Do not add new website code to a root `src` folder. Website source belongs in `apps/website/src`.
-
-Do not add new website assets to a root `public` folder. Website assets belong in `apps/website/public`.
-
-Do not import `apps/game/src/game` from the website.
-
-Do not recreate `apps/website/src/game` or `apps/website/src/components/game`.
-
-Do not put game copy inside the website i18n system. Game copy belongs in `apps/game/src/game/copy.ts`.
-
-Do not refactor game internals while doing website/game ownership work. Keep gameplay, state, and UI behavior stable.
-
-## Current Recommended Mental Model
-
-Use this ownership model when adding new files:
-
-```text
-Website app         -> apps/website
-Website code        -> apps/website/src
-Website assets      -> apps/website/public
-Standalone game     -> apps/game
-Game runtime        -> apps/game/src/game
-Game assets         -> apps/game/public
-Website/game link   -> iframe URL, usually PUBLIC_GAME_EMBED_URL
-Architecture notes  -> docs
-```
-
-If a file is new game runtime code, it should go into `apps/game/src/game`.
-
-If a file is new website code, it should go into `apps/website/src`.
+- [Project specification](../PROJECT_SPEC.md) — canonical project-wide inventory and conventions.
+- [Documentation index](./README.md) — document placement and authority.
+- [Game scene architecture](../apps/game/docs/threejs-scene-architecture.md) — internal game composition.
+- [Input Manager](./input-manager.md) — device-to-gameplay input boundary.
+- [Historical separation plan](./archive/game-separation-plan.md) — completed migration context.

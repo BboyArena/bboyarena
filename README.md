@@ -91,27 +91,15 @@ An enabled platform without a valid `http` or `https` URL remains hidden. Set `P
 
 ## Roadmap
 
-The roadmap is intentionally high level.
+The immediate priority is a small playable foundation while keeping the public project understandable and honest. See the canonical [roadmap](./ROADMAP.md) for product, technical, community, federation, and commercial direction.
 
-1. Public presence
-- keep the website stable;
-- make the project easy to follow;
-- publish clear progress updates.
+## Documentation
 
-2. First playable foundation
-- define the first MVP scope;
-- establish the gameplay loop;
-- validate controls and camera flow.
-
-3. PWA and updates
-- ship an installable experience when ready;
-- use the PWA as a lightweight update channel;
-- surface version changes and new content clearly.
-
-4. Community and growth
-- strengthen the Discord and social loop;
-- gather feedback from real users;
-- share devlogs, notes, and future plans.
+- [Project specification](./PROJECT_SPEC.md)
+- [Documentation index](./docs/README.md)
+- [Current architecture](./docs/current-architecture.md)
+- [Game application guide](./apps/game/README.md)
+- [Roadmap](./ROADMAP.md)
 
 ## Short copy
 

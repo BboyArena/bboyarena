@@ -11,7 +11,7 @@ Current status:
 - Tailwind v4 is enabled for the standalone game entry via `@tailwindcss/vite`.
 - Game theme tokens are exposed in `apps/game/src/standalone.css` for future utility-class work.
 
-Planned ownership:
+Runtime responsibilities:
 
 - Game runtime entry point
 - R3F / Three.js canvas scene
@@ -21,6 +21,8 @@ Planned ownership:
 - Tailwind utilities for new game UI work, while keeping the existing handcrafted CSS intact
 
 The app should stay runnable without Astro `Layout.astro`, website global CSS, or website Tailwind utilities.
+
+Detailed implementation belongs in the [game scene and screen architecture](./docs/threejs-scene-architecture.md). Repository-wide boundaries are defined by the [current architecture](../../docs/current-architecture.md).
 
 ## Commands
 

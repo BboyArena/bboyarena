@@ -1,5 +1,7 @@
 # Game Runtime Coupling Report
 
+> Archived audit. This report describes the repository before the completed website/game separation. Use the [current architecture](../current-architecture.md) for active rules.
+
 ## Scope
 
 This report maps the import graph used by the standalone game host at `apps/game/src/main.tsx` and the current runtime under `src/game`.

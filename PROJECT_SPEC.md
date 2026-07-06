@@ -1,6 +1,6 @@
 # BboyArena.org — Project Specification
 
-This document is the reference for the repository's current architecture, applications, routes, major components, integrations, and operating conventions. It describes the working tree as of July 6, 2026, including uncommitted changes.
+This living document is the canonical reference for the repository's current applications, routes, major components, integrations, and operating conventions. Architectural boundaries are expanded in [`docs/current-architecture.md`](./docs/current-architecture.md).
 
 ## 1. Project identity and current scope
 
@@ -298,7 +298,7 @@ Environment variables are loaded from the repository root. Browser-exposed varia
 
 ## 15. AI agent role definitions
 
-The untracked `agents/` directory contains operational prompts for AI coding assistants. The currently present role files are:
+The `agents/` directory contains operational prompts for AI coding assistants. The implemented role files are:
 
 - `website-community-agent.md`
 - `gameplay-agent.md`
@@ -306,28 +306,39 @@ The untracked `agents/` directory contains operational prompts for AI coding ass
 - `rendering-agent.md`
 - `devlog-agent.md`
 
-`agents/README.md` also describes planned roles that do not yet have corresponding files. These prompts are development aids, not runtime code or authoritative replacements for this specification.
+Additional roles may be added when they receive a corresponding charter. These prompts are development aids, not runtime code or authoritative replacements for this specification.
 
 ## 16. Governance and documentation
 
 - `legal/` contains the contribution, governance, licensing scope, commercial-use, trademark, certification, and CLA documents.
-- `docs/current-architecture.md` describes the website/game separation.
-- Additional reports under `docs/` cover scene architecture, runtime coupling, separation planning, input management, and repository structure.
-- `DEVELOPMENT_LOG.md`, `ROADMAP.md`, and the application READMEs provide historical and focused context; this file remains the broad current-state reference.
+- `docs/current-architecture.md` defines the active website, game, and server boundaries without repeating this specification's complete inventory.
+- Current focused guides cover scene architecture and input management; completed migration reports are retained under `docs/archive/`.
+- `docs/development-log.md`, `ROADMAP.md`, and the application READMEs provide historical and focused context; this file remains the broad current-state reference.
+- `docs/README.md` is the documentation index and defines documentation placement and linking rules.
 
-## 17. Current working-tree changes reflected here
+## 17. Recent changes reflected here
 
-This revision explicitly includes all staged, unstaged, and untracked state visible on July 6, 2026:
+This revision includes the recent privacy-tool and development-role changes:
 
 - the localStorage inspector moved from the development router to public and localized privacy routes;
 - the Privacy Policy gained a link card pointing to that helper;
 - `LegalPage.astro` gained reusable linked-resource cards;
 - the former development-only localStorage page and route were removed;
-- the new `agents/` role definitions were added to the repository working tree.
+- the new `agents/` role definitions were added to the repository.
 
-At the time of this update, Git contains no staged changes. The items above are currently unstaged or untracked, and this specification itself is modified by this update.
+## 18. Documentation organization
 
-## 18. Operational rules
+- Root entry points: [`README.md`](./README.md), [`LICENSE.md`](./LICENSE.md), [`PROJECT_SPEC.md`](./PROJECT_SPEC.md), and [`ROADMAP.md`](./ROADMAP.md).
+- Repository documentation index: [`docs/README.md`](./docs/README.md).
+- Current technical documentation and historical reports: `docs/`.
+- Superseded documents retained for context: `docs/archive/`.
+- Application-specific guides: the owning application's `docs/` directory or README.
+- Governance and licensing documents: `legal/`.
+- AI role definitions: `agents/`.
+
+All documentation must be written in English and use repository-relative paths. Machine-specific absolute paths and developer usernames must not appear in committed documentation.
+
+## 19. Operational rules
 
 - Prefer incremental, reviewable changes and avoid new dependencies without a concrete need.
 - Keep the website static unless a real requirement demands otherwise.
