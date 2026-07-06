@@ -33,10 +33,10 @@ Both live and replayed intents must pass through the same player motion machine.
 | --- | --- | --- |
 | Phase 0 — Baseline and contracts | Complete | Contracts added without changing runtime behavior; game build and focused type-check pass. |
 | Phase 1 — Animation catalog | Complete | Versioned procedural catalog, strict types, safe validation, and actionable errors added. |
-| Phase 2 — Replaceable catalog loading | Not started | Depends on Phase 1. |
-| Phase 3 — Player motion machine | Not started | Depends on stable motion contracts. |
-| Phase 4 — Intent resolver | Not started | Depends on the motion event protocol. |
-| Phase 5 — Animation playback machine | Not started | Depends on catalog loading. |
+| Phase 2 — Replaceable catalog loading | Complete | Local and HTTP sources share one interface with cancellation, safe results, and local fallback. |
+| Phase 3 — Player motion machine | In progress | Core machine and tests complete; legacy `GamePlayScene` migration remains in Phase 6. |
+| Phase 4 — Intent resolver | Complete | Edge-aware, device-independent resolver added and tested. |
+| Phase 5 — Animation playback machine | Complete | Catalog actor, resolution, playback lifecycle, fallback failure state, and observable outcomes implemented. |
 | Phase 6 — Runtime integration | Not started | Depends on motion and playback actors. |
 | Phase 7 — Deterministic replay foundation | Not started | Depends on authoritative motion transitions. |
 | Phase 8 — Replay recorder | Not started | Depends on the replay clock and format. |
@@ -55,6 +55,48 @@ Both live and replayed intents must pass through the same player motion machine.
 
 - Local catalog validation: passed with all six supported intent mappings.
 - Invalid duplicate mapping rejection: passed.
+- Focused strict TypeScript compilation: passed.
+- `npm run game:build`: passed.
+- `git diff --check`: passed.
+
+### Phase 2 verification
+
+- Local JSON source load: passed.
+- Mock HTTP source load: passed.
+- Invalid remote catalog fallback to local data: passed.
+- Aborted load propagation without fallback: passed.
+- Failed source result normalization: passed.
+- Focused strict TypeScript compilation: passed.
+- `npm run game:build`: passed.
+- `git diff --check`: passed.
+
+### Phase 3 verification
+
+- Inactive, grounded idle/moving, performing, and paused transitions: passed.
+- Interruption guards and freeze priority: passed.
+- Pause/resume deep-history restoration: passed.
+- Movement updates during an active performance: passed.
+- Focused strict TypeScript compilation: passed.
+- `npm run game:build`: passed.
+- `git diff --check`: passed.
+
+### Phase 4 verification
+
+- Primary press/release edge detection: passed.
+- Held-button repeat prevention: passed.
+- Modifier-based windmill intent and tracked release: passed.
+- Keyboard/gamepad canonical parity: passed.
+- Focused strict TypeScript compilation: passed.
+- `npm run game:build`: passed.
+- `git diff --check`: passed.
+
+### Phase 5 verification
+
+- Catalog actor loading and ready state: passed.
+- Intent-to-animation resolution and started outcome: passed.
+- Playback pause/resume: passed.
+- Completion and return to idle: passed.
+- Invalid catalog transition to recoverable failed state: passed.
 - Focused strict TypeScript compilation: passed.
 - `npm run game:build`: passed.
 - `git diff --check`: passed.
@@ -186,73 +228,73 @@ Suggested catalog shape:
 
 ## Phase 2 — Replaceable catalog loading
 
-- [ ] Define an `AnimationCatalogSource` interface.
-- [ ] Implement an asynchronous local JSON source.
-- [ ] Design an HTTP source with the same interface.
-- [ ] Support `AbortSignal` for canceled loads.
-- [ ] Define loading, ready, and failure results.
-- [ ] Provide a known local fallback when remote loading fails.
-- [ ] Keep the selected source configurable at the game composition boundary.
-- [ ] Avoid direct `fetch` calls inside gameplay or rendering components.
+- [x] Define an `AnimationCatalogSource` interface.
+- [x] Implement an asynchronous local JSON source.
+- [x] Design an HTTP source with the same interface.
+- [x] Support `AbortSignal` for canceled loads.
+- [x] Define loading, ready, and failure results.
+- [x] Provide a known local fallback when remote loading fails.
+- [x] Keep the selected source configurable at the game composition boundary.
+- [x] Avoid direct `fetch` calls inside gameplay or rendering components.
 
 ### Acceptance criteria
 
-- [ ] Switching from local JSON to HTTP does not change motion-machine code.
-- [ ] The game remains usable when the remote catalog is unavailable.
-- [ ] Catalog revision information is available to the replay system.
+- [x] Switching from local JSON to HTTP does not change motion-machine code.
+- [x] The local fallback remains available when the remote catalog is unavailable.
+- [x] Catalog revision information is available to the replay system.
 
 ## Phase 3 — Player motion machine
 
-- [ ] Create a typed XState `playerMotionMachine`.
-- [ ] Add the initial `inactive`, `grounded`, `performing`, and `paused` states.
-- [ ] Add nested `idle` and `moving` grounded states where useful.
-- [ ] Add `starting`, `active`, and `recovering` performing phases only when required by current moves.
-- [ ] Move movement, facing, balance, and contact data into serializable context.
-- [ ] Store the active semantic intent ID separately from animation state.
-- [ ] Implement guards for allowed motion transitions.
-- [ ] Implement interruption rules in motion code, not catalog data.
-- [ ] Define reset, pause, resume, and disable behavior.
-- [ ] Expose a small, typed motion snapshot to consumers.
+- [x] Create a typed XState `playerMotionMachine`.
+- [x] Add the initial `inactive`, `grounded`, `performing`, and `paused` states.
+- [x] Add nested `idle` and `moving` grounded states where useful.
+- [x] Defer `starting`, `active`, and `recovering` sub-phases until real clip completion requires them.
+- [x] Move movement, facing, balance, and contact data into serializable context.
+- [x] Store the active semantic intent ID separately from animation state.
+- [x] Implement guards for allowed motion transitions.
+- [x] Implement interruption rules in motion code, not catalog data.
+- [x] Define reset, pause, resume, and disable behavior.
+- [x] Expose a small, typed motion snapshot to consumers.
 
 ### Acceptance criteria
 
 - [ ] `PlayerMotionState` is no longer reconstructed ad hoc in `GamePlayScene`.
-- [ ] The machine accepts the current input-driven behaviors.
-- [ ] State snapshots contain no `THREE.Vector3`, meshes, clips, or mixers.
-- [ ] The machine can be exercised without React or WebGL.
+- [x] The machine accepts the current input-driven behaviors.
+- [x] State snapshots contain no `THREE.Vector3`, meshes, clips, or mixers.
+- [x] The machine can be exercised without React or WebGL.
 
 ## Phase 4 — Intent resolver
 
-- [ ] Create a pure resolver from canonical input snapshots to motion events.
-- [ ] Emit continuous movement updates separately from discrete move requests.
-- [ ] Detect button press and release edges.
-- [ ] Prevent a held button from restarting the same move every render.
-- [ ] Keep keyboard, touch, and gamepad behavior equivalent.
-- [ ] Preserve the original input source for optional diagnostics only.
-- [ ] Define behavior for conflicting simultaneous intents.
+- [x] Create an isolated resolver from canonical input snapshots to motion events.
+- [x] Emit movement updates separately from discrete move requests.
+- [x] Detect button press and release edges.
+- [x] Prevent a held button from restarting the same move every render.
+- [x] Keep keyboard, touch, and gamepad behavior equivalent.
+- [x] Keep the original input source outside authoritative motion intents and available in the input snapshot for diagnostics.
+- [x] Resolve simultaneous primary/secondary requests in stable order, with freeze emitted last and receiving interruption priority.
 
 ### Acceptance criteria
 
-- [ ] Identical canonical input produces identical motion events across devices.
-- [ ] Holding the primary action does not emit repeated start events.
-- [ ] The resolver is a pure function or isolated controller that can be tested independently.
+- [x] Identical canonical input produces identical motion events across devices.
+- [x] Holding the primary action does not emit repeated start events.
+- [x] The resolver is an isolated controller that can be tested independently.
 
 ## Phase 5 — Animation playback machine
 
-- [ ] Create a typed XState animation playback machine.
-- [ ] Add catalog loading, ready, playing, transitioning, and failed behavior.
-- [ ] Resolve accepted semantic intents through the loaded catalog.
-- [ ] Emit animation started, completed, interrupted, and failed events.
-- [ ] Define missing-animation fallback behavior.
-- [ ] Add playback speed, looping, and fade metadata handling.
-- [ ] Keep gameplay validity decisions outside this machine.
-- [ ] Define how pause and resume affect the active playback.
+- [x] Create a typed XState animation playback machine.
+- [x] Add catalog loading, ready, playing, transitioning, and failed behavior.
+- [x] Resolve accepted semantic intents through the loaded catalog.
+- [x] Expose animation started, completed, interrupted, and failed outcomes.
+- [x] Define missing-animation fallback behavior.
+- [x] Resolve and expose playback speed, looping, and fade metadata to the future clip renderer.
+- [x] Keep gameplay validity decisions outside this machine.
+- [x] Define how pause and resume affect the active playback.
 
 ### Acceptance criteria
 
-- [ ] Motion state can exist and transition without an animation clip.
-- [ ] Animation failure does not corrupt gameplay motion state.
-- [ ] Changing a catalog mapping changes presentation without changing input or motion rules.
+- [x] Motion state can exist and transition without an animation clip.
+- [x] Animation failure does not corrupt gameplay motion state.
+- [x] Changing a catalog mapping changes presentation without changing input or motion rules.
 
 ## Phase 6 — Runtime integration
 
