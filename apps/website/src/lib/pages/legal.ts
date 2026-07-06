@@ -25,6 +25,7 @@ export interface LegalSection {
   paragraphs?: string[];
   list?: string[];
   contacts?: LegalContactRow[];
+  links?: LegalContactRow[];
   callout?: string;
 }
 
@@ -77,6 +78,19 @@ const privacyPage: LegalPageCopy = {
         'Analytics are collected through a self-hosted Umami instance available through get.giorgiotedesco.it.',
         'BBoyArena does not use advertising trackers, behavioral profiling, or third-party advertising analytics.',
         'BBoyArena does not use analytics cookies for profiling purposes.'
+      ]
+    },
+    {
+      title: 'Privacy tools',
+      paragraphs: [
+        'If you need to inspect or reset browser storage for this site, use the private helper below. It is public, but only linked from this privacy page.'
+      ],
+      links: [
+        {
+          label: 'Open localStorage inspector',
+          value: '/privacy/localstorage-inspector',
+          note: 'Browser-only helper for debugging localStorage and no-tracking state.'
+        }
       ]
     },
     {

@@ -1,24 +1,30 @@
 ---
-import Layout from '../components/layout/Layout.astro';
+import Layout from '../layout/Layout.astro';
 
+interface Props {
+  locale: import('../../lib/i18n').LocaleCode;
+  pagePath: string;
+}
+
+const { locale, pagePath } = Astro.props as Props;
 const trackingKey = 'bboyarena-no-tracking';
 ---
 
 <Layout
-  title="LocalStorage Debugger"
-  description="Pagina di sviluppo per ispezionare e modificare localStorage, con toggle per il no tracking del browser."
-  locale="en-US"
-  pagePath="/__dev/localstorage"
+  title="LocalStorage Inspector"
+  description="Public privacy helper for inspecting localStorage and toggling the no-tracking flag for this browser."
+  locale={locale}
+  pagePath={pagePath}
   noindex
 >
   <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
     <section class="rounded-[2rem] border border-slate-200 bg-white/95 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.1)] backdrop-blur sm:p-8">
       <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div class="max-w-3xl">
-          <p class="text-[10px] font-black uppercase tracking-[0.38em] text-slate-500">Development route</p>
+          <p class="text-[10px] font-black uppercase tracking-[0.38em] text-slate-500">Privacy helper</p>
           <h1 class="mt-3 text-4xl font-black uppercase leading-[0.92] tracking-[0.14em] text-slate-950 sm:text-6xl">
             LocalStorage
-            <span class="block text-slate-500">debug console</span>
+            <span class="block text-slate-500">inspector</span>
           </h1>
           <p class="mt-4 text-sm leading-7 text-slate-600 sm:text-base">
             Usa questa pagina per leggere, aggiornare e pulire le chiavi del browser senza aprire gli strumenti di sviluppo.
@@ -30,7 +36,7 @@ const trackingKey = 'bboyarena-no-tracking';
         <div class="grid gap-2 text-[10px] font-black uppercase tracking-[0.28em] text-slate-500">
           <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">read / write</span>
           <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">no tracking</span>
-          <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">dev only</span>
+          <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">privacy page</span>
         </div>
       </div>
     </section>
@@ -166,142 +172,150 @@ const trackingKey = 'bboyarena-no-tracking';
 
   <script is:inline>
     (() => {
-      const trackingKey = {JSON.stringify(trackingKey)};
-      const storageTable = document.querySelector('[data-storage-table]');
-      const entryCount = document.querySelector('[data-entry-count]');
-      const trackingStatus = document.querySelector('[data-tracking-status]');
-      const keyInput = document.querySelector('[data-entry-key]');
-      const valueInput = document.querySelector('[data-entry-value]');
-      const refreshButton = document.querySelector('[data-refresh]');
-      const clearAllButton = document.querySelector('[data-clear-all]');
-      const saveButton = document.querySelector('[data-save-entry]');
-      const deleteButton = document.querySelector('[data-delete-entry]');
-      const enableTrackingButton = document.querySelector('[data-enable-no-tracking]');
-      const disableTrackingButton = document.querySelector('[data-disable-no-tracking]');
+      const init = () => {
+        const trackingKey = 'bboyarena-no-tracking';
+        const storageTable = document.querySelector('[data-storage-table]');
+        const entryCount = document.querySelector('[data-entry-count]');
+        const trackingStatus = document.querySelector('[data-tracking-status]');
+        const keyInput = document.querySelector('[data-entry-key]');
+        const valueInput = document.querySelector('[data-entry-value]');
+        const refreshButton = document.querySelector('[data-refresh]');
+        const clearAllButton = document.querySelector('[data-clear-all]');
+        const saveButton = document.querySelector('[data-save-entry]');
+        const deleteButton = document.querySelector('[data-delete-entry]');
+        const enableTrackingButton = document.querySelector('[data-enable-no-tracking]');
+        const disableTrackingButton = document.querySelector('[data-disable-no-tracking]');
 
-      if (
-        !storageTable ||
-        !entryCount ||
-        !trackingStatus ||
-        !keyInput ||
-        !valueInput ||
-        !refreshButton ||
-        !clearAllButton ||
-        !saveButton ||
-        !deleteButton ||
-        !enableTrackingButton ||
-        !disableTrackingButton
-      ) {
-        return;
-      }
-
-      const readEntries = () => {
-        const entries = [];
-        for (let index = 0; index < window.localStorage.length; index += 1) {
-          const key = window.localStorage.key(index);
-          if (key === null) continue;
-          entries.push([key, window.localStorage.getItem(key) ?? '']);
+        if (
+          !storageTable ||
+          !entryCount ||
+          !trackingStatus ||
+          !keyInput ||
+          !valueInput ||
+          !refreshButton ||
+          !clearAllButton ||
+          !saveButton ||
+          !deleteButton ||
+          !enableTrackingButton ||
+          !disableTrackingButton
+        ) {
+          return;
         }
 
-        return entries.sort(([a], [b]) => a.localeCompare(b));
-      };
+        const readEntries = () => {
+          const entries = [];
+          for (let index = 0; index < window.localStorage.length; index += 1) {
+            const key = window.localStorage.key(index);
+            if (key === null) continue;
+            entries.push([key, window.localStorage.getItem(key) ?? '']);
+          }
 
-      const updateTrackingState = () => {
-        const isEnabled = window.localStorage.getItem(trackingKey) === '1';
-        trackingStatus.textContent = isEnabled ? 'no tracking on' : 'tracking on';
-        trackingStatus.className = isEnabled
-          ? 'rounded-full bg-emerald-400/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.26em] text-emerald-300'
-          : 'rounded-full bg-rose-400/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.26em] text-rose-300';
-      };
+          return entries.sort(([a], [b]) => a.localeCompare(b));
+        };
 
-      const render = () => {
-        const entries = readEntries();
-        entryCount.textContent = `${entries.length} ${entries.length === 1 ? 'item' : 'items'}`;
-        updateTrackingState();
+        const updateTrackingState = () => {
+          const isEnabled = window.localStorage.getItem(trackingKey) === '1';
+          trackingStatus.textContent = isEnabled ? 'no tracking on' : 'tracking on';
+          trackingStatus.className = isEnabled
+            ? 'rounded-full bg-emerald-400/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.26em] text-emerald-300'
+            : 'rounded-full bg-rose-400/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.26em] text-rose-300';
+        };
 
-        storageTable.replaceChildren(
-          ...entries.map(([key, value]) => {
+        const render = () => {
+          const entries = readEntries();
+          entryCount.textContent = `${entries.length} ${entries.length === 1 ? 'item' : 'items'}`;
+          updateTrackingState();
+
+          storageTable.replaceChildren(
+            ...entries.map(([key, value]) => {
+              const row = document.createElement('tr');
+              row.className = key === trackingKey ? 'border-b border-slate-200 bg-emerald-50/80' : 'border-b border-slate-200 bg-white';
+
+              const keyCell = document.createElement('td');
+              keyCell.className = 'py-4 px-4 align-top text-sm font-semibold text-slate-950';
+              keyCell.textContent = key;
+
+              const valueCell = document.createElement('td');
+              valueCell.className = 'py-4 px-4 align-top text-sm text-slate-600';
+              valueCell.style.whiteSpace = 'pre-wrap';
+              valueCell.style.wordBreak = 'break-word';
+              valueCell.textContent = value || '""';
+
+              const actionCell = document.createElement('td');
+              actionCell.className = 'py-4 px-4 text-right';
+
+              const button = document.createElement('button');
+              button.type = 'button';
+              button.className = 'rounded-full border border-slate-300 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.24em] text-slate-700 transition hover:-translate-y-0.5';
+              button.textContent = 'Delete';
+              button.addEventListener('click', () => {
+                window.localStorage.removeItem(key);
+                render();
+              });
+
+              actionCell.append(button);
+              row.append(keyCell, valueCell, actionCell);
+              return row;
+            })
+          );
+
+          if (!entries.length) {
             const row = document.createElement('tr');
-            row.className = key === trackingKey ? 'border-b border-slate-200 bg-emerald-50/80' : 'border-b border-slate-200 bg-white';
+            const cell = document.createElement('td');
+            cell.colSpan = 3;
+            cell.className = 'py-8 px-4 text-sm text-slate-500';
+            cell.textContent = 'No localStorage entries found.';
+            row.append(cell);
+            storageTable.replaceChildren(row);
+          }
+        };
 
-            const keyCell = document.createElement('td');
-            keyCell.className = 'py-4 px-4 align-top text-sm font-semibold text-slate-950';
-            keyCell.textContent = key;
+        const saveEntry = () => {
+          const key = keyInput.value.trim();
+          if (!key) return;
 
-            const valueCell = document.createElement('td');
-            valueCell.className = 'py-4 px-4 align-top text-sm text-slate-600';
-            valueCell.style.whiteSpace = 'pre-wrap';
-            valueCell.style.wordBreak = 'break-word';
-            valueCell.textContent = value || '""';
+          window.localStorage.setItem(key, valueInput.value);
+          render();
+        };
 
-            const actionCell = document.createElement('td');
-            actionCell.className = 'py-4 px-4 text-right';
+        const deleteEntry = () => {
+          const key = keyInput.value.trim();
+          if (!key) return;
 
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'rounded-full border border-slate-300 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.24em] text-slate-700 transition hover:-translate-y-0.5';
-            button.textContent = 'Delete';
-            button.addEventListener('click', () => {
-              window.localStorage.removeItem(key);
-              render();
-            });
+          window.localStorage.removeItem(key);
+          render();
+        };
 
-            actionCell.append(button);
-            row.append(keyCell, valueCell, actionCell);
-            return row;
-          })
-        );
+        const toggleTracking = (enabled) => {
+          if (enabled) {
+            window.localStorage.setItem(trackingKey, '1');
+          } else {
+            window.localStorage.removeItem(trackingKey);
+          }
 
-        if (!entries.length) {
-          const row = document.createElement('tr');
-          const cell = document.createElement('td');
-          cell.colSpan = 3;
-          cell.className = 'py-8 px-4 text-sm text-slate-500';
-          cell.textContent = 'No localStorage entries found.';
-          row.append(cell);
-          storageTable.replaceChildren(row);
-        }
-      };
+          render();
+        };
 
-      const saveEntry = () => {
-        const key = keyInput.value.trim();
-        if (!key) return;
-
-        window.localStorage.setItem(key, valueInput.value);
-        render();
-      };
-
-      const deleteEntry = () => {
-        const key = keyInput.value.trim();
-        if (!key) return;
-
-        window.localStorage.removeItem(key);
-        render();
-      };
-
-      const toggleTracking = (enabled) => {
-        if (enabled) {
-          window.localStorage.setItem(trackingKey, '1');
-        } else {
-          window.localStorage.removeItem(trackingKey);
-        }
+        refreshButton.addEventListener('click', render);
+        clearAllButton.addEventListener('click', () => {
+          if (!window.confirm('Clear every localStorage key for this origin?')) return;
+          window.localStorage.clear();
+          render();
+        });
+        saveButton.addEventListener('click', saveEntry);
+        deleteButton.addEventListener('click', deleteEntry);
+        enableTrackingButton.addEventListener('click', () => toggleTracking(true));
+        disableTrackingButton.addEventListener('click', () => toggleTracking(false));
+        window.addEventListener('storage', render);
 
         render();
       };
 
-      refreshButton.addEventListener('click', render);
-      clearAllButton.addEventListener('click', () => {
-        if (!window.confirm('Clear every localStorage key for this origin?')) return;
-        window.localStorage.clear();
-        render();
-      });
-      saveButton.addEventListener('click', saveEntry);
-      deleteButton.addEventListener('click', deleteEntry);
-      enableTrackingButton.addEventListener('click', () => toggleTracking(true));
-      disableTrackingButton.addEventListener('click', () => toggleTracking(false));
-      window.addEventListener('storage', render);
-
-      render();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init, { once: true });
+      } else {
+        init();
+      }
     })();
   </script>
 </Layout>

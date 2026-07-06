@@ -73,6 +73,23 @@ const pagePath = LEGAL_PATHS[pageKey];
             </dl>
           )}
 
+          {section.links && (
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+              {section.links.map((link) => (
+                <div class="rounded-[1.15rem] border border-[#4f4337]/25 bg-[rgba(247,240,229,0.78)] p-4">
+                  <p class="text-[10px] font-black uppercase tracking-[0.24em] text-[#756553]">{link.label}</p>
+                  <a
+                    href={link.value.startsWith('/') ? buildLocalizedPath(locale, link.value) : link.value}
+                    class="mt-2 block break-words text-sm font-bold leading-relaxed text-[#2d261f] underline decoration-[#7f9246] decoration-2 underline-offset-4 transition hover:text-[#4f4337]"
+                  >
+                    {link.value}
+                  </a>
+                  {link.note && <span class="mt-2 block text-sm font-normal text-[#54483b]">{link.note}</span>}
+                </div>
+              ))}
+            </div>
+          )}
+
           {section.callout && (
             <p class="mt-4 text-xs font-black uppercase tracking-[0.24em] text-[#7f9246]">{section.callout}</p>
           )}
