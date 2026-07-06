@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "catalogId": "prototype-player",
+  "catalogRevision": "2026.07.1",
+  "animations": [
+    {
+      "id": "prototype-idle",
+      "intentId": "movement.idle",
+      "source": "procedural://prototype-player",
+      "clip": "Idle",
+      "playback": {
+        "loop": "repeat",
+        "speed": 1,
+        "fadeInMs": 150,
+        "fadeOutMs": 150
+      }
+    },
+    {
+      "id": "prototype-toprock",
+      "intentId": "movement.toprock",
+      "source": "procedural://prototype-player",
+      "clip": "Toprock",
+      "playback": {
+        "loop": "repeat",
+        "speed": 1,
+        "fadeInMs": 120,
+        "fadeOutMs": 120
+      }
+    },
+    {
+      "id": "prototype-spin-start",
+      "intentId": "move.spin.start",
+      "source": "procedural://prototype-player",
+      "clip": "SpinStart",
+      "playback": {
+        "loop": "once",
+        "speed": 1,
+        "fadeInMs": 80,
+        "fadeOutMs": 120
+      }
+    },
+    {
+      "id": "prototype-windmill",
+      "intentId": "move.windmill",
+      "source": "procedural://prototype-player",
+      "clip": "Windmill",
+      "playback": {
+        "loop": "repeat",
+        "speed": 1,
+        "fadeInMs": 120,
+        "fadeOutMs": 160
+      }
+    },
+    {
+      "id": "prototype-headspin",
+      "intentId": "move.headspin",
+      "source": "procedural://prototype-player",
+      "clip": "Headspin",
+      "playback": {
+        "loop": "repeat",
+        "speed": 1,
+        "fadeInMs": 120,
+        "fadeOutMs": 160
+      }
+    },
+    {
+      "id": "prototype-freeze",
+      "intentId": "pose.freeze",
+      "source": "procedural://prototype-player",
+      "clip": "Freeze",
+      "playback": {
+        "loop": "repeat",
+        "speed": 1,
+        "fadeInMs": 100,
+        "fadeOutMs": 140
+      }
+    }
+  ]
+}

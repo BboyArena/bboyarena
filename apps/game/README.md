@@ -22,7 +22,7 @@ Runtime responsibilities:
 
 The app should stay runnable without Astro `Layout.astro`, website global CSS, or website Tailwind utilities.
 
-Detailed implementation belongs in the [game scene and screen architecture](./docs/threejs-scene-architecture.md). Repository-wide boundaries are defined by the [current architecture](../../docs/current-architecture.md).
+Detailed implementation belongs in the [game scene and screen architecture](./docs/threejs-scene-architecture.md). The active motion, animation, and replay work is tracked in the [implementation plan](./docs/plan.md). Repository-wide boundaries are defined by the [current architecture](../../docs/current-architecture.md).
 
 ## Commands
 
