@@ -1,7 +1,7 @@
 {
   "version": 1,
   "catalogId": "prototype-player",
-  "catalogRevision": "2026.07.1",
+  "catalogRevision": "2026.07.2",
   "animations": [
     {
       "id": "prototype-idle",
@@ -28,10 +28,10 @@
       }
     },
     {
-      "id": "prototype-spin-start",
-      "intentId": "move.spin.start",
+      "id": "synthetic-neon-pulse",
+      "intentId": "move.neon.pulse",
       "source": "procedural://prototype-player",
-      "clip": "SpinStart",
+      "clip": "NeonPulse",
       "playback": {
         "loop": "once",
         "speed": 1,
@@ -40,10 +40,10 @@
       }
     },
     {
-      "id": "prototype-windmill",
-      "intentId": "move.windmill",
+      "id": "synthetic-comet-sweep",
+      "intentId": "move.comet.sweep",
       "source": "procedural://prototype-player",
-      "clip": "Windmill",
+      "clip": "CometSweep",
       "playback": {
         "loop": "repeat",
         "speed": 1,
@@ -52,10 +52,10 @@
       }
     },
     {
-      "id": "prototype-headspin",
-      "intentId": "move.headspin",
+      "id": "synthetic-axis-break",
+      "intentId": "move.axis.break",
       "source": "procedural://prototype-player",
-      "clip": "Headspin",
+      "clip": "AxisBreak",
       "playback": {
         "loop": "repeat",
         "speed": 1,
@@ -64,10 +64,10 @@
       }
     },
     {
-      "id": "prototype-freeze",
-      "intentId": "pose.freeze",
+      "id": "synthetic-signal-lock",
+      "intentId": "pose.signal.lock",
       "source": "procedural://prototype-player",
-      "clip": "Freeze",
+      "clip": "SignalLock",
       "playback": {
         "loop": "repeat",
         "speed": 1,

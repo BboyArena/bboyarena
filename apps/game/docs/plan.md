@@ -34,11 +34,11 @@ Both live and replayed intents must pass through the same player motion machine.
 | Phase 0 — Baseline and contracts | Complete | Contracts added without changing runtime behavior; game build and focused type-check pass. |
 | Phase 1 — Animation catalog | Complete | Versioned procedural catalog, strict types, safe validation, and actionable errors added. |
 | Phase 2 — Replaceable catalog loading | Complete | Local and HTTP sources share one interface with cancellation, safe results, and local fallback. |
-| Phase 3 — Player motion machine | In progress | Core machine and tests complete; legacy `GamePlayScene` migration remains in Phase 6. |
+| Phase 3 — Player motion machine | Complete | Core machine is active in `GamePlayScene`; the legacy derived state has been removed. |
 | Phase 4 — Intent resolver | Complete | Edge-aware, device-independent resolver added and tested. |
 | Phase 5 — Animation playback machine | Complete | Catalog actor, resolution, playback lifecycle, fallback failure state, and observable outcomes implemented. |
-| Phase 6 — Runtime integration | Not started | Depends on motion and playback actors. |
-| Phase 7 — Deterministic replay foundation | Not started | Depends on authoritative motion transitions. |
+| Phase 6 — Runtime integration | Visual verification pending | Runtime wiring and diagnostic HUD are complete; final visual confirmation remains. |
+| Phase 7 — Deterministic replay foundation | In progress | Global fixed-step rhythm clock is active; replay recording and tempo-change events remain. |
 | Phase 8 — Replay recorder | Not started | Depends on the replay clock and format. |
 | Phase 9 — Replay player | Not started | Depends on recorder-compatible events. |
 | Phase 10 — Timeline and seeking | Not started | Depends on stable playback. |
@@ -73,7 +73,7 @@ Both live and replayed intents must pass through the same player motion machine.
 ### Phase 3 verification
 
 - Inactive, grounded idle/moving, performing, and paused transitions: passed.
-- Interruption guards and freeze priority: passed.
+- Interruption guards and Signal Lock priority: passed.
 - Pause/resume deep-history restoration: passed.
 - Movement updates during an active performance: passed.
 - Focused strict TypeScript compilation: passed.
@@ -84,7 +84,7 @@ Both live and replayed intents must pass through the same player motion machine.
 
 - Primary press/release edge detection: passed.
 - Held-button repeat prevention: passed.
-- Modifier-based windmill intent and tracked release: passed.
+- Modifier-based Comet Sweep intent and tracked release: passed.
 - Keyboard/gamepad canonical parity: passed.
 - Focused strict TypeScript compilation: passed.
 - `npm run game:build`: passed.
@@ -100,6 +100,19 @@ Both live and replayed intents must pass through the same player motion machine.
 - Focused strict TypeScript compilation: passed.
 - `npm run game:build`: passed.
 - `git diff --check`: passed.
+
+### Phase 6 verification
+
+- `GamePlayScene` actor integration: build-verified.
+- Legacy `PlayerMotionState` references: none remain.
+- Motion-to-playback intent synchronization: implemented through accepted motion snapshots.
+- Diagnostic HUD data: available in Training mode.
+- Pause/resume input wiring: implemented for the Pause action.
+- Training mode auto-starts its internal game lifecycle so diagnostic intents are accepted immediately.
+- `npm run game:build`: passed.
+- `npm run build`: passed with 91 static website pages.
+- `git diff --check`: passed.
+- Manual visual interaction: pending.
 
 ## Architectural rules
 
@@ -163,7 +176,7 @@ GameInputSnapshot
 → procedural mesh transforms
 ```
 
-`GamePlayScene` currently derives move selection directly from held input, BPM, and the global game lifecycle. `Player` then combines gameplay interpretation with procedural presentation. The new contracts are isolated and do not change this runtime behavior yet.
+At the recorded baseline, `GamePlayScene` derived move selection directly from held input, BPM, and the global game lifecycle. `Player` then combined gameplay interpretation with procedural presentation. Phase 6 replaced this legacy flow; the baseline remains here for comparison.
 
 The initial simulation rate is `60` ticks per second. This is a gameplay/replay clock decision and does not require the renderer to run at 60 frames per second.
 
@@ -172,17 +185,17 @@ Initial intent candidates:
 ```text
 movement.idle
 movement.toprock
-move.spin.start
-move.windmill
-move.headspin
-pose.freeze
+move.neon.pulse
+move.comet.sweep
+move.axis.break
+pose.signal.lock
 ```
 
 ### Acceptance criteria
 
 - [x] Types distinguish input, gameplay motion, animation playback, and replay data.
 - [x] No type references an animation filename as a gameplay decision.
-- [x] The proposed contracts can represent the current idle, toprock, spin, and freeze behavior.
+- [x] The proposed contracts can represent grounded movement and the initial synthetic performance set.
 
 ## Phase 1 — Animation catalog
 
@@ -202,7 +215,7 @@ Suggested catalog shape:
 {
   "version": 1,
   "catalogId": "default-player",
-  "catalogRevision": "2026.07.1",
+  "catalogRevision": "2026.07.2",
   "animations": [
     {
       "id": "default-idle",
@@ -258,7 +271,7 @@ Suggested catalog shape:
 
 ### Acceptance criteria
 
-- [ ] `PlayerMotionState` is no longer reconstructed ad hoc in `GamePlayScene`.
+- [x] `PlayerMotionState` is no longer reconstructed ad hoc in `GamePlayScene`.
 - [x] The machine accepts the current input-driven behaviors.
 - [x] State snapshots contain no `THREE.Vector3`, meshes, clips, or mixers.
 - [x] The machine can be exercised without React or WebGL.
@@ -271,7 +284,7 @@ Suggested catalog shape:
 - [x] Prevent a held button from restarting the same move every render.
 - [x] Keep keyboard, touch, and gamepad behavior equivalent.
 - [x] Keep the original input source outside authoritative motion intents and available in the input snapshot for diagnostics.
-- [x] Resolve simultaneous primary/secondary requests in stable order, with freeze emitted last and receiving interruption priority.
+- [x] Resolve simultaneous primary/secondary requests in stable order, with Signal Lock emitted last and receiving interruption priority.
 
 ### Acceptance criteria
 
@@ -298,31 +311,109 @@ Suggested catalog shape:
 
 ## Phase 6 — Runtime integration
 
-- [ ] Instantiate the motion and animation actors at the gameplay composition boundary.
-- [ ] Connect global game lifecycle events to motion and playback actors.
-- [ ] Replace `GamePlayScene` motion-state `useMemo` construction.
-- [ ] Pass a stable motion snapshot and playback command through `CanvasScene`.
-- [ ] Remove move-selection decisions from `Player.tsx`.
-- [ ] Convert serializable vectors to Three.js values only inside rendering code.
-- [ ] Preserve the current procedural animation as a temporary fallback.
-- [ ] Add diagnostic display for game state, motion state, active intent, and resolved animation.
+- [x] Instantiate the motion and animation actors at the gameplay composition boundary.
+- [x] Connect global game lifecycle events to motion and playback actors.
+- [x] Replace `GamePlayScene` motion-state `useMemo` construction.
+- [x] Pass a stable motion snapshot and resolved playback definition through `CanvasScene`.
+- [x] Remove move-selection decisions from `Player.tsx`.
+- [x] Keep serializable motion values independent from Three.js runtime objects.
+- [x] Preserve the current procedural animation as a temporary fallback.
+- [x] Add diagnostic display for game state, motion state, active intent, tick, catalog, fallback, playback state, and resolved animation.
 
 ### Acceptance criteria
 
-- [ ] Existing idle, toprock, spin, pause, and freeze feedback still works.
-- [ ] `Player.tsx` no longer decides which gameplay move is active.
-- [ ] Website and game builds still succeed independently.
+- [ ] Existing grounded movement, synthetic move, pause, and Signal Lock feedback works visually.
+- [x] `Player.tsx` no longer decides which gameplay move is active.
+- [x] Website and game builds still succeed independently.
+
+## Synthetic move-history prototype
+
+This prototype validates accepted-move history before scoring rules are designed.
+
+- [x] Replace real move names with a clearly fictional test set.
+- [x] Map Primary to `Neon Pulse`.
+- [x] Map Left Modifier + Primary to `Comet Sweep`.
+- [x] Map Right Modifier + Primary to `Axis Break`.
+- [x] Map Secondary to `Signal Lock` with interruption priority.
+- [x] Record only performance intents accepted by the motion machine.
+- [x] Exclude idle, grounded movement, raw device input, and rejected intents.
+- [x] Store sequence, intent ID, animation ID, start tick, end tick, duration, and outcome.
+- [x] Mark replaced moves as `interrupted` and released moves as `completed`.
+- [x] Keep scoring explicit as `not-evaluated` with no numeric value.
+- [x] Limit in-memory session history to the latest 24 entries.
+- [x] Show the latest eight entries in the Training diagnostic HUD.
+
+### Verification
+
+- Synthetic catalog validation: passed.
+- Grounded intents excluded from history: passed.
+- Accepted move start: passed.
+- Accepted replacement interruption: passed.
+- Released move completion and duration: passed.
+- Rejected move does not change the authoritative motion intent: passed.
+- Scoring remains `not-evaluated`: passed.
+- `npm run game:build`: passed.
+- `git diff --check`: passed.
+
+### Scoring decision deferred
+
+The history deliberately does not award points yet. A future scoring design must decide which execution evidence is authoritative, such as timing accuracy, completion, interruption, balance, contact quality, rhythm, and repetition. Animation playback alone must not determine gameplay score.
+
+## Rhythm and authored move-timing prerequisite
+
+All move execution and scoring must use the global musical clock rather than render frames or input-event counts.
+
+- [x] Add a global fixed-step `RhythmClock` at 60 simulation ticks per second.
+- [x] Read BPM from the existing game Zustand store.
+- [x] Preserve continuous beat position when BPM changes.
+- [x] Expose global tick, beat, beat phase, and quarter-beat subdivision.
+- [x] Replace the temporary input-event tick counter in `GamePlayScene`.
+- [x] Feed global rhythm ticks into `playerMotionMachine`.
+- [x] Timestamp accepted move history with global ticks.
+- [x] Display BPM, beat, phase, subdivision, and global tick in the Training HUD.
+- [x] Define authored move phases, loops, cues, skills, and transition windows in source frames.
+- [x] Preserve source FPS and frame count for animation-authoring alignment.
+- [x] Normalize authored frames into beat positions and runtime tick offsets.
+- [x] Compute runtime move duration and animation time scale from BPM.
+- [x] Add four synthetic authored move definitions in local JSON.
+- [ ] Add runtime validation and replaceable API loading for move definitions.
+- [ ] Add the generic `moveExecutionMachine` that interprets phases, loops, and transition windows.
+- [ ] Record canonical input evidence against the active move timeline.
+- [ ] Record BPM changes as deterministic replay events.
+- [ ] Apply normalized `animationTimeScale` to the future real clip player.
+
+### Normalization rule
+
+```text
+source frame
+→ sourceFrame / sourceFrameCount
+→ beat offset inside move duration
+→ runtime tick offset at current BPM
+```
+
+Input is captured immediately at the current global tick. Evaluation compares that tick with the normalized cue window; input must never be artificially delayed to match a move.
+
+### Verification
+
+- 60 ticks at 120 BPM advance the clock by 2 beats: passed.
+- A BPM change from 120 to 60 preserves beat continuity: passed.
+- Frame 10 of a 24-frame, 2-beat move at 120 BPM normalizes to tick 25: passed.
+- The same 2-beat move lasts 60 ticks at 120 BPM and 120 ticks at 60 BPM: passed.
+- Animation time scale normalizes to `1` at 120 BPM and `0.5` at 60 BPM for the prototype: passed.
+- Focused strict TypeScript checks: passed.
+- `npm run game:build`: passed.
+- `git diff --check`: passed.
 
 ## Phase 7 — Deterministic replay foundation
 
-- [ ] Implement a fixed-step replay clock.
-- [ ] Define a versioned `PlayerReplay` format.
-- [ ] Store format, gameplay-rules, and animation-catalog versions.
-- [ ] Store tick rate, mode, BPM, selected character, and deterministic seed.
-- [ ] Define the minimum serializable initial player snapshot.
-- [ ] Define replay event types for accepted motion intents and lifecycle changes.
+- [x] Implement a fixed-step clock shared by live gameplay and future replay.
+- [x] Define a versioned `PlayerReplay` format.
+- [x] Store format, gameplay-rules, and animation-catalog versions.
+- [x] Store tick rate, mode, BPM, selected character, and deterministic seed.
+- [x] Define the minimum serializable initial player snapshot.
+- [x] Define replay event types for accepted motion intents and lifecycle changes.
 - [ ] Remove replay-sensitive dependencies on `Date.now()` and unseeded `Math.random()`.
-- [ ] Keep rendering delta time outside authoritative replay decisions.
+- [x] Keep rendering delta time outside authoritative replay decisions.
 
 Suggested replay envelope:
 
@@ -330,7 +421,7 @@ Suggested replay envelope:
 {
   "formatVersion": 1,
   "gameplayVersion": "0.0.1",
-  "catalogRevision": "2026.07.1",
+  "catalogRevision": "2026.07.2",
   "tickRate": 60,
   "seed": 1,
   "initialState": {},

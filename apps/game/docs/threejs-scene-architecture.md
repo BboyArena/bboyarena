@@ -74,6 +74,24 @@ physical device
 
 Device adapters must not manipulate Three.js objects directly.
 
+## Rhythm timing
+
+`RhythmClockProvider` owns the global fixed-step musical clock. It reads BPM from the game store and exposes simulation tick, beat position, beat phase, and subdivision independently from the render frame rate.
+
+Player intent is timestamped immediately with the current global tick. Authored move frames are converted to beat positions and then to runtime tick offsets; input is never delayed to imitate animation timing. BPM changes preserve the continuous beat position and alter the duration of future musical intervals.
+
+## Authored move definitions
+
+Move definitions under `apps/game/src/game/move` describe source FPS, frame count, musical duration, phases, loop regions, expected input cues, skills, and transition windows. Animation files remain separate presentation assets.
+
+The normalization boundary is:
+
+```text
+source frame → normalized move position → beat offset → runtime tick offset
+```
+
+The local JSON data is currently a synthetic prototype. Runtime validation, API loading, phase execution, input-evidence evaluation, and scoring remain separate follow-up work.
+
 ## Input architecture
 
 `GameInputProvider` owns the shared input lifecycle. Keyboard/mouse, gamepad, and touch adapters produce the same gameplay-facing contract. The active source can change without changing player logic.

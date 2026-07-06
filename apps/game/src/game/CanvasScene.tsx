@@ -3,11 +3,13 @@ import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import Player from './Player';
-import type { PlayerMotionState } from './state/playerMotionState';
+import type { PlayerMotionSnapshot } from './motion/playerMotionTypes';
+import type { AnimationDefinition } from './animation/animationCatalogTypes';
 
 interface CanvasSceneProps {
   gameState: string;
-  playerMotionState: PlayerMotionState;
+  playerMotionState: PlayerMotionSnapshot;
+  animationDefinition: AnimationDefinition | null;
 }
 
 function ParquetFloor() {
@@ -44,7 +46,7 @@ function WebGLContextGuard({ onContextLost }: { onContextLost: () => void }) {
   return null;
 }
 
-export default function CanvasScene({ gameState, playerMotionState }: CanvasSceneProps) {
+export default function CanvasScene({ gameState, playerMotionState, animationDefinition }: CanvasSceneProps) {
   const [hasWebGLContext, setHasWebGLContext] = useState(true);
 
   if (!hasWebGLContext) {
@@ -104,7 +106,11 @@ export default function CanvasScene({ gameState, playerMotionState }: CanvasScen
         <ParquetFloor />
 
         <group position={[0, 0, 0]}>
-          <Player gameState={gameState} playerMotionState={playerMotionState} />
+          <Player
+            gameState={gameState}
+            playerMotionState={playerMotionState}
+            animationDefinition={animationDefinition}
+          />
         </group>
 
         <OrbitControls

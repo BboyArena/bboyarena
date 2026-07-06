@@ -114,7 +114,7 @@ const playerMotionSetup = setup({
       return {
         phase: 'active' as const,
         activeIntentId: event.intent.intentId,
-        angularVelocity: event.intent.intentId === 'move.spin.start' ? 1 : context.angularVelocity,
+        angularVelocity: event.intent.intentId === 'move.neon.pulse' ? 1 : context.angularVelocity,
         tick: event.tick
       };
     })
@@ -205,14 +205,31 @@ export const playerMotionMachine = playerMotionSetup.createMachine({
                 actions: 'updateMovementWhilePerforming'
               },
               {
+                guard: ({ context, event }) =>
+                  event.type === 'INTENT' &&
+                  isReleaseIntent(event.intent) &&
+                  event.intent.intentId === context.activeIntentId &&
+                  hasMovement(context.movement),
+                target: 'grounded.moving',
+                actions: 'restoreGroundedMovement'
+              },
+              {
                 guard: 'releasesActivePerformance',
                 target: 'grounded.idle',
-                actions: 'applyIdleIntent'
+                actions: 'restoreGroundedIdle'
+              },
+              {
+                guard: ({ context, event }) =>
+                  event.type === 'INTENT' &&
+                  event.intent.type === 'motion.stop' &&
+                  hasMovement(context.movement),
+                target: 'grounded.moving',
+                actions: 'restoreGroundedMovement'
               },
               {
                 guard: 'requestsStop',
                 target: 'grounded.idle',
-                actions: 'applyIdleIntent'
+                actions: 'restoreGroundedIdle'
               }
             ]
           }

@@ -2,9 +2,9 @@ import type {
   PlayerMotionIntent,
   PlayerMotionSnapshot
 } from '../motion/playerMotionTypes';
+export { DEFAULT_SIMULATION_TICK_RATE } from '../rhythm/RhythmClock';
 
 export const PLAYER_REPLAY_FORMAT_VERSION = 1;
-export const DEFAULT_SIMULATION_TICK_RATE = 60;
 
 export type ReplayEventSource = 'live' | 'replay';
 

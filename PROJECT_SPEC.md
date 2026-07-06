@@ -205,8 +205,11 @@ Localization configuration and path helpers live in `apps/website/src/lib/i18n.t
 - `ui/` — menu, HUD, gameplay HUD, panels, scroll areas, fullscreen controls, touch overlay, demo scene, and canvas error boundary.
 - `state/gameMachine.ts` — XState lifecycle states: idle, playing, paused, and game over.
 - `state/useGameStore.ts` and `state/useInputStore.ts` — Zustand state boundaries.
-- `state/playerMotionState.ts` — player motion model.
+- `motion/` — semantic intent resolution, XState player motion, transition rules, and accepted move history.
 - `input/` — unified keyboard/mouse, touch, virtual joystick, gesture, and gamepad input infrastructure.
+- `rhythm/` — global fixed-step musical clock driven by the game BPM.
+- `move/` — authored move phases, loops, cues, skills, transitions, and frame-to-beat normalization.
+- `replay/` — versioned replay contracts and future deterministic timeline support.
 - `locales/` — game copy for the same five supported locales as the website.
 
 Input devices must produce canonical game actions through the input layer; they must not control the player directly. Rendering, gameplay, UI, and input responsibilities should remain separate.
@@ -255,6 +258,7 @@ Environment variables are loaded from the repository root. Browser-exposed varia
 - `PUBLIC_APP_VERSION`
 - `PUBLIC_GAME_EMBED_URL`
 - `PUBLIC_GAME_BASE` (standalone game build)
+- `PUBLIC_ANIMATION_CATALOG_URL` (optional remote animation catalog with local fallback)
 
 ### Data and content
 

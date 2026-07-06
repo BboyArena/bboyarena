@@ -2,14 +2,16 @@ import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useGameStore } from './state/useGameStore';
 import * as THREE from 'three';
-import type { PlayerMotionState } from './state/playerMotionState';
+import type { PlayerMotionSnapshot } from './motion/playerMotionTypes';
+import type { AnimationDefinition } from './animation/animationCatalogTypes';
 
 interface PlayerProps {
   gameState: string;
-  playerMotionState: PlayerMotionState;
+  playerMotionState: PlayerMotionSnapshot;
+  animationDefinition: AnimationDefinition | null;
 }
 
-export default function Player({ gameState, playerMotionState }: PlayerProps) {
+export default function Player({ gameState, playerMotionState, animationDefinition }: PlayerProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const selectedCharacter = useGameStore((state) => state.selectedCharacter);
   const bpm = useGameStore((state) => state.bpm);
@@ -20,16 +22,18 @@ export default function Player({ gameState, playerMotionState }: PlayerProps) {
     const time = state.clock.getElapsedTime();
     const bps = bpm / 60;
     const rhythm = Math.sin(time * bps * Math.PI * 2);
-    const { currentMove, spinSpeed, balance, rotationAxis } = playerMotionState;
+    const { activeIntentId, balance, rotationAxis } = playerMotionState;
+    const playbackSpeed = animationDefinition?.playback.speed ?? 1;
+    const spinSpeed = (bpm / 34) * playbackSpeed;
 
-    if (currentMove === 'freeze') {
+    if (activeIntentId === 'pose.signal.lock') {
       // Freeze state
       meshRef.current.position.y = 1 + Math.sin(time) * 0.08 * balance;
       meshRef.current.rotation.y = time * 0.2;
       meshRef.current.scale.set(1, 1, 1);
     } else if (gameState === 'playing') {
       // Dance moves: Spin, bounce and tilt matching the BPM
-      const movePulse = currentMove === 'spinStart' ? 1.12 : 1;
+      const movePulse = activeIntentId === 'move.neon.pulse' ? 1.12 : 1;
       const spinDirection = rotationAxis.y === 0 ? 1 : Math.sign(rotationAxis.y);
       meshRef.current.position.y = 1 + Math.abs(rhythm) * 0.8 * balance;
       meshRef.current.rotation.y = time * spinSpeed * spinDirection;

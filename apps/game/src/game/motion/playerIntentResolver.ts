@@ -17,9 +17,9 @@ const wasReleased = (
 ) => previous.buttons[button].pressed && !current.buttons[button].pressed;
 
 const resolvePrimaryIntentId = (snapshot: GameInputSnapshot): PlayerMotionIntentId => {
-  if (snapshot.buttons.modifierLeft.pressed) return 'move.windmill';
-  if (snapshot.buttons.modifierRight.pressed) return 'move.headspin';
-  return 'move.spin.start';
+  if (snapshot.buttons.modifierLeft.pressed) return 'move.comet.sweep';
+  if (snapshot.buttons.modifierRight.pressed) return 'move.axis.break';
+  return 'move.neon.pulse';
 };
 
 export class PlayerIntentResolver {
@@ -42,7 +42,7 @@ export class PlayerIntentResolver {
     }
 
     if (wasPressed(previous, current, 'secondary')) {
-      this.secondaryIntentId = 'pose.freeze';
+      this.secondaryIntentId = 'pose.signal.lock';
       intents.push({ type: 'motion.perform', intentId: this.secondaryIntentId });
     }
 

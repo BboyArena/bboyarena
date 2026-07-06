@@ -5,6 +5,7 @@ import GameFullscreenReticle from './ui/GameFullscreenReticle';
 import GameHUD from './ui/GameHUD';
 import GamePlayScene from './GamePlayScene';
 import { getDefaultGameCopy, loadGameCopy, type GameCopy, type LocaleCode } from './copy';
+import { RhythmClockProvider } from './rhythm/RhythmClockProvider';
 import './game.css';
 
 interface GameAppProps {
@@ -58,30 +59,32 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
 
   console.log('GameApp: rendering screen', screen, 'with mode', selectedMode, 'and locale', resolvedLocale);
   return (
-    <div id="bboyarena-game-root" className="bboy-game-root" ref={rootRef}>
-      <div className="game-shell">
-        <div className="game-stage" data-scene={screen}>
-          {isPlayableScreen ? (
-            <GamePlayScene mode={selectedMode} copy={copy} />
-          ) : (
-            <>
-              {isDev ? (
-                <button
-                  type="button"
-                  className="game-status-pill game-status-pill--interactive"
-                  onClick={cycleScreen}
-                  aria-label={copy.sceneSelector}
-                >
-                  {copy.sceneSelector} / {screen}
-                </button>
-              ) : null}
-              <GameHUD copy={copy} />
-            </>
-          )}
-          <GameFullscreenToggle targetRef={rootRef} />
-          <GameFullscreenReticle targetRef={rootRef} />
+    <RhythmClockProvider>
+      <div id="bboyarena-game-root" className="bboy-game-root" ref={rootRef}>
+        <div className="game-shell">
+          <div className="game-stage" data-scene={screen}>
+            {isPlayableScreen ? (
+              <GamePlayScene mode={selectedMode} copy={copy} />
+            ) : (
+              <>
+                {isDev ? (
+                  <button
+                    type="button"
+                    className="game-status-pill game-status-pill--interactive"
+                    onClick={cycleScreen}
+                    aria-label={copy.sceneSelector}
+                  >
+                    {copy.sceneSelector} / {screen}
+                  </button>
+                ) : null}
+                <GameHUD copy={copy} />
+              </>
+            )}
+            <GameFullscreenToggle targetRef={rootRef} />
+            <GameFullscreenReticle targetRef={rootRef} />
+          </div>
         </div>
       </div>
-    </div>
+    </RhythmClockProvider>
   );
 }

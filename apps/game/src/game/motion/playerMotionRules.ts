@@ -5,10 +5,10 @@ import type {
 } from './playerMotionTypes';
 
 const performingIntentIds = new Set<PlayerMotionIntentId>([
-  'move.spin.start',
-  'move.windmill',
-  'move.headspin',
-  'pose.freeze'
+  'move.neon.pulse',
+  'move.comet.sweep',
+  'move.axis.break',
+  'pose.signal.lock'
 ]);
 
 export const hasMovement = (movement: SerializableVector2) =>
@@ -43,4 +43,4 @@ export const canInterruptMotion = (
   activeIntentId === null ||
   activeIntentId.startsWith('movement.') ||
   activeIntentId === nextIntentId ||
-  nextIntentId === 'pose.freeze';
+  nextIntentId === 'pose.signal.lock';
