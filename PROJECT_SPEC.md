@@ -1,240 +1,290 @@
-# BboyArena.org - Project Spec
+# BboyArena.org — Project Specification
 
-Documento di riferimento per la struttura del progetto, i componenti principali, le route e le convenzioni operative.
+This document is the reference for the repository's current architecture, applications, routes, major components, integrations, and operating conventions. It describes the working tree as of July 6, 2026, including uncommitted changes.
 
-## 1. Identita del progetto
+## 1. Project identity and current scope
 
-- `BboyArena.org` e un progetto indipendente dedicato alla cultura breaking, al movimento creativo e allo sviluppo sperimentale.
-- Il sito e una superficie pubblica essenziale sopra un progetto in evoluzione.
-- Il tono visivo e urban, underground, leggibile e non corporate.
-- Il progetto privilegia contenuti statici, route semplici e manutenzione facile.
+- BboyArena is an independent, community-driven project about breaking culture, creative movement, and experimental browser game development.
+- The public website is the stable communication surface for the project, its manifesto, news, legal information, community participation, and development progress.
+- The game is an early standalone application with a 3D scene, input infrastructure, UI experiments, and state foundations. It is not yet a complete playable release.
+- The visual direction is street-inspired, warm, readable, and intentionally non-corporate.
+- Development should remain incremental, honest about the project's state, and biased toward playable progress rather than speculative infrastructure.
 
-## 2. Stack tecnico
+## 2. Repository architecture
 
-- `Astro` per il rendering statico e il routing.
-- `React` per le parti interattive lato client.
-- `TypeScript` per la tipizzazione.
-- `TailwindCSS v4` per lo styling.
-- `Three.js` + `@react-three/fiber` + `@react-three/drei` per la parte 3D.
-- `Zustand` per stato UI e stato condiviso.
-- `XState` per la macchina a stati del gameplay.
-- `@vite-pwa/astro` per la PWA.
-- `Supabase` per il client e l'infrastruttura dati predisposta.
+The repository contains two independent front-end applications and an experimental multiplayer server:
 
-## 3. Comandi principali
+```text
+.
+├── apps/
+│   ├── website/       # Astro public website
+│   └── game/          # Standalone Vite/React game
+├── server/colyseus/   # Experimental Colyseus server
+├── agents/            # AI coding-assistant role definitions
+├── docs/              # Architecture and technical reports
+├── legal/             # Governance, licensing, and contribution documents
+├── docker/            # Local infrastructure configuration
+├── docker-compose.yml
+└── package.json       # Root commands and shared dependencies
+```
 
-- `npm run dev` avvia lo sviluppo locale.
-- `npm run build` genera il sito statico in `dist/`.
-- `npm run preview` serve la build locale.
-- `npm run astro` espone il CLI di Astro.
+Website code must live under `apps/website`; game runtime code must live under `apps/game`. Do not recreate a root `src/` directory or import the game runtime into the website.
 
-## 4. Struttura generale delle route
+## 3. Technology stack
 
-### Route pubbliche principali
+### Website
 
-- `/` home
+- Astro 5 with static output and file-based routing
+- React 19 for interactive islands
+- TypeScript
+- Tailwind CSS 4 through the Vite plugin
+- `@vite-pwa/astro` for the web app manifest, service worker, and offline asset caching
+- Astro Sitemap for sitemap generation
+- PocketBase support for remotely managed devlogs
+- Supabase client support for future data integration
+- Photo Sphere Viewer for panoramic content
+- `marked` for Markdown rendering
+
+### Game
+
+- Vite with React 19 and TypeScript
+- Three.js, React Three Fiber, and Drei
+- Zustand for game and input stores
+- XState for the game state machine
+- Tailwind CSS 4 plus game-owned handcrafted CSS
+- `nipplejs` for the virtual joystick
+
+### Server and local infrastructure
+
+- An experimental Colyseus WebSocket server under `server/colyseus`
+- Docker Compose services for Traefik, the website, Colyseus, PostgreSQL, and a self-hosted Supabase stack
+
+## 4. Application boundaries and build output
+
+### Website ownership
+
+- Source: `apps/website/src`
+- Static assets: `apps/website/public`
+- Configuration: `apps/website/astro.config.mjs`
+- Production output: root `dist/`
+- Default development URL: `http://localhost:4321/`
+
+The website is statically generated. Its base path adapts to a custom domain, GitHub Pages project deployment, or `ASTRO_BASE_PATH`.
+
+### Game ownership
+
+- Runtime: `apps/game/src/game`
+- Standalone entry point: `apps/game/src/main.tsx`
+- Static assets: `apps/game/public`
+- Configuration: `apps/game/vite.config.mjs`
+- Production output: root `dist-game/`
+- Development URL: `http://localhost:4322/`
+- Preview URL: `http://localhost:4323/`
+
+The website integrates the game only through an iframe/URL boundary on `/play-the-game`. `PUBLIC_GAME_EMBED_URL` selects the deployed game URL; development falls back to `http://localhost:4322/`.
+
+## 5. Root commands
+
+- `npm run dev` — run the Astro website.
+- `npm run dev:all` — run the website and standalone game together.
+- `npm run build` — build the website into `dist/`.
+- `npm run preview` — preview the website build.
+- `npm run astro` — run the Astro CLI against `apps/website`.
+- `npm run game:dev` — run the standalone game.
+- `npm run game:build` — build the game into `dist-game/`.
+- `npm run game:preview` — preview the game build.
+
+Node.js 22.12.0 or newer is required.
+
+## 6. Public website routes
+
+English (`en-US`) is the unprefixed default locale. Unless noted otherwise, every route below also has localized variants under `/it`, `/es`, `/pt-br`, and `/zh`.
+
+### Main and community routes
+
+- `/`
 - `/manifesto`
+- `/founding-crew`
+- `/play-the-game`
+- `/open-development`
+- `/contact`
+
+### News routes
+
 - `/news`
 - `/news/devlog`
 - `/news/app`
 - `/news/scene`
+- `/news/{category}/{slug}`
+
+The supported categories are `devlog`, `app`, and `scene`. Content can come from local records, PocketBase devlogs, or a configured external scene feed.
+
+### Legal and privacy routes
+
 - `/privacy`
+- `/privacy/localstorage-inspector`
 - `/cookies`
 - `/terms`
-- `/open-development`
-- `/contact`
 
-### Route localizzate
+The localStorage inspector is a public, `noindex` browser-only privacy helper. It reads, writes, and clears origin-scoped localStorage and controls the `bboyarena-no-tracking` flag. It is linked from the Privacy Policy and has all localized route variants, although its current UI copy is shared rather than translated per locale.
 
-- `/it/*`
-- `/es/*`
-- `/pt-br/*`
-- `/zh/*`
+### Utility routes
 
-Le pagine locali seguono la stessa struttura delle route principali e sono generate con Astro i18n.
+- `/404`
+- `/robots.txt`
 
-### Route tecniche e di supporto
+### Development-only routes
 
-- `/[...dev]` per pagine dev/locali di supporto.
+The `[...dev].astro` router emits these pages only when Astro runs in development mode:
 
-## 5. Componenti principali
+- `/__dev/tailwind-showcase`
+- `/__dev/component-lab`
+- `/__dev/ui-demo`
+- `/__dev/leaderboard`
 
-### Layout
+The former `/__dev/localstorage` route has been removed in favor of the public privacy helper.
 
-- [src/components/layout/Layout.astro](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/components/layout/Layout.astro)
-- E il wrapper globale di tutte le pagine.
-- Gestisce:
-  - `<head>` e SEO
-  - navigazione superiore
-  - struttura del main
-  - footer globale
-  - alternates locali
-  - canonical
-  - JSON-LD
+## 7. Localization
 
-### Navigazione
+Supported locale codes and URL prefixes are:
 
-- [src/components/navigation/SiteNavigation.astro](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/components/navigation/SiteNavigation.astro)
-- [src/components/navigation/HomeLogo.astro](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/components/navigation/HomeLogo.astro)
+| Locale | URL prefix |
+| --- | --- |
+| `en-US` | none |
+| `it-IT` | `/it` |
+| `es-419` | `/es` |
+| `pt-BR` | `/pt-br` |
+| `zh-Hans` | `/zh` |
 
-Funzioni:
+Localization configuration and path helpers live in `apps/website/src/lib/i18n.ts`. Shared and page-specific translated copy lives under `apps/website/src/lib/i18n-data/site`. `Layout.astro` generates localized alternates and canonical metadata from the common page path.
 
-- menu principale
-- switch lingua
-- menu mobile
-- logo cliccabile verso la home
+## 8. Major website components
 
-### Pagine
+### Global layout and navigation
 
-- [src/components/pages/HomePage.astro](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/components/pages/HomePage.astro)
-- [src/components/pages/ManifestoPage.astro](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/components/pages/ManifestoPage.astro)
-- [src/components/pages/LegalPage.astro](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/components/pages/LegalPage.astro)
+- `apps/website/src/components/layout/Layout.astro` owns the document shell, global navigation, footer, SEO metadata, canonical URL, locale alternates, social metadata, structured data, analytics loading, and PWA-related behavior.
+- `apps/website/src/components/navigation/SiteNavigation.astro` owns desktop/mobile navigation and locale switching.
+- `apps/website/src/components/navigation/HomeLogo.astro` provides the home link and project mark.
 
-Responsabilita:
+### Page components
 
-- `HomePage`: hero, devlogs recenti, CTA manifesto e archivio
-- `ManifestoPage`: contenuto narrativo del manifesto
-- `LegalPage`: rendering comune per privacy, cookies, terms, open development e contact
+- `HomePage.astro` — project introduction, current activity, calls to action, and recent news.
+- `ManifestoPage.astro` — the project's narrative and principles.
+- `FoundingCrewPage.astro` — early community participation.
+- `PlayTheGamePage.astro` — iframe showroom and fallback messaging for the standalone game.
+- `LegalPage.astro` — shared renderer for privacy, cookies, terms, open development, and contact content; supports paragraphs, lists, contact rows, link cards, and callouts.
+- `LocalStorageInspectorPage.astro` — browser storage and no-tracking controls.
 
-### Game layer
+### Supporting components
 
-- [src/components/game/GameApp.tsx](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/components/game/GameApp.tsx)
-- [src/components/game/GameCanvas.tsx](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/components/game/GameCanvas.tsx)
-- [src/components/game/Hud.tsx](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/components/game/Hud.tsx)
-- [src/components/game/Player.tsx](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/components/game/Player.tsx)
+- `SecondaryCTA.astro` and `SupportProject.astro` provide reusable calls to action and optional supporter links.
+- `MarkdownBody.astro` renders editorial Markdown.
+- `DevlogPwaGate.astro` handles PWA-specific devlog behavior.
+- `PanoramaViewer.tsx` and `PanoramaFallback.astro` provide interactive and fallback panoramic content.
 
-Questi componenti governano:
+## 9. Website data and support libraries
 
-- scena 3D
-- HUD di gioco
-- player control
-- interazioni client side
+- `lib/base.ts` — deployment base-path utilities.
+- `lib/i18n.ts`, `lib/i18n-types.ts`, and `lib/i18n-data/` — locale configuration, types, routing helpers, and translated copy.
+- `lib/seo.ts` — SEO URL and metadata helpers.
+- `lib/news.ts` — news types, categories, local content, PocketBase aggregation, and external feed handling.
+- `lib/pocketbase.ts` — PocketBase configuration and record normalization.
+- `lib/pages/home.ts`, `lib/pages/manifesto.ts`, and `lib/pages/legal.ts` — page copy and content models.
+- `lib/pwa-analytics.ts` — privacy-aware PWA analytics behavior.
+- `lib/supabase.ts` — optional Supabase browser client.
+- `lib/support.ts` — supporter-link feature flags and validation.
+- `data/navigation.json` — primary navigation keys and paths.
 
-## 6. Librerie di supporto
+## 10. Game runtime
 
-### SEO e routing
+`apps/game/src/game` owns the complete standalone runtime:
 
-- [src/lib/seo.ts](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/lib/seo.ts)
-- [src/lib/i18n.ts](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/lib/i18n.ts)
+- `GameApp.tsx` — top-level game application.
+- `CanvasScene.tsx` and `GamePlayScene.tsx` — Three.js/R3F scene composition.
+- `Player.tsx` — current player representation.
+- `ui/` — menu, HUD, gameplay HUD, panels, scroll areas, fullscreen controls, touch overlay, demo scene, and canvas error boundary.
+- `state/gameMachine.ts` — XState lifecycle states: idle, playing, paused, and game over.
+- `state/useGameStore.ts` and `state/useInputStore.ts` — Zustand state boundaries.
+- `state/playerMotionState.ts` — player motion model.
+- `input/` — unified keyboard/mouse, touch, virtual joystick, gesture, and gamepad input infrastructure.
+- `locales/` — game copy for the same five supported locales as the website.
 
-### Contenuti editoriali
+Input devices must produce canonical game actions through the input layer; they must not control the player directly. Rendering, gameplay, UI, and input responsibilities should remain separate.
 
-- [src/lib/home.ts](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/lib/home.ts)
-- [src/lib/manifesto.ts](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/lib/manifesto.ts)
-- [src/lib/news.ts](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/lib/news.ts)
-- [src/lib/legal.ts](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/lib/legal.ts)
+## 11. Experimental server
 
-### Dati e integrazioni
+`server/colyseus` contains an early multiplayer scaffold, not a production gameplay dependency. It currently provides:
 
-- [src/lib/supabase.ts](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/lib/supabase.ts)
-- [src/data/navigation.json](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/data/navigation.json)
+- an HTTP health endpoint at `/health`;
+- a `battle` room with a maximum of eight clients;
+- basic player join/leave state;
+- `joinCrew`, `ping`, and `pong` messages.
 
-## 7. Design system
+Do not describe multiplayer as a released game feature.
 
-### Principi visivi
+## 12. SEO, PWA, analytics, and privacy
 
-- atmosfera street / underground
-- leggibilita alta
-- layout robusto e semplice
-- niente look corporate freddo
-- niente componenti inutilmente complessi
+- The default site URL is `https://bboyarena.org`.
+- The default site name and title are `BboyArena.org`.
+- `Layout.astro` owns title, description, canonical URL, locale alternates, Open Graph, Twitter cards, and JSON-LD.
+- Editorial pages may use article metadata including publication/modification times, section, tags, and author.
+- The website is statically generated with a sitemap, `robots.txt`, PWA manifest, auto-updating service worker, and offline asset caching.
+- Analytics is optional and configured through public environment variables.
+- Setting `bboyarena-no-tracking` to `1` in localStorage disables analytics for that browser.
+- The public legal copy states that analytics is self-hosted and that profiling cookies are not used.
 
-### Pattern ricorrenti
+## 13. Design and content conventions
 
-- pannelli con bordo e ombra
-- chip/capsule per label brevi
-- bottoni solo dove serve una CTA vera
-- footer usato come site map testuale
+- Preserve the warm street/underground identity without sacrificing readability.
+- Prefer robust, simple layouts and small reusable components.
+- Long-form content should use a readable maximum width.
+- The global header is sticky; desktop footers use columns; mobile layouts stack vertically.
+- Use buttons for real actions and calls to action, not for ordinary navigation links.
+- Keep public claims accurate: planned features must never be presented as complete.
+- Public-facing copy should be clear, welcoming, culturally respectful, and free of corporate hype.
+- Maintain mobile usability and accessibility whenever changing structure or interaction.
 
-### Regole di layout
+## 14. Environment configuration
 
-- max width leggibile su contenuti lunghi
-- header sticky
-- footer con struttura a colonne su desktop
-- mobile full width e stack verticale
+Environment variables are loaded from the repository root. Browser-exposed variables used by the website should also be declared in `apps/website/src/env.d.ts`.
 
-## 8. Footer globale
-
-Il footer globale deve includere:
-
-- `Manifesto`
-- `Privacy`
-- `Cookies`
-- `Terms`
-- `Contact`
-- `Open Source`
-- `Participate`
-- `GitHub` se disponibile
-
-Comportamento attuale:
-
-- su desktop: logo a sinistra, link allineati a destra
-- su mobile: tutto centrato e impilato
-- i link sono testuali, non button-like
-
-## 9. SEO e metadata
-
-- Il title globale di default e `BboyArena.org`.
-- La description globale sintetizza il manifesto del progetto.
-- `Layout.astro` gestisce:
-  - title
-  - description
-  - canonical
-  - alternates
-  - Open Graph
-  - Twitter Card
-  - JSON-LD
-
-### Pagine article
-
-Per contenuti editoriali si usa `type="article"` e, se necessario:
-
-- `publishedTime`
-- `modifiedTime`
-- `section`
-- `tags`
-
-## 10. Pagine legali e informative
-
-Le pagine legali sono generate con `LegalPage.astro` e condividono il contenuto definito in `src/lib/legal.ts`.
-
-### Pagine presenti
-
-- `Privacy Policy`
-- `Cookie Policy`
-- `Terms of Service`
-- `Open Development`
-- `Contact`
-
-### Convenzioni contenuto
-
-- tono chiaro e semplice
-- inglese per i contenuti pubblici
-- riferimento privacy a `giorgiotedesco.it`
-- email privacy: `privacy@giorgiotedesco.it`
-- analytics self-hosted su `get.giorgiotedesco.it`
-- niente cookie banner invasivo
-- niente cookie di profilazione
-
-## 11. Convenzioni i18n
-
-- Lingua di default: `en-US`
-- Localizzazioni supportate:
-  - `it-IT`
-  - `es-419`
-  - `pt-BR`
-  - `zh-Hans`
-
-Le route localizzate vengono generate con lo stesso schema della pagina principale.
-
-## 12. Environment variables
-
-Le variabili principali sono documentate in `.env.example` e devono essere aggiunte prima in `src/env.d.ts`.
-
-### Principali variabili esposte
+### Deployment and application
 
 - `PUBLIC_SITE_URL`
+- `ASTRO_BASE_PATH`
+- `PUBLIC_APP_VERSION`
+- `PUBLIC_GAME_EMBED_URL`
+- `PUBLIC_GAME_BASE` (standalone game build)
+
+### Data and content
+
+- `PUBLIC_SUPABASE_URL`
+- `PUBLIC_SUPABASE_ANON_KEY`
+- `PUBLIC_POCKETBASE_URL`
+- `PUBLIC_POCKETBASE_DEVLOGS_COLLECTION`
+- `PUBLIC_POCKETBASE_DEVLOGS_FILTER`
+- `PUBLIC_NEWS_EXTERNAL_FEED_URL`
+- `PUBLIC_NEWS_EXTERNAL_SOURCE_NAME`
+- `PUBLIC_NEWS_EXTERNAL_SOURCE_URL`
+
+### Community, contact, and support
+
 - `PUBLIC_GITHUB_URL`
+- `PUBLIC_DISCORD_URL`
+- `PUBLIC_INSTAGRAM_URL`
+- `PUBLIC_YOUTUBE_URL`
+- `PUBLIC_CONTACT_EMAIL`
+- `PUBLIC_NEWSLETTER_URL`
+- `PUBLIC_SUPPORT_ENABLED`
+- `PUBLIC_BUYMEACOFFEE_ENABLED`
+- `PUBLIC_BUYMEACOFFEE_URL`
+- `PUBLIC_PATREON_ENABLED`
+- `PUBLIC_PATREON_URL`
+
+### Analytics and SEO
+
+- `PUBLIC_ANALYTICS_SCRIPT_URL`
+- `PUBLIC_ANALYTICS_WEBSITE_ID`
 - `PUBLIC_SEO_SITE_NAME`
 - `PUBLIC_SEO_TITLE`
 - `PUBLIC_SEO_DESCRIPTION`
@@ -245,35 +295,43 @@ Le variabili principali sono documentate in `.env.example` e devono essere aggiu
 - `PUBLIC_SEO_TWITTER_SITE`
 - `PUBLIC_SEO_TWITTER_CREATOR`
 - `PUBLIC_SEO_AUTHOR`
-- `PUBLIC_NEWS_EXTERNAL_FEED_URL`
-- `PUBLIC_NEWS_EXTERNAL_SOURCE_NAME`
-- `PUBLIC_NEWS_EXTERNAL_SOURCE_URL`
 
-## 13. File chiave da tenere d'occhio
+## 15. AI agent role definitions
 
-- [src/components/layout/Layout.astro](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/components/layout/Layout.astro)
-- [src/components/pages/HomePage.astro](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/components/pages/HomePage.astro)
-- [src/components/pages/ManifestoPage.astro](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/components/pages/ManifestoPage.astro)
-- [src/components/pages/LegalPage.astro](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/components/pages/LegalPage.astro)
-- [src/lib/i18n.ts](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/lib/i18n.ts)
-- [src/lib/legal.ts](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/lib/legal.ts)
-- [src/lib/manifesto.ts](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/lib/manifesto.ts)
-- [src/lib/home.ts](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/lib/home.ts)
-- [src/lib/news.ts](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/lib/news.ts)
-- [src/lib/seo.ts](/home/giorgionetg/Scrivania/Progetti%20Web/breaking-2/src/lib/seo.ts)
+The untracked `agents/` directory contains operational prompts for AI coding assistants. The currently present role files are:
 
-## 14. Note operative
+- `website-community-agent.md`
+- `gameplay-agent.md`
+- `input-agent.md`
+- `rendering-agent.md`
+- `devlog-agent.md`
 
-- Preferire componenti piccoli e riusabili.
-- Evitare dipendenze nuove se non necessarie.
-- Mantenere il sito statico salvo esigenze reali.
-- Tenere il footer e il layout globale coerenti con il resto della UI.
-- Ogni modifica strutturale dovrebbe preservare la leggibilita mobile.
+`agents/README.md` also describes planned roles that do not yet have corresponding files. These prompts are development aids, not runtime code or authoritative replacements for this specification.
 
-## 15. Stato attuale
+## 16. Governance and documentation
 
-- Build statica funzionante.
-- Pagine legali e informative presenti.
-- Footer globale aggiornato.
-- SEO globale allineata a `BboyArena.org`.
+- `legal/` contains the contribution, governance, licensing scope, commercial-use, trademark, certification, and CLA documents.
+- `docs/current-architecture.md` describes the website/game separation.
+- Additional reports under `docs/` cover scene architecture, runtime coupling, separation planning, input management, and repository structure.
+- `DEVELOPMENT_LOG.md`, `ROADMAP.md`, and the application READMEs provide historical and focused context; this file remains the broad current-state reference.
 
+## 17. Current working-tree changes reflected here
+
+This revision explicitly includes all staged, unstaged, and untracked state visible on July 6, 2026:
+
+- the localStorage inspector moved from the development router to public and localized privacy routes;
+- the Privacy Policy gained a link card pointing to that helper;
+- `LegalPage.astro` gained reusable linked-resource cards;
+- the former development-only localStorage page and route were removed;
+- the new `agents/` role definitions were added to the repository working tree.
+
+At the time of this update, Git contains no staged changes. The items above are currently unstaged or untracked, and this specification itself is modified by this update.
+
+## 18. Operational rules
+
+- Prefer incremental, reviewable changes and avoid new dependencies without a concrete need.
+- Keep the website static unless a real requirement demands otherwise.
+- Preserve the iframe/URL boundary between the website and game.
+- Keep application-owned assets inside the corresponding app's `public/` directory.
+- Update documentation when route structure, application ownership, environment variables, or major architectural boundaries change.
+- Run the relevant website or game build after structural changes and leave the affected application buildable.
