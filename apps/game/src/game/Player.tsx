@@ -26,14 +26,14 @@ export default function Player({ gameState, playerMotionState, animationDefiniti
     const playbackSpeed = animationDefinition?.playback.speed ?? 1;
     const spinSpeed = (bpm / 34) * playbackSpeed;
 
-    if (activeIntentId === 'pose.signal.lock') {
+    if (activeIntentId === 'move.freeze.default') {
       // Freeze state
       meshRef.current.position.y = 1 + Math.sin(time) * 0.08 * balance;
       meshRef.current.rotation.y = time * 0.2;
       meshRef.current.scale.set(1, 1, 1);
     } else if (gameState === 'playing') {
       // Dance moves: Spin, bounce and tilt matching the BPM
-      const movePulse = activeIntentId === 'move.neon.pulse' ? 1.12 : 1;
+      const movePulse = activeIntentId === 'move.powermove.default' ? 1.12 : 1;
       const spinDirection = rotationAxis.y === 0 ? 1 : Math.sign(rotationAxis.y);
       meshRef.current.position.y = 1 + Math.abs(rhythm) * 0.8 * balance;
       meshRef.current.rotation.y = time * spinSpeed * spinDirection;

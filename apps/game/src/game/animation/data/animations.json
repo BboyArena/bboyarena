@@ -1,7 +1,7 @@
 {
   "version": 1,
   "catalogId": "prototype-player",
-  "catalogRevision": "2026.07.2",
+  "catalogRevision": "2026.07.3",
   "animations": [
     {
       "id": "prototype-idle",
@@ -28,10 +28,10 @@
       }
     },
     {
-      "id": "synthetic-neon-pulse",
-      "intentId": "move.neon.pulse",
+      "id": "default-toprock",
+      "intentId": "move.toprock.default",
       "source": "procedural://prototype-player",
-      "clip": "NeonPulse",
+      "clip": "DefaultToprock",
       "playback": {
         "loop": "once",
         "speed": 1,
@@ -40,10 +40,10 @@
       }
     },
     {
-      "id": "synthetic-comet-sweep",
-      "intentId": "move.comet.sweep",
+      "id": "default-footwork",
+      "intentId": "move.footwork.default",
       "source": "procedural://prototype-player",
-      "clip": "CometSweep",
+      "clip": "DefaultFootwork",
       "playback": {
         "loop": "repeat",
         "speed": 1,
@@ -52,10 +52,10 @@
       }
     },
     {
-      "id": "synthetic-axis-break",
-      "intentId": "move.axis.break",
+      "id": "default-powermove",
+      "intentId": "move.powermove.default",
       "source": "procedural://prototype-player",
-      "clip": "AxisBreak",
+      "clip": "DefaultPowermove",
       "playback": {
         "loop": "repeat",
         "speed": 1,
@@ -64,10 +64,10 @@
       }
     },
     {
-      "id": "synthetic-signal-lock",
-      "intentId": "pose.signal.lock",
+      "id": "default-freeze",
+      "intentId": "move.freeze.default",
       "source": "procedural://prototype-player",
-      "clip": "SignalLock",
+      "clip": "DefaultFreeze",
       "playback": {
         "loop": "repeat",
         "speed": 1,

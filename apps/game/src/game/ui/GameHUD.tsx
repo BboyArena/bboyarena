@@ -97,14 +97,18 @@ export default function GameHUD({ copy }: GameHudProps) {
   ];
   const selectedSettingsCard = settingsCards.find((item) => item.id === selectedSettingsTab) ?? settingsCards[2];
   const inputActions: Array<{ id: GameInputButtonId; label: string }> = [
-    { id: 'primary', label: 'Primary' },
-    { id: 'secondary', label: 'Secondary' },
-    { id: 'modifierLeft', label: 'Left modifier' },
-    { id: 'modifierRight', label: 'Right modifier' },
-    { id: 'start', label: 'Start' },
-    { id: 'pause', label: 'Pause' }
+    { id: 'toprock', label: 'Toprock' },
+    { id: 'footwork', label: 'Footwork' },
+    { id: 'freeze', label: 'Freeze' },
+    { id: 'powermove', label: 'Powermove' },
+    { id: 'l1', label: 'L1' },
+    { id: 'l2', label: 'L2' },
+    { id: 'r1', label: 'R1' },
+    { id: 'r2', label: 'R2' },
+    { id: 'start', label: 'Options' },
+    { id: 'pause', label: 'Esc' }
   ];
-  const keyboardOptions = ['Space', 'KeyJ', 'KeyK', 'KeyQ', 'KeyE', 'Enter', 'Escape', 'ShiftLeft', 'ShiftRight'];
+  const keyboardOptions = ['Space', 'KeyJ', 'KeyK', 'KeyL', 'KeyQ', 'KeyZ', 'KeyE', 'KeyC', 'Enter', 'Escape', 'ShiftLeft', 'ShiftRight'];
 
   if (screen === 'splashscreen') {
     return (

@@ -25,12 +25,14 @@ interface GamePlayHudProps {
 }
 
 const displayedButtons: Array<{ id: GameInputButtonId; label: string }> = [
-  { id: 'primary', label: 'Neon' },
-  { id: 'secondary', label: 'Signal' },
-  { id: 'modifierLeft', label: 'Comet Mod' },
-  { id: 'modifierRight', label: 'Axis Mod' },
-  { id: 'start', label: 'Start' },
-  { id: 'pause', label: 'Pause' }
+  { id: 'toprock', label: 'Toprock' },
+  { id: 'footwork', label: 'Footwork' },
+  { id: 'freeze', label: 'Freeze' },
+  { id: 'powermove', label: 'Powermove' },
+  { id: 'l1', label: 'L1' }, { id: 'l2', label: 'L2' },
+  { id: 'r1', label: 'R1' }, { id: 'r2', label: 'R2' },
+  { id: 'start', label: 'Options' },
+  { id: 'pause', label: 'Esc' }
 ];
 
 export default function GamePlayHUD({
@@ -76,6 +78,7 @@ export default function GamePlayHUD({
             />
             <output>{snapshot.move.x.toFixed(2)} / {snapshot.move.y.toFixed(2)}</output>
           </div>
+          <div>Right stick: <output>{snapshot.look.x.toFixed(2)} / {snapshot.look.y.toFixed(2)}</output></div>
 
           <div className="game-training-input-hud__buttons">
             {displayedButtons.map((button) => (

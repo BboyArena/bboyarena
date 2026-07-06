@@ -1,92 +1,104 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useGameInputController } from '../input/GameInputProvider';
 import TouchInputAdapter from '../input/TouchInputAdapter';
 import { useGameStore } from '../state/useGameStore';
-import type { GameInputButtonId } from '../input/gameInputTypes';
+import { normalizeInputVector, type GameInputButtonId } from '../input/gameInputTypes';
 
-function getButtonLabel(buttonId: GameInputButtonId) {
-  switch (buttonId) {
-    case 'primary':
-      return 'A';
-    case 'secondary':
-      return 'B';
-    case 'modifierLeft':
-      return 'L';
-    case 'modifierRight':
-      return 'R';
-    case 'start':
-      return 'Start';
-    case 'pause':
-    default:
-      return 'Pause';
-  }
-}
+const labels: Record<GameInputButtonId, string> = {
+  toprock: 'A', footwork: 'B', freeze: 'X', powermove: 'Y',
+  l1: 'L1', l2: 'L2', r1: 'R1', r2: 'R2', start: 'Options', pause: 'Esc'
+};
 
-interface TouchButtonProps {
-  buttonId: GameInputButtonId;
-  className: string;
-}
-
-function TouchButton({ buttonId, className }: TouchButtonProps) {
+function TouchButton({ buttonId, className }: { buttonId: GameInputButtonId; className: string }) {
   const controller = useGameInputController();
-
+  const [pressed, setPressed] = useState(false);
   const release = () => {
+    setPressed(false);
     controller.updateButton('touch', buttonId, false);
   };
 
   return (
-    <button
-      type="button"
-      className={className}
-      aria-label={buttonId}
+    <button type="button" className={className} aria-label={`${labels[buttonId]}: ${buttonId}`} aria-pressed={pressed}
       onPointerDown={(event) => {
         event.preventDefault();
+        event.currentTarget.setPointerCapture(event.pointerId);
+        setPressed(true);
         controller.updateButton('touch', buttonId, true);
       }}
-      onPointerUp={(event) => {
-        event.preventDefault();
-        release();
-      }}
-      onPointerLeave={release}
+      onPointerUp={(event) => { event.preventDefault(); release(); }}
       onPointerCancel={release}
-    >
-      {getButtonLabel(buttonId)}
-    </button>
+    >{labels[buttonId]}</button>
   );
+}
+
+type Direction = 'up' | 'down' | 'left' | 'right';
+
+function DirectionPad() {
+  const controller = useGameInputController();
+  const active = useRef(new Set<Direction>());
+  const [, render] = useState(0);
+  const sync = () => {
+    const x = Number(active.current.has('right')) - Number(active.current.has('left'));
+    const y = Number(active.current.has('up')) - Number(active.current.has('down'));
+    controller.updateMove('touch', normalizeInputVector({ x, y }));
+    render((value) => value + 1);
+  };
+  const setDirection = (direction: Direction, pressed: boolean) => {
+    if (pressed) active.current.add(direction); else active.current.delete(direction);
+    sync();
+  };
+
+  return <div className="touch-controls__dpad" aria-label="Directional pad">
+    {(['up', 'left', 'right', 'down'] as const).map((direction) => (
+      <button key={direction} type="button" className={`touch-controls__dpad-button touch-controls__dpad-button--${direction}`}
+        aria-label={direction} aria-pressed={active.current.has(direction)}
+        onPointerDown={(event) => { event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId); setDirection(direction, true); }}
+        onPointerUp={() => setDirection(direction, false)} onPointerCancel={() => setDirection(direction, false)}
+      >{direction === 'up' ? '▲' : direction === 'down' ? '▼' : direction === 'left' ? '◀' : '▶'}</button>
+    ))}
+  </div>;
 }
 
 export default function TouchControlsOverlay() {
   const touchControlsVisible = useGameStore((state) => state.touchControlsVisible);
   const activeInputSource = useGameStore((state) => state.activeInputSource);
-  const joystickZoneRef = useRef<HTMLDivElement | null>(null);
-
-  const shouldMountJoystick = useMemo(
-    () => touchControlsVisible && activeInputSource === 'touch',
-    [activeInputSource, touchControlsVisible]
-  );
-
+  const leftStickRef = useRef<HTMLDivElement | null>(null);
+  const rightStickRef = useRef<HTMLDivElement | null>(null);
+  const mountSticks = useMemo(() => touchControlsVisible && activeInputSource === 'touch', [activeInputSource, touchControlsVisible]);
   if (!touchControlsVisible) return null;
 
-  return (
-    <div className="touch-controls" data-input-source={activeInputSource}>
-      <div className="touch-controls__joystick-zone" ref={joystickZoneRef}>
-        {shouldMountJoystick ? <TouchInputAdapter joystickZoneRef={joystickZoneRef} /> : null}
-      </div>
+  return <div className="touch-controls" data-input-source={activeInputSource}>
+    <div className="touch-controls__shoulders touch-controls__shoulders--left">
+      <TouchButton buttonId="l2" className="touch-controls__shoulder" />
+      <TouchButton buttonId="l1" className="touch-controls__shoulder" />
+    </div>
+    <div className="touch-controls__shoulders touch-controls__shoulders--right">
+      <TouchButton buttonId="r2" className="touch-controls__shoulder" />
+      <TouchButton buttonId="r1" className="touch-controls__shoulder" />
+    </div>
 
-      <div className="touch-controls__actions">
-        <div className="touch-controls__action-row">
-          <TouchButton buttonId="modifierLeft" className="touch-controls__button touch-controls__button--modifier" />
-          <TouchButton buttonId="modifierRight" className="touch-controls__button touch-controls__button--modifier" />
-        </div>
-        <div className="touch-controls__action-row touch-controls__action-row--primary">
-          <TouchButton buttonId="secondary" className="touch-controls__button touch-controls__button--secondary" />
-          <TouchButton buttonId="primary" className="touch-controls__button touch-controls__button--primary" />
-        </div>
-        <div className="touch-controls__action-row touch-controls__action-row--system">
-          <TouchButton buttonId="pause" className="touch-controls__button touch-controls__button--system" />
-          <TouchButton buttonId="start" className="touch-controls__button touch-controls__button--system" />
-        </div>
+    <div className="touch-controls__side touch-controls__side--left">
+      <DirectionPad />
+      <div className="touch-controls__joystick-zone" ref={leftStickRef} aria-label="Left analog stick">
+        {mountSticks ? <TouchInputAdapter joystickZoneRef={leftStickRef} channel="move" /> : null}
       </div>
     </div>
-  );
+
+    <div className="touch-controls__system">
+      <TouchButton buttonId="pause" className="touch-controls__system-button" />
+      <TouchButton buttonId="start" className="touch-controls__system-button" />
+    </div>
+
+    <div className="touch-controls__side touch-controls__side--right">
+      <div className="touch-controls__face" aria-label="Move family buttons">
+        <TouchButton buttonId="powermove" className="touch-controls__face-button touch-controls__face-button--y" />
+        <TouchButton buttonId="freeze" className="touch-controls__face-button touch-controls__face-button--x" />
+        <TouchButton buttonId="footwork" className="touch-controls__face-button touch-controls__face-button--b" />
+        <TouchButton buttonId="toprock" className="touch-controls__face-button touch-controls__face-button--a" />
+      </div>
+      <div className="touch-controls__joystick-zone" ref={rightStickRef} aria-label="Right analog stick">
+        {mountSticks ? <TouchInputAdapter joystickZoneRef={rightStickRef} channel="look" /> : null}
+      </div>
+    </div>
+  </div>;
 }

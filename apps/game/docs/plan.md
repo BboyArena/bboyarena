@@ -73,7 +73,7 @@ Both live and replayed intents must pass through the same player motion machine.
 ### Phase 3 verification
 
 - Inactive, grounded idle/moving, performing, and paused transitions: passed.
-- Interruption guards and Signal Lock priority: passed.
+- Interruption guards and default Freeze priority: passed.
 - Pause/resume deep-history restoration: passed.
 - Movement updates during an active performance: passed.
 - Focused strict TypeScript compilation: passed.
@@ -84,7 +84,7 @@ Both live and replayed intents must pass through the same player motion machine.
 
 - Primary press/release edge detection: passed.
 - Held-button repeat prevention: passed.
-- Modifier-based Comet Sweep intent and tracked release: passed.
+- Canonical family fallback intent and tracked release: passed.
 - Keyboard/gamepad canonical parity: passed.
 - Focused strict TypeScript compilation: passed.
 - `npm run game:build`: passed.
@@ -185,17 +185,17 @@ Initial intent candidates:
 ```text
 movement.idle
 movement.toprock
-move.neon.pulse
-move.comet.sweep
-move.axis.break
-pose.signal.lock
+move.toprock.default
+move.footwork.default
+move.freeze.default
+move.powermove.default
 ```
 
 ### Acceptance criteria
 
 - [x] Types distinguish input, gameplay motion, animation playback, and replay data.
 - [x] No type references an animation filename as a gameplay decision.
-- [x] The proposed contracts can represent grounded movement and the initial synthetic performance set.
+- [x] The proposed contracts can represent grounded movement and the four canonical default moves.
 
 ## Phase 1 — Animation catalog
 
@@ -215,7 +215,7 @@ Suggested catalog shape:
 {
   "version": 1,
   "catalogId": "default-player",
-  "catalogRevision": "2026.07.2",
+  "catalogRevision": "2026.07.3",
   "animations": [
     {
       "id": "default-idle",
@@ -284,12 +284,12 @@ Suggested catalog shape:
 - [x] Prevent a held button from restarting the same move every render.
 - [x] Keep keyboard, touch, and gamepad behavior equivalent.
 - [x] Keep the original input source outside authoritative motion intents and available in the input snapshot for diagnostics.
-- [x] Resolve simultaneous primary/secondary requests in stable order, with Signal Lock emitted last and receiving interruption priority.
+- [x] Resolve canonical family presses into stable default fallback intents, with Freeze receiving interruption priority.
 
 ### Acceptance criteria
 
 - [x] Identical canonical input produces identical motion events across devices.
-- [x] Holding the primary action does not emit repeated start events.
+- [x] Holding a canonical family button does not emit repeated start events.
 - [x] The resolver is an isolated controller that can be tested independently.
 
 ## Phase 5 — Animation playback machine
@@ -322,19 +322,18 @@ Suggested catalog shape:
 
 ### Acceptance criteria
 
-- [ ] Existing grounded movement, synthetic move, pause, and Signal Lock feedback works visually.
+- [ ] Existing grounded movement, canonical default moves, pause, and Freeze feedback works visually.
 - [x] `Player.tsx` no longer decides which gameplay move is active.
 - [x] Website and game builds still succeed independently.
 
-## Synthetic move-history prototype
+## Canonical move-family history prototype
 
-This prototype validates accepted-move history before scoring rules are designed.
+This prototype validates accepted default-move history before selection windows and scoring rules are designed.
 
-- [x] Replace real move names with a clearly fictional test set.
-- [x] Map Primary to `Neon Pulse`.
-- [x] Map Left Modifier + Primary to `Comet Sweep`.
-- [x] Map Right Modifier + Primary to `Axis Break`.
-- [x] Map Secondary to `Signal Lock` with interruption priority.
+- [x] Define the four canonical input families: Toprock, Footwork, Freeze, and Powermove.
+- [x] Give every family a valid default fallback move.
+- [x] Map each canonical touchscreen button directly to its default fallback.
+- [x] Keep Freeze as the current interruption-priority fallback.
 - [x] Record only performance intents accepted by the motion machine.
 - [x] Exclude idle, grounded movement, raw device input, and rejected intents.
 - [x] Store sequence, intent ID, animation ID, start tick, end tick, duration, and outcome.
@@ -342,10 +341,24 @@ This prototype validates accepted-move history before scoring rules are designed
 - [x] Keep scoring explicit as `not-evaluated` with no numeric value.
 - [x] Limit in-memory session history to the latest 24 entries.
 - [x] Show the latest eight entries in the Training diagnostic HUD.
+- [x] Display the four canonical touchscreen HUD buttons directly.
+
+## Full touchscreen controller prototype
+
+- [x] Add a four-direction D-pad and normalize diagonal movement.
+- [x] Add independent left movement and right look analog sticks.
+- [x] Present Toprock, Footwork, Freeze, and Powermove as A, B, X, and Y.
+- [x] Add L1, L2, R1, and R2 canonical button states.
+- [x] Add Options and Esc system controls.
+- [x] Support simultaneous pointers through pointer capture and independent releases.
+- [x] Display both stick vectors and all controller buttons in the Training diagnostics.
+- [x] Map standard gamepad axes and shoulder indices to the same canonical snapshot.
+- [x] Verify the game production build after integration.
+- [ ] Visually verify ergonomics and overlap on target touchscreen aspect ratios.
 
 ### Verification
 
-- Synthetic catalog validation: passed.
+- Canonical default catalog validation: passed.
 - Grounded intents excluded from history: passed.
 - Accepted move start: passed.
 - Accepted replacement interruption: passed.
@@ -375,7 +388,7 @@ All move execution and scoring must use the global musical clock rather than ren
 - [x] Preserve source FPS and frame count for animation-authoring alignment.
 - [x] Normalize authored frames into beat positions and runtime tick offsets.
 - [x] Compute runtime move duration and animation time scale from BPM.
-- [x] Add four synthetic authored move definitions in local JSON.
+- [x] Add four canonical default authored move definitions in local JSON.
 - [ ] Add runtime validation and replaceable API loading for move definitions.
 - [ ] Add the generic `moveExecutionMachine` that interprets phases, loops, and transition windows.
 - [ ] Record canonical input evidence against the active move timeline.
@@ -421,7 +434,7 @@ Suggested replay envelope:
 {
   "formatVersion": 1,
   "gameplayVersion": "0.0.1",
-  "catalogRevision": "2026.07.2",
+  "catalogRevision": "2026.07.3",
   "tickRate": 60,
   "seed": 1,
   "initialState": {},
@@ -527,14 +540,14 @@ Suggested replay envelope:
 
 ### Build verification
 
-- [ ] Run `npm run game:build` after every implementation phase.
+- [x] Run `npm run game:build` after every implementation phase.
 - [ ] Run `npm run build` after changes to the website/game integration boundary.
-- [ ] Run `git diff --check` before completing each phase.
+- [x] Run `git diff --check` before completing each phase.
 
 ## Documentation checklist
 
 - [ ] Update the [game scene architecture](./threejs-scene-architecture.md) after the new actor boundaries are implemented.
-- [ ] Update the repository [Input Manager documentation](../../../docs/input-manager.md) if the intent contract changes.
+- [x] Update the repository [Input Manager documentation](../../../docs/input-manager.md) if the intent contract changes.
 - [ ] Update the [project specification](../../../PROJECT_SPEC.md) when the runtime structure becomes active.
 - [ ] Add replay format documentation before replay files become externally shareable.
 - [ ] Keep this task list synchronized as tasks are completed or intentionally deferred.

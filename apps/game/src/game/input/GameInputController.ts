@@ -25,12 +25,17 @@ function areButtonStatesEqual(
 function areSnapshotsEqual(a: GameInputSnapshot, b: GameInputSnapshot) {
   if (a.source !== b.source) return false;
   if (!areVectorsEqual(a.move, b.move)) return false;
+  if (!areVectorsEqual(a.look, b.look)) return false;
 
   return (
-    areButtonStatesEqual(a.buttons.primary, b.buttons.primary) &&
-    areButtonStatesEqual(a.buttons.secondary, b.buttons.secondary) &&
-    areButtonStatesEqual(a.buttons.modifierLeft, b.buttons.modifierLeft) &&
-    areButtonStatesEqual(a.buttons.modifierRight, b.buttons.modifierRight) &&
+    areButtonStatesEqual(a.buttons.toprock, b.buttons.toprock) &&
+    areButtonStatesEqual(a.buttons.footwork, b.buttons.footwork) &&
+    areButtonStatesEqual(a.buttons.freeze, b.buttons.freeze) &&
+    areButtonStatesEqual(a.buttons.powermove, b.buttons.powermove) &&
+    areButtonStatesEqual(a.buttons.l1, b.buttons.l1) &&
+    areButtonStatesEqual(a.buttons.l2, b.buttons.l2) &&
+    areButtonStatesEqual(a.buttons.r1, b.buttons.r1) &&
+    areButtonStatesEqual(a.buttons.r2, b.buttons.r2) &&
     areButtonStatesEqual(a.buttons.start, b.buttons.start) &&
     areButtonStatesEqual(a.buttons.pause, b.buttons.pause)
   );
@@ -62,6 +67,15 @@ export class GameInputController {
     };
 
     this.commitSnapshot(nextSnapshot);
+  }
+
+  updateLook(source: ActiveInputSource, vector: GameInputVector): void {
+    this.commitSnapshot({
+      ...this.snapshot,
+      source,
+      look: normalizeInputVector(vector),
+      updatedAt: this.getTimestamp()
+    });
   }
 
   updateButton(

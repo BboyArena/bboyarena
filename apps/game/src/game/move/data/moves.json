@@ -1,13 +1,13 @@
 {
   "version": 1,
   "catalogId": "synthetic-move-prototypes",
-  "catalogRevision": "2026.07.1",
+  "catalogRevision": "2026.07.2",
   "moves": [
     {
-      "id": "synthetic-neon-pulse",
+      "id": "default-toprock",
       "version": 1,
-      "intentId": "move.neon.pulse",
-      "label": "Neon Pulse",
+      "intentId": "move.toprock.default",
+      "label": "Default Toprock",
       "skills": ["rhythm", "timing", "coordination"],
       "sourceFps": 24,
       "sourceFrameCount": 24,
@@ -19,20 +19,20 @@
         { "id": "loop", "startFrame": 18, "endFrame": 24 }
       ],
       "cues": [
-        { "id": "pulse-m", "phaseId": "execution", "action": "action.primary", "sourceFrame": 10, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
-        { "id": "pulse-j", "phaseId": "execution", "action": "action.secondary", "sourceFrame": 12, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
-        { "id": "pulse-i", "phaseId": "execution", "action": "action.primary", "sourceFrame": 18, "earlyWindowFrames": 3, "lateWindowFrames": 3, "weight": 1.5 }
+        { "id": "toprock-m", "phaseId": "execution", "action": "action.toprock", "sourceFrame": 10, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
+        { "id": "toprock-j", "phaseId": "execution", "action": "action.footwork", "sourceFrame": 12, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
+        { "id": "toprock-i", "phaseId": "execution", "action": "action.toprock", "sourceFrame": 18, "earlyWindowFrames": 3, "lateWindowFrames": 3, "weight": 1.5 }
       ],
       "transitions": [
-        { "intentId": "move.comet.sweep", "windowStartFrame": 18, "windowEndFrame": 24 },
-        { "intentId": "move.axis.break", "windowStartFrame": 18, "windowEndFrame": 24 }
+        { "intentId": "move.footwork.default", "windowStartFrame": 18, "windowEndFrame": 24 },
+        { "intentId": "move.powermove.default", "windowStartFrame": 18, "windowEndFrame": 24 }
       ]
     },
     {
-      "id": "synthetic-comet-sweep",
+      "id": "default-footwork",
       "version": 1,
-      "intentId": "move.comet.sweep",
-      "label": "Comet Sweep",
+      "intentId": "move.footwork.default",
+      "label": "Default Footwork",
       "skills": ["timing", "direction", "flow"],
       "sourceFps": 30,
       "sourceFrameCount": 30,
@@ -44,19 +44,19 @@
         { "id": "recovery", "startFrame": 24, "endFrame": 30 }
       ],
       "cues": [
-        { "id": "comet-mod", "phaseId": "entry", "action": "action.modifierLeft", "sourceFrame": 8, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
-        { "id": "comet-hit", "phaseId": "sweep", "action": "action.primary", "sourceFrame": 12, "earlyWindowFrames": 2, "lateWindowFrames": 3, "weight": 1.5 },
+        { "id": "footwork-open", "phaseId": "entry", "action": "action.footwork", "sourceFrame": 8, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
+        { "id": "footwork-hit", "phaseId": "sweep", "action": "action.toprock", "sourceFrame": 12, "earlyWindowFrames": 2, "lateWindowFrames": 3, "weight": 1.5 },
         { "id": "comet-direction", "phaseId": "sweep", "action": "move", "sourceFrame": 18, "earlyWindowFrames": 3, "lateWindowFrames": 3, "weight": 1 }
       ],
       "transitions": [
-        { "intentId": "pose.signal.lock", "windowStartFrame": 24, "windowEndFrame": 30 }
+        { "intentId": "move.freeze.default", "windowStartFrame": 24, "windowEndFrame": 30 }
       ]
     },
     {
-      "id": "synthetic-axis-break",
+      "id": "default-powermove",
       "version": 1,
-      "intentId": "move.axis.break",
-      "label": "Axis Break",
+      "intentId": "move.powermove.default",
+      "label": "Default Powermove",
       "skills": ["coordination", "precision", "balance"],
       "sourceFps": 24,
       "sourceFrameCount": 36,
@@ -68,19 +68,19 @@
         { "id": "loop", "startFrame": 28, "endFrame": 36 }
       ],
       "cues": [
-        { "id": "axis-mod", "phaseId": "entry", "action": "action.modifierRight", "sourceFrame": 9, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
-        { "id": "axis-hit", "phaseId": "break", "action": "action.primary", "sourceFrame": 14, "earlyWindowFrames": 2, "lateWindowFrames": 3, "weight": 1.5 },
+        { "id": "power-open", "phaseId": "entry", "action": "action.powermove", "sourceFrame": 9, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
+        { "id": "power-hit", "phaseId": "break", "action": "action.toprock", "sourceFrame": 14, "earlyWindowFrames": 2, "lateWindowFrames": 3, "weight": 1.5 },
         { "id": "axis-balance", "phaseId": "break", "action": "move", "sourceFrame": 24, "earlyWindowFrames": 4, "lateWindowFrames": 4, "weight": 1 }
       ],
       "transitions": [
-        { "intentId": "move.neon.pulse", "windowStartFrame": 28, "windowEndFrame": 36 }
+        { "intentId": "move.toprock.default", "windowStartFrame": 28, "windowEndFrame": 36 }
       ]
     },
     {
-      "id": "synthetic-signal-lock",
+      "id": "default-freeze",
       "version": 1,
-      "intentId": "pose.signal.lock",
-      "label": "Signal Lock",
+      "intentId": "move.freeze.default",
+      "label": "Default Freeze",
       "skills": ["timing", "control", "hold"],
       "sourceFps": 24,
       "sourceFrameCount": 24,
@@ -92,8 +92,8 @@
         { "id": "hold", "startFrame": 18, "endFrame": 24 }
       ],
       "cues": [
-        { "id": "signal-hit", "phaseId": "lock", "action": "action.secondary", "sourceFrame": 10, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1.5 },
-        { "id": "signal-hold", "phaseId": "hold", "action": "action.secondary", "sourceFrame": 18, "earlyWindowFrames": 3, "lateWindowFrames": 3, "weight": 1 }
+        { "id": "freeze-hit", "phaseId": "lock", "action": "action.freeze", "sourceFrame": 10, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1.5 },
+        { "id": "freeze-hold", "phaseId": "hold", "action": "action.freeze", "sourceFrame": 18, "earlyWindowFrames": 3, "lateWindowFrames": 3, "weight": 1 }
       ],
       "transitions": [
         { "intentId": "movement.toprock", "windowStartFrame": 18, "windowEndFrame": 24 }

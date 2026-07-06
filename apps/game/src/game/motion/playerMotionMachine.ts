@@ -114,7 +114,7 @@ const playerMotionSetup = setup({
       return {
         phase: 'active' as const,
         activeIntentId: event.intent.intentId,
-        angularVelocity: event.intent.intentId === 'move.neon.pulse' ? 1 : context.angularVelocity,
+        angularVelocity: event.intent.intentId === 'move.powermove.default' ? 1 : context.angularVelocity,
         tick: event.tick
       };
     })

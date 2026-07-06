@@ -1,5 +1,19 @@
-import type { GameInputSnapshot } from '../input/gameInputTypes';
+import type { GameInputButtonId, GameInputSnapshot } from '../input/gameInputTypes';
 import type { PlayerMotionIntent, PlayerMotionIntentId } from './playerMotionTypes';
+
+type MoveFamilyButton = Extract<
+  GameInputButtonId,
+  'toprock' | 'footwork' | 'freeze' | 'powermove'
+>;
+
+const familyButtons: MoveFamilyButton[] = ['toprock', 'footwork', 'freeze', 'powermove'];
+
+const defaultMoveByFamily: Record<MoveFamilyButton, PlayerMotionIntentId> = {
+  toprock: 'move.toprock.default',
+  footwork: 'move.footwork.default',
+  freeze: 'move.freeze.default',
+  powermove: 'move.powermove.default'
+};
 
 const movementChanged = (previous: GameInputSnapshot, current: GameInputSnapshot) =>
   previous.move.x !== current.move.x || previous.move.y !== current.move.y;
@@ -7,24 +21,17 @@ const movementChanged = (previous: GameInputSnapshot, current: GameInputSnapshot
 const wasPressed = (
   previous: GameInputSnapshot,
   current: GameInputSnapshot,
-  button: keyof GameInputSnapshot['buttons']
+  button: GameInputButtonId
 ) => !previous.buttons[button].pressed && current.buttons[button].pressed;
 
 const wasReleased = (
   previous: GameInputSnapshot,
   current: GameInputSnapshot,
-  button: keyof GameInputSnapshot['buttons']
+  button: GameInputButtonId
 ) => previous.buttons[button].pressed && !current.buttons[button].pressed;
 
-const resolvePrimaryIntentId = (snapshot: GameInputSnapshot): PlayerMotionIntentId => {
-  if (snapshot.buttons.modifierLeft.pressed) return 'move.comet.sweep';
-  if (snapshot.buttons.modifierRight.pressed) return 'move.axis.break';
-  return 'move.neon.pulse';
-};
-
 export class PlayerIntentResolver {
-  private primaryIntentId: PlayerMotionIntentId | null = null;
-  private secondaryIntentId: PlayerMotionIntentId | null = null;
+  private readonly activeMoves = new Map<MoveFamilyButton, PlayerMotionIntentId>();
 
   resolve(previous: GameInputSnapshot, current: GameInputSnapshot): PlayerMotionIntent[] {
     const intents: PlayerMotionIntent[] = [];
@@ -36,41 +43,32 @@ export class PlayerIntentResolver {
       });
     }
 
-    if (wasPressed(previous, current, 'primary')) {
-      this.primaryIntentId = resolvePrimaryIntentId(current);
-      intents.push({ type: 'motion.perform', intentId: this.primaryIntentId });
+    for (const button of familyButtons) {
+      if (wasPressed(previous, current, button)) {
+        const intentId = defaultMoveByFamily[button];
+        this.activeMoves.set(button, intentId);
+        intents.push({ type: 'motion.perform', intentId });
+      }
     }
 
-    if (wasPressed(previous, current, 'secondary')) {
-      this.secondaryIntentId = 'pose.signal.lock';
-      intents.push({ type: 'motion.perform', intentId: this.secondaryIntentId });
-    }
-
-    if (wasReleased(previous, current, 'primary') && this.primaryIntentId !== null) {
-      intents.push({ type: 'motion.release', intentId: this.primaryIntentId });
-      this.primaryIntentId = null;
-    }
-
-    if (wasReleased(previous, current, 'secondary') && this.secondaryIntentId !== null) {
-      intents.push({ type: 'motion.release', intentId: this.secondaryIntentId });
-      this.secondaryIntentId = null;
+    for (const button of familyButtons) {
+      if (!wasReleased(previous, current, button)) continue;
+      const intentId = this.activeMoves.get(button);
+      if (intentId) {
+        intents.push({ type: 'motion.release', intentId });
+        this.activeMoves.delete(button);
+      }
     }
 
     return intents;
   }
 
   reset(): PlayerMotionIntent[] {
-    const intents: PlayerMotionIntent[] = [];
-
-    if (this.primaryIntentId !== null) {
-      intents.push({ type: 'motion.release', intentId: this.primaryIntentId });
-    }
-    if (this.secondaryIntentId !== null) {
-      intents.push({ type: 'motion.release', intentId: this.secondaryIntentId });
-    }
-
-    this.primaryIntentId = null;
-    this.secondaryIntentId = null;
+    const intents = [...this.activeMoves.values()].map<PlayerMotionIntent>((intentId) => ({
+      type: 'motion.release',
+      intentId
+    }));
+    this.activeMoves.clear();
     return intents;
   }
 }

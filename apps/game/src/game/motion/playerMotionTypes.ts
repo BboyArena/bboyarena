@@ -1,10 +1,10 @@
 export const PLAYER_MOTION_INTENT_IDS = [
   'movement.idle',
   'movement.toprock',
-  'move.neon.pulse',
-  'move.comet.sweep',
-  'move.axis.break',
-  'pose.signal.lock'
+  'move.toprock.default',
+  'move.footwork.default',
+  'move.freeze.default',
+  'move.powermove.default'
 ] as const;
 
 export type PlayerMotionIntentId = (typeof PLAYER_MOTION_INTENT_IDS)[number];
@@ -12,10 +12,10 @@ export type PlayerMotionIntentId = (typeof PLAYER_MOTION_INTENT_IDS)[number];
 export const PLAYER_MOTION_INTENT_LABELS: Record<PlayerMotionIntentId, string> = {
   'movement.idle': 'Idle',
   'movement.toprock': 'Toprock',
-  'move.neon.pulse': 'Neon Pulse',
-  'move.comet.sweep': 'Comet Sweep',
-  'move.axis.break': 'Axis Break',
-  'pose.signal.lock': 'Signal Lock'
+  'move.toprock.default': 'Default Toprock',
+  'move.footwork.default': 'Default Footwork',
+  'move.freeze.default': 'Default Freeze',
+  'move.powermove.default': 'Default Powermove'
 };
 
 export type SerializableVector2 = {

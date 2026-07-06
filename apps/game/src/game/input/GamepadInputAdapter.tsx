@@ -50,6 +50,10 @@ export default function GamepadInputAdapter() {
       });
 
       controller.updateMove('gamepad', move);
+      controller.updateLook('gamepad', normalizeGamepadVector({
+        x: gamepad.axes[2] ?? 0,
+        y: -(gamepad.axes[3] ?? 0)
+      }));
 
       Object.entries(gamepadInputMap).forEach(([buttonId, index]) => {
         const buttonState = gamepad.buttons[index];

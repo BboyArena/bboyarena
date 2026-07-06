@@ -4,18 +4,27 @@ export type ActiveInputSource = 'touch' | 'gamepad' | 'keyboardMouse';
 
 export type GameInputAction =
   | 'move'
-  | 'action.primary'
-  | 'action.secondary'
-  | 'action.modifierLeft'
-  | 'action.modifierRight'
+  | 'look'
+  | 'action.toprock'
+  | 'action.footwork'
+  | 'action.freeze'
+  | 'action.powermove'
+  | 'action.l1'
+  | 'action.l2'
+  | 'action.r1'
+  | 'action.r2'
   | 'system.start'
   | 'system.pause';
 
 export type GameInputButtonId =
-  | 'primary'
-  | 'secondary'
-  | 'modifierLeft'
-  | 'modifierRight'
+  | 'toprock'
+  | 'footwork'
+  | 'freeze'
+  | 'powermove'
+  | 'l1'
+  | 'l2'
+  | 'r1'
+  | 'r2'
   | 'start'
   | 'pause';
 
@@ -23,19 +32,27 @@ export type KeyboardInputMap = Record<GameInputButtonId, string>;
 export type GamepadInputMap = Record<GameInputButtonId, number>;
 
 export const defaultKeyboardInputMap: KeyboardInputMap = {
-  primary: 'Space',
-  secondary: 'KeyK',
-  modifierLeft: 'KeyQ',
-  modifierRight: 'KeyE',
+  toprock: 'KeyJ',
+  footwork: 'KeyK',
+  freeze: 'KeyL',
+  powermove: 'Space',
+  l1: 'KeyQ',
+  l2: 'KeyZ',
+  r1: 'KeyE',
+  r2: 'KeyC',
   start: 'Enter',
   pause: 'Escape'
 };
 
 export const defaultGamepadInputMap: GamepadInputMap = {
-  primary: 0,
-  secondary: 1,
-  modifierLeft: 4,
-  modifierRight: 5,
+  toprock: 0,
+  footwork: 1,
+  freeze: 2,
+  powermove: 3,
+  l1: 4,
+  r1: 5,
+  l2: 6,
+  r2: 7,
   pause: 8,
   start: 9
 };
@@ -53,6 +70,7 @@ export type GameInputButtonState = {
 export type GameInputSnapshot = {
   source: ActiveInputSource;
   move: GameInputVector;
+  look: GameInputVector;
   buttons: Record<GameInputButtonId, GameInputButtonState>;
   updatedAt: number;
 };
@@ -70,10 +88,14 @@ export type GameInputEvent = {
 };
 
 const buttonIds: GameInputButtonId[] = [
-  'primary',
-  'secondary',
-  'modifierLeft',
-  'modifierRight',
+  'toprock',
+  'footwork',
+  'freeze',
+  'powermove',
+  'l1',
+  'l2',
+  'r1',
+  'r2',
   'start',
   'pause'
 ];
@@ -84,6 +106,7 @@ export function createDefaultGameInputSnapshot(
   return {
     source,
     move: { x: 0, y: 0 },
+    look: { x: 0, y: 0 },
     buttons: Object.fromEntries(
       buttonIds.map((button) => [button, { pressed: false, value: 0 }])
     ) as Record<GameInputButtonId, GameInputButtonState>,

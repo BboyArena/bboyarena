@@ -4,13 +4,13 @@ The game input system centralizes physical input and produces a normalized snaps
 
 ## Source files
 
-- [`InputManager.ts`](../apps/game/src/game/input/InputManager.ts) owns device listeners, polling, normalization, and subscriptions.
+- [`GameInputController.ts`](../apps/game/src/game/input/GameInputController.ts) owns the normalized snapshot and subscriptions.
 - [`GameInputProvider.tsx`](../apps/game/src/game/input/GameInputProvider.tsx) provides the manager to React.
 - [`KeyboardMouseInputAdapter.tsx`](../apps/game/src/game/input/KeyboardMouseInputAdapter.tsx) maps keyboard and pointer input.
 - [`GamepadInputAdapter.tsx`](../apps/game/src/game/input/GamepadInputAdapter.tsx) maps the browser Gamepad API.
 - [`TouchInputAdapter.tsx`](../apps/game/src/game/input/TouchInputAdapter.tsx) maps touch controls and gestures.
 - [`gameInputTypes.ts`](../apps/game/src/game/input/gameInputTypes.ts) defines the canonical gameplay-facing types.
-- [`useInputStore.ts`](../apps/game/src/game/state/useInputStore.ts) exposes normalized input state through Zustand.
+- [`useGameStore.ts`](../apps/game/src/game/state/useGameStore.ts) stores device preferences and configurable bindings.
 
 ## Supported sources
 
@@ -22,13 +22,11 @@ Keyboard movement is normalized so diagonal movement cannot exceed a magnitude o
 
 The manager polls `navigator.getGamepads()` once per animation frame. Stick values pass through a configurable dead zone and are normalized. Button indices map to canonical actions, and connection metadata is exposed in each snapshot.
 
-### Virtual joystick
+### Touch controller
 
-`nipplejs` supplies touch movement through a configured joystick zone. The manager owns the joystick lifecycle and destroys it when stopped.
+The overlay provides a D-pad, two virtual analog sticks, ABXY, L1/L2/R1/R2, Options, and Esc. `nipplejs` supplies independent movement and look vectors from the two stick zones. Pointer capture keeps button releases reliable during multi-touch input.
 
-### Touch gestures
-
-Touch input recognizes taps, double taps, swipes, and pinches. Gesture records contain positions, deltas, distance, scale where relevant, and a timestamp.
+ABXY are presentation labels for the four semantic move families: A maps to Toprock, B to Footwork, X to Freeze, and Y to Powermove. The move resolver never depends on the displayed controller label.
 
 For development on a device that does not naturally expose touch controls, open the game with `?touchControls=1`.
 
@@ -37,11 +35,8 @@ For development on a device that does not naturally expose touch controls, open 
 An input snapshot contains:
 
 - normalized movement and look vectors;
-- pointer position;
-- active canonical actions;
-- active input sources;
-- connected gamepads;
-- the latest gesture;
+- canonical button states for move families, shoulders, and system controls;
+- the most recently active input source;
 - a timestamp.
 
 Snapshots are immutable from the consumer's point of view. Consumers subscribe to updates rather than reading browser APIs directly.
