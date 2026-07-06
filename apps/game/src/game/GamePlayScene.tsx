@@ -10,7 +10,7 @@ import { GameInputProvider, useGameInputSnapshot } from './input/GameInputProvid
 import GamepadInputAdapter from './input/GamepadInputAdapter';
 import KeyboardMouseInputAdapter from './input/KeyboardMouseInputAdapter';
 import { useResolveActiveInputSource } from './input/useResolveActiveInputSource';
-import { PlayerIntentResolver } from './motion/playerIntentResolver';
+import { PlayerIntentResolver, type VariationSelectionSnapshot } from './motion/playerIntentResolver';
 import {
   playerMotionMachine,
   selectPlayerMotionSnapshot
@@ -83,6 +83,8 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const lastAnimationIntentRef = useRef<string | null>(null);
   const moveHistoryRef = useRef(new PlayerMoveHistory());
   const [moveHistory, setMoveHistory] = useState(() => moveHistoryRef.current.getSnapshot());
+  const [variationSelection, setVariationSelection] = useState<VariationSelectionSnapshot>(null);
+  const [diagnosticsVisible, setDiagnosticsVisible] = useState(true);
 
   useEffect(() => {
     if (mode === 'training' && gameState === 'idle') {
@@ -106,6 +108,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
       motionSend({ type: 'DISABLE' });
       animationSend({ type: 'animation.reset', issuedAtTick: currentTick });
       intentResolverRef.current.reset();
+      setVariationSelection(null);
       lastAnimationIntentRef.current = null;
       if (moveHistoryRef.current.reset(currentTick)) {
         setMoveHistory(moveHistoryRef.current.getSnapshot());
@@ -118,8 +121,12 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   useEffect(() => {
     if (gameState === 'playing') {
       motionSend({ type: 'TICK', tick: rhythmSnapshot.tick });
+      for (const intent of intentResolverRef.current.advance(rhythmSnapshot.beat)) {
+        motionSend({ type: 'INTENT', intent, tick: rhythmSnapshot.tick });
+      }
+      setVariationSelection(intentResolverRef.current.getSelectionSnapshot());
     }
-  }, [gameState, motionSend, rhythmSnapshot.tick]);
+  }, [gameState, motionSend, rhythmSnapshot.beat, rhythmSnapshot.tick]);
 
   useEffect(() => {
     const previousSnapshot = previousMotionInputRef.current;
@@ -127,9 +134,10 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
 
     if (gameState !== 'playing') return;
 
-    for (const intent of intentResolverRef.current.resolve(previousSnapshot, snapshot)) {
+    for (const intent of intentResolverRef.current.resolve(previousSnapshot, snapshot, rhythmClock.getSnapshot().beat)) {
       motionSend({ type: 'INTENT', intent, tick: rhythmClock.getSnapshot().tick });
     }
+    setVariationSelection(intentResolverRef.current.getSelectionSnapshot());
   }, [gameState, motionSend, rhythmClock, snapshot]);
 
   useEffect(() => {
@@ -181,14 +189,26 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   return (
     <>
       <GameInputSceneBindings gameState={gameState} send={send} />
-      <button
-        type="button"
-        className="game-status-pill game-status-pill--interactive"
-        onClick={openMainMenu}
-        aria-label={copy.backToMenu}
-      >
-        {copy.playStatus} / {mode} / {gameState}
-      </button>
+      <div className="game-play-status-controls">
+        <button
+          type="button"
+          className="game-status-pill game-status-pill--interactive"
+          onClick={openMainMenu}
+          aria-label={copy.backToMenu}
+        >
+          {copy.playStatus} / {mode} / {gameState}
+        </button>
+        {mode === 'training' ? (
+          <button
+            type="button"
+            className="game-training-input-hud__toggle"
+            aria-pressed={diagnosticsVisible}
+            onClick={() => setDiagnosticsVisible((visible) => !visible)}
+          >
+            Debug HUD {diagnosticsVisible ? 'On' : 'Off'}
+          </button>
+        ) : null}
+      </div>
       <GameCanvasErrorBoundary>
         <CanvasScene
           gameState={gameState}
@@ -207,6 +227,8 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
         animationContext={animationActorState.context}
         moveHistory={moveHistory}
         rhythmState={rhythmSnapshot}
+        variationSelection={variationSelection}
+        diagnosticsVisible={diagnosticsVisible}
       />
     </>
   );

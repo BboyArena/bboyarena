@@ -351,10 +351,29 @@ This prototype validates accepted default-move history before selection windows 
 - [x] Add L1, L2, R1, and R2 canonical button states.
 - [x] Add Options and Esc system controls.
 - [x] Support simultaneous pointers through pointer capture and independent releases.
-- [x] Display both stick vectors and all controller buttons in the Training diagnostics.
+- [x] Keep raw stick and auxiliary button input out of the compact intent monitor.
+- [x] Keep the compact live-input layer behind touch controls and show only pressed move-family inputs.
+- [x] Preserve D-pad centering while pressed and soften the virtual-stick response curve.
+- [x] Mirror the landscape layout as D-pad–stick on the left and stick–ABXY on the right.
+- [x] Stack buttons before analog sticks on both sides in portrait orientation.
 - [x] Map standard gamepad axes and shoulder indices to the same canonical snapshot.
 - [x] Verify the game production build after integration.
 - [ ] Visually verify ergonomics and overlap on target touchscreen aspect ratios.
+
+## BPM-normalized variation selection
+
+- [x] Treat the first canonical family button as a variation-window opener.
+- [x] Buffer subsequent canonical button presses as beat-relative evidence.
+- [x] Resolve exactly one semantic move intent when the window closes.
+- [x] Use the family default when no variation recipe matches.
+- [x] Keep the selected move active until a later move replaces it.
+- [x] Define selection windows and variation recipes in `moves.json`.
+- [x] Add a synthetic `move.toprock.indianstep` recipe: Toprock, then Freeze at beat 0.25, then Powermove at beat 0.5.
+- [x] Add animation-catalog coverage for the Indian Step intent.
+- [x] Show active family, remaining beats, and buffered evidence in Training diagnostics.
+- [x] Add a session-local toggle for the Training debug HUD.
+- [ ] Add catalog validation for variation recipes and ambiguous combinations.
+- [ ] Add more variations only after the prototype timing is visually verified.
 
 ### Verification
 

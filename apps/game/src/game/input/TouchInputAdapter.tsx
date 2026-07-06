@@ -20,6 +20,19 @@ type JoystickManager = {
   destroy(): void;
 };
 
+const touchDeadzone = 0.18;
+
+function softenTouchVector(x: number, y: number) {
+  const magnitude = Math.min(1, Math.hypot(x, y));
+  if (magnitude <= touchDeadzone) return { x: 0, y: 0 };
+
+  const response = Math.pow((magnitude - touchDeadzone) / (1 - touchDeadzone), 1.35);
+  return {
+    x: (x / magnitude) * response,
+    y: (y / magnitude) * response
+  };
+}
+
 export default function TouchInputAdapter({ joystickZoneRef, channel }: TouchInputAdapterProps) {
   const controller = useGameInputController();
 
@@ -31,13 +44,13 @@ export default function TouchInputAdapter({ joystickZoneRef, channel }: TouchInp
       zone,
       mode: 'dynamic',
       size: 120,
-      threshold: 0.12
+      threshold: touchDeadzone
     }) as unknown as JoystickManager;
 
     const handleMove = (_event: unknown, data: JoystickMoveData) => {
       const x = data.vector?.x ?? 0;
       const y = data.vector?.y ?? 0;
-      const vector = { x, y };
+      const vector = softenTouchVector(x, y);
       if (channel === 'move') controller.updateMove('touch', vector);
       else controller.updateLook('touch', vector);
     };

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "catalogId": "prototype-player",
-  "catalogRevision": "2026.07.3",
+  "catalogRevision": "2026.07.4",
   "animations": [
     {
       "id": "prototype-idle",
@@ -35,6 +35,18 @@
       "playback": {
         "loop": "once",
         "speed": 1,
+        "fadeInMs": 80,
+        "fadeOutMs": 120
+      }
+    },
+    {
+      "id": "toprock-indianstep",
+      "intentId": "move.toprock.indianstep",
+      "source": "procedural://prototype-player",
+      "clip": "IndianStep",
+      "playback": {
+        "loop": "repeat",
+        "speed": 1.08,
         "fadeInMs": 80,
         "fadeOutMs": 120
       }

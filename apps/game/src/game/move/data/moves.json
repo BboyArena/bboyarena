@@ -1,7 +1,26 @@
 {
   "version": 1,
   "catalogId": "synthetic-move-prototypes",
-  "catalogRevision": "2026.07.2",
+  "catalogRevision": "2026.07.3",
+  "variationSelection": [
+    {
+      "family": "toprock",
+      "defaultIntentId": "move.toprock.default",
+      "selectionWindowBeats": 1,
+      "variations": [
+        {
+          "intentId": "move.toprock.indianstep",
+          "steps": [
+            { "button": "freeze", "beatOffset": 0.25, "toleranceBeats": 0.18 },
+            { "button": "powermove", "beatOffset": 0.5, "toleranceBeats": 0.18 }
+          ]
+        }
+      ]
+    },
+    { "family": "footwork", "defaultIntentId": "move.footwork.default", "selectionWindowBeats": 1, "variations": [] },
+    { "family": "freeze", "defaultIntentId": "move.freeze.default", "selectionWindowBeats": 1, "variations": [] },
+    { "family": "powermove", "defaultIntentId": "move.powermove.default", "selectionWindowBeats": 1, "variations": [] }
+  ],
   "moves": [
     {
       "id": "default-toprock",
@@ -26,6 +45,29 @@
       "transitions": [
         { "intentId": "move.footwork.default", "windowStartFrame": 18, "windowEndFrame": 24 },
         { "intentId": "move.powermove.default", "windowStartFrame": 18, "windowEndFrame": 24 }
+      ]
+    },
+    {
+      "id": "toprock-indianstep",
+      "version": 1,
+      "intentId": "move.toprock.indianstep",
+      "label": "Indian Step",
+      "skills": ["rhythm", "timing", "coordination"],
+      "sourceFps": 24,
+      "sourceFrameCount": 24,
+      "durationBeats": 2,
+      "loop": { "startFrame": 8, "endFrame": 24 },
+      "phases": [
+        { "id": "entry", "startFrame": 0, "endFrame": 8 },
+        { "id": "cross-step", "startFrame": 8, "endFrame": 18 },
+        { "id": "loop", "startFrame": 18, "endFrame": 24 }
+      ],
+      "cues": [
+        { "id": "indian-cross", "phaseId": "cross-step", "action": "action.freeze", "sourceFrame": 10, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
+        { "id": "indian-open", "phaseId": "cross-step", "action": "action.powermove", "sourceFrame": 14, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1.5 }
+      ],
+      "transitions": [
+        { "intentId": "move.footwork.default", "windowStartFrame": 18, "windowEndFrame": 24 }
       ]
     },
     {

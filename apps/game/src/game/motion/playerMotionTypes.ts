@@ -2,6 +2,7 @@ export const PLAYER_MOTION_INTENT_IDS = [
   'movement.idle',
   'movement.toprock',
   'move.toprock.default',
+  'move.toprock.indianstep',
   'move.footwork.default',
   'move.freeze.default',
   'move.powermove.default'
@@ -13,6 +14,7 @@ export const PLAYER_MOTION_INTENT_LABELS: Record<PlayerMotionIntentId, string> =
   'movement.idle': 'Idle',
   'movement.toprock': 'Toprock',
   'move.toprock.default': 'Default Toprock',
+  'move.toprock.indianstep': 'Indian Step',
   'move.footwork.default': 'Default Footwork',
   'move.freeze.default': 'Default Freeze',
   'move.powermove.default': 'Default Powermove'

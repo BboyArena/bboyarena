@@ -1,74 +1,91 @@
 import type { GameInputButtonId, GameInputSnapshot } from '../input/gameInputTypes';
+import type { MoveFamilyId, MoveVariationFamilyDefinition } from '../move/moveDefinitionTypes';
+import moveCatalog from '../move/data/moves.json';
 import type { PlayerMotionIntent, PlayerMotionIntentId } from './playerMotionTypes';
 
-type MoveFamilyButton = Extract<
-  GameInputButtonId,
-  'toprock' | 'footwork' | 'freeze' | 'powermove'
->;
+type Evidence = { button: MoveFamilyId; beatOffset: number };
 
-const familyButtons: MoveFamilyButton[] = ['toprock', 'footwork', 'freeze', 'powermove'];
+export type VariationSelectionSnapshot = {
+  family: MoveFamilyId;
+  openedAtBeat: number;
+  closesAtBeat: number;
+  evidence: Evidence[];
+} | null;
 
-const defaultMoveByFamily: Record<MoveFamilyButton, PlayerMotionIntentId> = {
-  toprock: 'move.toprock.default',
-  footwork: 'move.footwork.default',
-  freeze: 'move.freeze.default',
-  powermove: 'move.powermove.default'
-};
+const familyButtons: MoveFamilyId[] = ['toprock', 'footwork', 'freeze', 'powermove'];
+const definitions = (moveCatalog.variationSelection ?? []) as MoveVariationFamilyDefinition[];
 
 const movementChanged = (previous: GameInputSnapshot, current: GameInputSnapshot) =>
   previous.move.x !== current.move.x || previous.move.y !== current.move.y;
 
-const wasPressed = (
-  previous: GameInputSnapshot,
-  current: GameInputSnapshot,
-  button: GameInputButtonId
-) => !previous.buttons[button].pressed && current.buttons[button].pressed;
+const wasPressed = (previous: GameInputSnapshot, current: GameInputSnapshot, button: GameInputButtonId) =>
+  !previous.buttons[button].pressed && current.buttons[button].pressed;
 
-const wasReleased = (
-  previous: GameInputSnapshot,
-  current: GameInputSnapshot,
-  button: GameInputButtonId
-) => previous.buttons[button].pressed && !current.buttons[button].pressed;
+function matchesVariation(evidence: Evidence[], definition: MoveVariationFamilyDefinition) {
+  return definition.variations.find((variation) =>
+    variation.steps.length === evidence.length && variation.steps.every((step, index) => {
+      const input = evidence[index];
+      return input?.button === step.button &&
+        Math.abs(input.beatOffset - step.beatOffset) <= step.toleranceBeats;
+    })
+  );
+}
 
 export class PlayerIntentResolver {
-  private readonly activeMoves = new Map<MoveFamilyButton, PlayerMotionIntentId>();
+  private selection: VariationSelectionSnapshot = null;
+  private activeIntentId: PlayerMotionIntentId | null = null;
 
-  resolve(previous: GameInputSnapshot, current: GameInputSnapshot): PlayerMotionIntent[] {
+  getSelectionSnapshot(): VariationSelectionSnapshot {
+    return this.selection ? { ...this.selection, evidence: [...this.selection.evidence] } : null;
+  }
+
+  resolve(previous: GameInputSnapshot, current: GameInputSnapshot, beat: number): PlayerMotionIntent[] {
     const intents: PlayerMotionIntent[] = [];
-
     if (movementChanged(previous, current)) {
-      intents.push({
-        type: 'motion.move',
-        movement: { x: current.move.x, y: current.move.y }
-      });
+      intents.push({ type: 'motion.move', movement: { x: current.move.x, y: current.move.y } });
     }
 
     for (const button of familyButtons) {
-      if (wasPressed(previous, current, button)) {
-        const intentId = defaultMoveByFamily[button];
-        this.activeMoves.set(button, intentId);
-        intents.push({ type: 'motion.perform', intentId });
-      }
-    }
-
-    for (const button of familyButtons) {
-      if (!wasReleased(previous, current, button)) continue;
-      const intentId = this.activeMoves.get(button);
-      if (intentId) {
-        intents.push({ type: 'motion.release', intentId });
-        this.activeMoves.delete(button);
+      if (!wasPressed(previous, current, button)) continue;
+      if (!this.selection) {
+        const definition = definitions.find((item) => item.family === button);
+        if (definition) {
+          this.selection = {
+            family: button,
+            openedAtBeat: beat,
+            closesAtBeat: beat + definition.selectionWindowBeats,
+            evidence: []
+          };
+        }
+      } else if (beat <= this.selection.closesAtBeat) {
+        this.selection.evidence.push({ button, beatOffset: beat - this.selection.openedAtBeat });
       }
     }
 
     return intents;
   }
 
+  advance(beat: number): PlayerMotionIntent[] {
+    if (!this.selection || beat < this.selection.closesAtBeat) return [];
+    const definition = definitions.find((item) => item.family === this.selection?.family);
+    if (!definition) {
+      this.selection = null;
+      return [];
+    }
+
+    const variation = matchesVariation(this.selection.evidence, definition);
+    const intentId = variation?.intentId ?? definition.defaultIntentId;
+    this.selection = null;
+    this.activeIntentId = intentId;
+    return [{ type: 'motion.perform', intentId }];
+  }
+
   reset(): PlayerMotionIntent[] {
-    const intents = [...this.activeMoves.values()].map<PlayerMotionIntent>((intentId) => ({
-      type: 'motion.release',
-      intentId
-    }));
-    this.activeMoves.clear();
+    const intents: PlayerMotionIntent[] = this.activeIntentId
+      ? [{ type: 'motion.release', intentId: this.activeIntentId }]
+      : [];
+    this.selection = null;
+    this.activeIntentId = null;
     return intents;
   }
 }

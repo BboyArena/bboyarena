@@ -46,6 +46,27 @@ export type MoveDefinitionCatalog = {
   catalogId: string;
   catalogRevision: string;
   moves: MoveDefinition[];
+  variationSelection?: MoveVariationFamilyDefinition[];
+};
+
+export type MoveFamilyId = 'toprock' | 'footwork' | 'freeze' | 'powermove';
+
+export type MoveVariationStepDefinition = {
+  button: MoveFamilyId;
+  beatOffset: number;
+  toleranceBeats: number;
+};
+
+export type MoveVariationDefinition = {
+  intentId: PlayerMotionIntentId;
+  steps: MoveVariationStepDefinition[];
+};
+
+export type MoveVariationFamilyDefinition = {
+  family: MoveFamilyId;
+  defaultIntentId: PlayerMotionIntentId;
+  selectionWindowBeats: number;
+  variations: MoveVariationDefinition[];
 };
 
 export type NormalizedMoveCue = MoveCueDefinition & {
