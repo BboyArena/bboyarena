@@ -372,6 +372,7 @@ This prototype validates accepted default-move history before selection windows 
 - [x] Add animation-catalog coverage for the Indian Step intent.
 - [x] Show active family, remaining beats, and buffered evidence in Training diagnostics.
 - [x] Add a session-local toggle for the Training debug HUD.
+- [x] Keep the debug toggle inside the mobile viewport with a touch-safe hit area.
 - [ ] Add catalog validation for variation recipes and ambiguous combinations.
 - [ ] Add more variations only after the prototype timing is visually verified.
 
