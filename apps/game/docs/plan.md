@@ -356,6 +356,17 @@ This prototype validates accepted default-move history before selection windows 
 - [x] Preserve D-pad centering while pressed and soften the virtual-stick response curve.
 - [x] Mirror the landscape layout as D-pad–stick on the left and stick–ABXY on the right.
 - [x] Stack buttons before analog sticks on both sides in portrait orientation.
+- [x] Match mobile D-pad proportions to desktop and give system buttons consistent padding.
+- [x] Replace rectangular joystick zones with circular 3D static virtual sticks.
+- [x] Replace font-dependent D-pad glyphs with equal-size geometric CSS arrows across viewports.
+- [x] Stack wider shoulder buttons vertically for fine-pointer desktop layouts.
+- [x] Keep virtual sticks mounted so mouse and pen input emulate touchscreen joysticks.
+- [x] Preserve the double-ring joystick base while driving the active control opacity from magnitude.
+- [x] Highlight full joystick deflection at 100%.
+- [x] Use nipple force—not its normalized direction vector—as analog magnitude.
+- [x] Show selected zero-force sticks in green and full-force sticks in power red.
+- [x] Display live joystick force as a visible percentage while selected.
+- [x] Replace library-dependent joystick dragging with native pointer capture for mouse, touch, and pen parity.
 - [x] Map standard gamepad axes and shoulder indices to the same canonical snapshot.
 - [x] Verify the game production build after integration.
 - [ ] Visually verify ergonomics and overlap on target touchscreen aspect ratios.

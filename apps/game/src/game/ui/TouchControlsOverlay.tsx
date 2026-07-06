@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useGameInputController } from '../input/GameInputProvider';
 import TouchInputAdapter from '../input/TouchInputAdapter';
 import { useGameStore } from '../state/useGameStore';
@@ -54,7 +54,7 @@ function DirectionPad() {
         aria-label={direction} aria-pressed={active.current.has(direction)}
         onPointerDown={(event) => { event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId); setDirection(direction, true); }}
         onPointerUp={() => setDirection(direction, false)} onPointerCancel={() => setDirection(direction, false)}
-      >{direction === 'up' ? '▲' : direction === 'down' ? '▼' : direction === 'left' ? '◀' : '▶'}</button>
+      ><span className={`touch-controls__dpad-icon touch-controls__dpad-icon--${direction}`} aria-hidden="true" /></button>
     ))}
   </div>;
 }
@@ -64,7 +64,6 @@ export default function TouchControlsOverlay() {
   const activeInputSource = useGameStore((state) => state.activeInputSource);
   const leftStickRef = useRef<HTMLDivElement | null>(null);
   const rightStickRef = useRef<HTMLDivElement | null>(null);
-  const mountSticks = useMemo(() => touchControlsVisible && activeInputSource === 'touch', [activeInputSource, touchControlsVisible]);
   if (!touchControlsVisible) return null;
 
   return <div className="touch-controls" data-input-source={activeInputSource}>
@@ -80,7 +79,8 @@ export default function TouchControlsOverlay() {
     <div className="touch-controls__side touch-controls__side--left">
       <DirectionPad />
       <div className="touch-controls__joystick-zone" ref={leftStickRef} aria-label="Left analog stick">
-        {mountSticks ? <TouchInputAdapter joystickZoneRef={leftStickRef} channel="move" /> : null}
+        <span className="touch-controls__joystick-visual" aria-hidden="true" />
+        <TouchInputAdapter joystickZoneRef={leftStickRef} channel="move" />
       </div>
     </div>
 
@@ -97,7 +97,8 @@ export default function TouchControlsOverlay() {
         <TouchButton buttonId="toprock" className="touch-controls__face-button touch-controls__face-button--a" />
       </div>
       <div className="touch-controls__joystick-zone" ref={rightStickRef} aria-label="Right analog stick">
-        {mountSticks ? <TouchInputAdapter joystickZoneRef={rightStickRef} channel="look" /> : null}
+        <span className="touch-controls__joystick-visual" aria-hidden="true" />
+        <TouchInputAdapter joystickZoneRef={rightStickRef} channel="look" />
       </div>
     </div>
   </div>;
