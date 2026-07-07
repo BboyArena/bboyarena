@@ -21,7 +21,7 @@ import { useRhythmClock, useRhythmClockSnapshot } from './rhythm/RhythmClockProv
 import { moveCatalog } from './move/moveCatalog';
 import { sampleStickCueStep } from './move/stickCueTracks';
 import { getMoveQueueFamilyForButton, MoveQueueController } from './move/MoveQueueController';
-import type { GameInputButtonId } from './input/gameInputTypes';
+import type { GameInputButtonId, GameInputSnapshot } from './input/gameInputTypes';
 import {
   accuracyToMoveScore,
   sampleMoveInputAccuracy,
@@ -42,6 +42,15 @@ function resolveTimingWindowBeats(mode: 'assisted' | 'adaptive' | 'expert', skil
   if (mode === 'assisted') return 0.45;
   if (mode === 'expert') return 0.2;
   return 0.45 - Math.max(0, Math.min(1, skillRating)) * 0.25;
+}
+
+function hasMeaningfulGameplayInput(input: GameInputSnapshot) {
+  return Math.hypot(input.move.x, input.move.y) > 0.01
+    || Math.hypot(input.look.x, input.look.y) > 0.01
+    || input.buttons.toprock.pressed
+    || input.buttons.footwork.pressed
+    || input.buttons.freeze.pressed
+    || input.buttons.powermove.pressed;
 }
 
 interface GamePlaySceneProps {
@@ -219,7 +228,11 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
             });
           }
 
-          if (!started) {
+          const shouldEnterStandby = nextStamina <= MINIMUM_TRAINING_STAMINA
+            && !started
+            && !hasMeaningfulGameplayInput(liveInputRef.current);
+
+          if (!started && !shouldEnterStandby) {
             started = moveQueueRef.current.enqueue(
               transition.completed.family,
               transition.completed.startedAtBeat + transition.completed.durationBeats
