@@ -4,6 +4,7 @@ export const NAV_COPY: Record<LocaleCode, SiteCopy['nav']> = {
   'en-US': {
     menu: 'Menu',
     play: 'Play',
+    moves: 'Moves',
     joinCrew: 'Join Crew',
     manifesto: 'Manifesto',
     news: 'News',
@@ -14,6 +15,7 @@ export const NAV_COPY: Record<LocaleCode, SiteCopy['nav']> = {
   'it-IT': {
     menu: 'Menu',
     play: 'Gioca',
+    moves: 'Mosse',
     joinCrew: 'Partecipa',
     manifesto: 'Manifesto',
     news: 'News',
@@ -24,6 +26,7 @@ export const NAV_COPY: Record<LocaleCode, SiteCopy['nav']> = {
   'es-419': {
     menu: 'Menú',
     play: 'Jugar',
+    moves: 'Movimientos',
     joinCrew: 'Únete',
     manifesto: 'Manifiesto',
     news: 'Noticias',
@@ -34,6 +37,7 @@ export const NAV_COPY: Record<LocaleCode, SiteCopy['nav']> = {
   'pt-BR': {
     menu: 'Menu',
     play: 'Jogar',
+    moves: 'Movimentos',
     joinCrew: 'Participar',
     manifesto: 'Manifesto',
     news: 'Notícias',
@@ -44,6 +48,7 @@ export const NAV_COPY: Record<LocaleCode, SiteCopy['nav']> = {
   'zh-Hans': {
     menu: '菜单',
     play: '开始游戏',
+    moves: '动作',
     joinCrew: '加入团队',
     manifesto: '宣言',
     news: '新闻',

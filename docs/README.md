@@ -27,6 +27,7 @@ Focused application guides are authoritative only within their stated component 
 
 - [Game application README](../apps/game/README.md)
 - [Game scene and screen architecture](../apps/game/docs/threejs-scene-architecture.md)
+- [Game move catalog](../apps/game/docs/move-catalog.md)
 - [Game UI development guide](../apps/game/docs/ui-development.md)
 - [Player motion, animation, and replay plan](../apps/game/docs/plan.md)
 - [Website localization data guide](../apps/website/src/lib/i18n-data/README.md)

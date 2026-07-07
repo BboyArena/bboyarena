@@ -106,6 +106,9 @@ English (`en-US`) is the unprefixed default locale. Unless noted otherwise, ever
 - `/manifesto`
 - `/founding-crew`
 - `/play-the-game`
+- `/moves`
+- `/moves/{family}`
+- `/moves/{family}/{move}`
 - `/open-development`
 - `/contact`
 

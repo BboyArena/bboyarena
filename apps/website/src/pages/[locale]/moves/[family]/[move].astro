@@ -1,0 +1,9 @@
+---
+import MoveDetailPage from '../../../../components/pages/MoveDetailPage.astro';
+import { getLocaleCodeFromPath, getLocalePath, SUPPORTED_LOCALES } from '../../../../lib/i18n';
+import { PUBLIC_MOVES } from '../../../../lib/pages/moves';
+export function getStaticPaths() { return SUPPORTED_LOCALES.filter((locale) => locale !== 'en-US').flatMap((locale) => PUBLIC_MOVES.map((move) => ({ params: { locale: getLocalePath(locale), family: move.family, move: move.id }, props: { move } }))); }
+const locale = getLocaleCodeFromPath(Astro.params.locale);
+const { move } = Astro.props;
+---
+<MoveDetailPage locale={locale} move={move} />

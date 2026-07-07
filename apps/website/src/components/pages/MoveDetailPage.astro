@@ -1,0 +1,76 @@
+---
+import Layout from '../layout/Layout.astro';
+import { buildLocalizedAlternates, buildLocalizedPath, getLocaleSwitcherLinks, type LocaleCode } from '../../lib/i18n';
+import { getMovesCopy, MOVES_PATH, type PublicMove } from '../../lib/pages/moves';
+import InputModeSelector from '../moves/InputModeSelector.astro';
+
+interface Props { locale: LocaleCode; move: PublicMove; }
+const { locale, move } = Astro.props as Props;
+const copy = getMovesCopy(locale);
+const pagePath = `${MOVES_PATH}/${move.family}/${move.id}`;
+const isVariation = move.steps.length > 1;
+---
+
+<Layout
+  title={`${move.label} · BboyArena`}
+  description={`${move.label}: ${copy.mainButton} ${move.family} and prototype game instructions.`}
+  locale={locale}
+  pagePath={pagePath}
+  alternateLinks={buildLocalizedAlternates(pagePath)}
+  localeSwitcherLinks={getLocaleSwitcherLinks(pagePath)}
+  fullBleedMain
+  plainBackground
+  type="article"
+  section="Moves"
+  tags={['breaking', move.family, 'game prototype']}
+>
+  <article class="mx-auto w-full max-w-4xl px-1 py-3 sm:px-2">
+    <a href={buildLocalizedPath(locale, `${MOVES_PATH}/${move.family}`)} class="text-xs font-black uppercase tracking-[0.18em] text-[#655544] hover:underline">← {move.family}</a>
+
+    <header class="mt-7 border-b border-[#4f4337]/20 pb-8">
+      <div class="flex flex-wrap items-center gap-3">
+        <p class="text-[10px] font-black uppercase tracking-[0.35em] text-[#756553]">{move.family}</p>
+        <span class:list={['rounded-full px-3 py-2 text-[9px] font-black uppercase tracking-[0.18em]', move.status === 'playable' ? 'bg-[#dbe3c1] text-[#3f512a]' : 'bg-[#ead3be] text-[#71442d]']}>
+          {move.status === 'playable' ? copy.playable : copy.prototype}
+        </span>
+      </div>
+      <h1 class="mt-4 text-4xl font-black uppercase leading-[0.9] tracking-[0.08em] text-[#2d261f] sm:text-6xl">{move.label}</h1>
+    </header>
+
+    <InputModeSelector locale={locale} />
+
+    <section class="my-7 grid gap-5 sm:grid-cols-[1.2fr_1fr]">
+      <div class="rounded-[1.75rem] border-2 border-[#4f4337] bg-[#2f281f] p-6 text-[#f8f1e7] shadow-[0_8px_0_rgba(95,82,69,0.25)]" data-control-family={move.family}>
+        <p class="text-[10px] font-black uppercase tracking-[0.28em] text-[#d9c9b1]">{copy.mainButton}</p>
+        <span class="mt-3 flex items-center justify-between"><strong class="text-3xl font-black uppercase tracking-[0.12em]" data-control-value></strong><small class="text-[9px] uppercase tracking-widest text-[#d9c9b1]" data-control-mode></small></span>
+      </div>
+      <div class="rounded-[1.75rem] border-2 border-[#4f4337] bg-[#f8f1e7] p-6">
+        <p class="text-[10px] font-black uppercase tracking-[0.24em] text-[#756553]">{copy.skills}</p>
+        <div class="mt-3 flex flex-wrap gap-2">
+          {move.skills.map((skill) => <span class="rounded-full bg-[#e8ddcd] px-3 py-1.5 text-xs text-[#54483b]">{skill}</span>)}
+        </div>
+      </div>
+    </section>
+
+    <section class="rounded-[1.75rem] border-2 border-[#4f4337] bg-[#f8f1e7] p-5 sm:p-7">
+      <h2 class="text-xl font-black uppercase tracking-[0.1em] text-[#2d261f]">{copy.execution}</h2>
+      <p class="mt-3 text-sm leading-relaxed text-[#54483b] sm:text-base">{isVariation ? copy.sequenceLead : copy.singleButtonLead}</p>
+      <ol class="mt-5 grid gap-3 sm:grid-cols-3">
+        {move.steps.map((action, index) => (
+          <li class="rounded-2xl bg-[#eee3d3] p-4 text-[#453a2f]" data-control-family={action === 'move' ? undefined : action}>
+            <span class="text-[9px] font-black uppercase tracking-[0.2em] text-[#756553]">{index + 1}</span>
+            <strong class="mt-2 block text-sm uppercase tracking-[0.08em]">{copy.action[action]}</strong>
+            {action !== 'move' && <span class="mt-3 flex items-center justify-between rounded-xl bg-[#2f281f] px-3 py-2 text-[#f8f1e7]"><b data-control-value></b><small class="text-[8px] uppercase tracking-widest text-[#d9c9b1]" data-control-mode></small></span>}
+          </li>
+        ))}
+      </ol>
+      {move.stickPath && <p class="mt-5 rounded-2xl border border-[#4f4337]/25 px-4 py-3 text-sm text-[#54483b]"><strong>{copy.path}:</strong> <span class="ml-2 text-lg tracking-widest">{move.stickPath}</span></p>}
+      {move.status === 'prototype' && <p class="mt-5 border-l-4 border-[#a76543] pl-4 text-sm leading-relaxed text-[#67432f]">{copy.prototypeNote}</p>}
+    </section>
+
+    <aside class="mt-7 rounded-3xl border-2 border-[#8b4f35] bg-[#f4e4d5] p-5 sm:p-6">
+      <h2 class="text-sm font-black uppercase tracking-[0.14em] text-[#653721]">{copy.noticeTitle}</h2>
+      <p class="mt-3 text-sm leading-relaxed text-[#544036] sm:text-base">{copy.notice}</p>
+    </aside>
+  </article>
+</Layout>

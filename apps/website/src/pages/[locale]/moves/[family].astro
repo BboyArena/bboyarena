@@ -1,0 +1,9 @@
+---
+import MoveFamilyPage from '../../../components/pages/MoveFamilyPage.astro';
+import { getLocaleCodeFromPath, getLocalePath, SUPPORTED_LOCALES } from '../../../lib/i18n';
+import { MOVE_FAMILIES } from '../../../lib/pages/moves';
+export function getStaticPaths() { return SUPPORTED_LOCALES.filter((locale) => locale !== 'en-US').flatMap((locale) => MOVE_FAMILIES.map((family) => ({ params: { locale: getLocalePath(locale), family }, props: { family } }))); }
+const locale = getLocaleCodeFromPath(Astro.params.locale);
+const { family } = Astro.props;
+---
+<MoveFamilyPage locale={locale} family={family} />

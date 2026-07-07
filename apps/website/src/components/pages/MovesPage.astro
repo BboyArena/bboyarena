@@ -1,0 +1,54 @@
+---
+import Layout from '../layout/Layout.astro';
+import { buildLocalizedAlternates, buildLocalizedPath, getLocaleSwitcherLinks, type LocaleCode } from '../../lib/i18n';
+import { getMovesCopy, MOVE_FAMILIES, MOVES_PATH, PUBLIC_MOVES } from '../../lib/pages/moves';
+import InputModeSelector from '../moves/InputModeSelector.astro';
+
+interface Props { locale: LocaleCode; }
+const { locale } = Astro.props as Props;
+const copy = getMovesCopy(locale);
+---
+
+<Layout title={copy.seoTitle} description={copy.seoDescription} locale={locale} pagePath={MOVES_PATH}
+  alternateLinks={buildLocalizedAlternates(MOVES_PATH)} localeSwitcherLinks={getLocaleSwitcherLinks(MOVES_PATH)}
+  fullBleedMain plainBackground type="article" section="Moves" tags={['breaking', 'moves', 'game prototype']}>
+  <article class="mx-auto w-full max-w-6xl px-1 py-3 sm:px-2">
+    <header class="border-b border-[#4f4337]/20 pb-9">
+      <p class="text-[10px] font-black uppercase tracking-[0.4em] text-[#756553]">{copy.eyebrow}</p>
+      <h1 class="mt-5 max-w-4xl text-4xl font-black uppercase leading-[0.9] tracking-[0.08em] text-[#2d261f] sm:text-6xl">{copy.title}</h1>
+      <p class="mt-5 max-w-3xl text-base leading-relaxed text-[#54483b] sm:text-lg">{copy.lead}</p>
+    </header>
+
+    <InputModeSelector locale={locale} />
+
+    <aside class="my-8 rounded-3xl border-2 border-[#8b4f35] bg-[#f4e4d5] p-5 sm:p-6">
+      <h2 class="text-sm font-black uppercase tracking-[0.14em] text-[#653721]">{copy.noticeTitle}</h2>
+      <p class="mt-3 max-w-4xl text-sm leading-relaxed text-[#544036] sm:text-base">{copy.notice}</p>
+    </aside>
+
+    <section class="grid gap-5 md:grid-cols-2" aria-label={copy.eyebrow}>
+      {MOVE_FAMILIES.map((family) => (
+        <article class="rounded-[1.75rem] border-2 border-[#4f4337] bg-[#f8f1e7] p-5 shadow-[0_8px_0_rgba(95,82,69,0.25)] sm:p-6">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p class="text-[10px] font-black uppercase tracking-[0.3em] text-[#756553]">{PUBLIC_MOVES.filter((move) => move.family === family).length} {copy.movesFound}</p>
+              <h2 class="mt-2 text-2xl font-black uppercase tracking-[0.08em] text-[#2d261f]">{copy.familyLabel[family]}</h2>
+            </div>
+          </div>
+
+          <div class="mt-6 rounded-2xl bg-[#2f281f] p-4 text-[#f8f1e7]" data-control-family={family}>
+            <span class="text-[9px] font-black uppercase tracking-[0.22em] text-[#d9c9b1]">{copy.mainButton}</span>
+            <span class="mt-2 flex items-center justify-between gap-3"><strong class="text-2xl font-black uppercase tracking-[0.12em]" data-control-value></strong><small class="text-[9px] font-black uppercase tracking-[0.18em] text-[#d9c9b1]" data-control-mode></small></span>
+          </div>
+          <a href={buildLocalizedPath(locale, `${MOVES_PATH}/${family}`)} class="street-button mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-full px-5 text-[10px] font-black uppercase tracking-[0.22em]">{copy.openFamily}</a>
+        </article>
+      ))}
+    </section>
+
+    <section class="street-dark mt-9 rounded-[1.75rem] p-6 sm:p-8">
+      <h2 class="text-2xl font-black uppercase tracking-[0.1em] text-[#f8f1e7]">{copy.developmentTitle}</h2>
+      <p class="mt-4 max-w-3xl text-sm leading-relaxed text-[#e5d8c5] sm:text-base">{copy.developmentText}</p>
+      <a href={buildLocalizedPath(locale, '/play-the-game')} class="street-button street-button-primary mt-6 inline-flex min-h-11 items-center rounded-full px-5 text-[10px] font-black uppercase tracking-[0.22em]">{copy.playCta}</a>
+    </section>
+  </article>
+</Layout>

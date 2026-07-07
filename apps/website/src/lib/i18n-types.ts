@@ -24,6 +24,7 @@ export interface SiteCopy {
   nav: {
     menu: string;
     play: string;
+    moves: string;
     joinCrew: string;
     manifesto: string;
     news: string;

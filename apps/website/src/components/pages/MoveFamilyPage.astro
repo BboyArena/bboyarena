@@ -1,0 +1,70 @@
+---
+import Layout from '../layout/Layout.astro';
+import { buildLocalizedAlternates, buildLocalizedPath, getLocaleSwitcherLinks, type LocaleCode } from '../../lib/i18n';
+import { getMovesCopy, MOVES_PATH, PUBLIC_MOVES, type MoveFamily } from '../../lib/pages/moves';
+import InputModeSelector from '../moves/InputModeSelector.astro';
+
+interface Props { locale: LocaleCode; family: MoveFamily; }
+const { locale, family } = Astro.props as Props;
+const copy = getMovesCopy(locale);
+const familyMoves = PUBLIC_MOVES.filter((move) => move.family === family);
+const pagePath = `${MOVES_PATH}/${family}`;
+---
+
+<Layout title={`${copy.familyLabel[family]} · ${copy.seoTitle}`} description={`${copy.familyLabel[family]}: ${familyMoves.length} ${copy.movesFound}.`}
+  locale={locale} pagePath={pagePath} alternateLinks={buildLocalizedAlternates(pagePath)}
+  localeSwitcherLinks={getLocaleSwitcherLinks(pagePath)} fullBleedMain plainBackground type="article" section="Moves">
+  <article class="mx-auto w-full max-w-5xl px-1 py-3 sm:px-2" data-move-family>
+    <a href={buildLocalizedPath(locale, MOVES_PATH)} class="text-xs font-black uppercase tracking-[0.18em] text-[#655544] hover:underline">← {copy.backToMoves}</a>
+    <header class="mt-7 border-b border-[#4f4337]/20 pb-8">
+      <p class="text-[10px] font-black uppercase tracking-[0.35em] text-[#756553]">{copy.mainButton}: {family}</p>
+      <h1 class="mt-4 text-4xl font-black uppercase tracking-[0.1em] text-[#2d261f] sm:text-6xl">{copy.familyLabel[family]}</h1>
+      <p class="mt-4 text-sm text-[#54483b]">{familyMoves.length} {copy.movesFound}</p>
+    </header>
+
+    <InputModeSelector locale={locale} />
+
+    <div class="my-7 rounded-3xl border-2 border-[#4f4337] bg-[#f8f1e7] p-4 sm:p-5">
+      <label for="move-family-search" class="block text-[10px] font-black uppercase tracking-[0.2em] text-[#655544]">{copy.searchLabel}</label>
+      <input id="move-family-search" type="search" placeholder={copy.searchPlaceholder} autocomplete="off"
+        class="mt-3 min-h-12 w-full rounded-2xl border-2 border-[#4f4337] bg-white px-4 text-base text-[#2d261f] outline-none focus:ring-4 focus:ring-[#c98656]/30" data-move-search />
+    </div>
+
+    <section class="grid gap-5 sm:grid-cols-2" aria-live="polite">
+      {familyMoves.map((move) => (
+        <article class="rounded-[1.75rem] border-2 border-[#4f4337] bg-[#f8f1e7] p-5 shadow-[0_8px_0_rgba(95,82,69,0.25)]" data-move-card data-search={`${move.label} ${move.skills.join(' ')}`.toLowerCase()}>
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <h2 class="text-2xl font-black uppercase tracking-[0.08em] text-[#2d261f]">{move.label}</h2>
+            <span class:list={['rounded-full px-3 py-2 text-[9px] font-black uppercase tracking-[0.18em]', move.status === 'playable' ? 'bg-[#dbe3c1] text-[#3f512a]' : 'bg-[#ead3be] text-[#71442d]']}>
+              {move.status === 'playable' ? copy.playable : copy.prototype}
+            </span>
+          </div>
+          <div class="mt-5 flex flex-wrap gap-2">{move.skills.map((skill) => <span class="rounded-full bg-[#e8ddcd] px-3 py-1.5 text-xs text-[#54483b]">{skill}</span>)}</div>
+          <div class="mt-5 rounded-2xl bg-[#2f281f] p-4 text-[#f8f1e7]" data-control-family={move.family}>
+            <span class="text-[9px] font-black uppercase tracking-[0.2em] text-[#d9c9b1]">{copy.mainButton}</span>
+            <span class="mt-2 flex items-center justify-between"><strong class="text-2xl" data-control-value></strong><small class="text-[9px] uppercase tracking-widest text-[#d9c9b1]" data-control-mode></small></span>
+          </div>
+          <a href={buildLocalizedPath(locale, `${MOVES_PATH}/${family}/${move.id}`)} class="street-button mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-full px-5 text-[10px] font-black uppercase tracking-[0.22em]">{copy.openMove}</a>
+        </article>
+      ))}
+    </section>
+    <p class="mt-7 rounded-2xl bg-[#eee3d3] p-5 text-sm text-[#54483b]" data-no-results hidden>{copy.noResults}</p>
+  </article>
+</Layout>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-move-family]');
+  const search = root?.querySelector<HTMLInputElement>('[data-move-search]');
+  const cards = Array.from(root?.querySelectorAll<HTMLElement>('[data-move-card]') ?? []);
+  const empty = root?.querySelector<HTMLElement>('[data-no-results]');
+  search?.addEventListener('input', () => {
+    const query = search.value.trim().toLocaleLowerCase();
+    let visible = 0;
+    cards.forEach((card) => {
+      const matches = !query || (card.dataset.search ?? '').includes(query);
+      card.hidden = !matches;
+      if (matches) visible += 1;
+    });
+    if (empty) empty.hidden = visible !== 0;
+  });
+</script>

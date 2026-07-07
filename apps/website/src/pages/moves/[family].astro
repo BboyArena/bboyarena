@@ -1,0 +1,7 @@
+---
+import MoveFamilyPage from '../../components/pages/MoveFamilyPage.astro';
+import { MOVE_FAMILIES } from '../../lib/pages/moves';
+export function getStaticPaths() { return MOVE_FAMILIES.map((family) => ({ params: { family }, props: { family } })); }
+const { family } = Astro.props;
+---
+<MoveFamilyPage locale="en-US" family={family} />
