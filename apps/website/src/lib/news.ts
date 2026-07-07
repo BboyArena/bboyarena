@@ -66,6 +66,53 @@ export const NEWS_CATEGORIES: Record<NewsCategory, NewsCategoryMeta> = {
 const LOCAL_NEWS: LocalNewsItem[] = [
   {
     category: 'devlog',
+    slug: 'from-pressing-buttons-to-building-a-round',
+    sourceKind: 'local',
+    title: 'From Pressing Buttons to Building a Round',
+    description:
+      'BboyArena now has its first playable movement flow: moves follow the beat, combinations can be planned ahead, and touch controls are becoming easier to trust.',
+    excerpt:
+      'The latest prototype is less about triggering isolated animations and more about an essential part of breaking: choosing what comes next and giving each move room to land.',
+    publishedTime: '2026-07-07T10:00:00+02:00',
+    modifiedTime: '2026-07-07T10:00:00+02:00',
+    author: 'BboyArena',
+    image: '/readme-banner.png',
+    imageAlt: 'BboyArena first gameplay prototype development log',
+    tags: ['devlog', 'gameplay', 'rhythm', 'movement', 'touch-controls', 'prototype'],
+    body: `For a long time, BboyArena could recognize an input, choose a movement and show useful information on screen. Those were important foundations, but they did not yet feel like playing.
+
+The latest prototype changes that.
+
+You can now choose between toprock, footwork, freezes and powermoves. A move starts, follows a set number of beats and makes room for the next choice. If you enter another move while the current one is still playing, it waits in a queue instead of interrupting everything immediately.
+
+It is a small change with a big effect: the player is no longer pressing buttons only to see isolated reactions. They are beginning to build a sequence.
+
+That distinction matters in breaking. A round is not a bag of moves thrown onto the floor. Timing, transitions and intention connect the vocabulary. Even a powerful move can feel misplaced if it arrives without preparation or ignores the music.
+
+The problem was that our earlier experiments treated input too directly. Press a control, trigger a response. That was useful for testing, but it gave every action the same urgency. There was no space for anticipation and very little sense of flow.
+
+So the new experiment gives moves time. Each one has a duration measured against the beat, while a visible counter helps show where the music is. The interface also displays the active move, its progress and what is coming next. These are still development tools rather than a finished game interface, but they make the emerging rules much easier to understand.
+
+We are also exploring directional paths for different movement families. Toprock can ask for a back-and-forth direction, footwork can trace a wider change of weight, a freeze can focus on holding balance, and a powermove can suggest circular control. For now, these paths are prototypes shown through diagnostic graphics. They are not a claim that breaking can be reduced to drawing shapes with a stick.
+
+In fact, the experiment is teaching us the opposite.
+
+The same path can produce very different movement depending on timing, body position and what came before it. The controls need enough structure to be readable, but enough freedom to leave space for style. Finding that balance will take many iterations.
+
+Touch controls were another part of this work. The virtual joystick has been revised so it responds more clearly across phones and touch-capable devices. It is improving, but it still needs real testing on different screens and in different hands. A control that feels comfortable on one device can feel vague or oversized on another.
+
+The result is the first version of BboyArena that begins to answer a gameplay question instead of only a technical one:
+
+> How can a player think one move ahead while staying connected to the beat?
+
+The answer is not complete. The current moves are synthetic prototypes, the visual feedback is deliberately diagnostic, and final animation quality is still ahead of us. Replay recording is also not finished, even though the rhythm foundation needed for it is now taking shape.
+
+But there is finally a loop we can touch, question and improve. Choose a move. Feel its duration. Prepare the next one. Watch a short sequence become the beginning of a round.
+
+Next, the work is to test whether these controls feel natural rather than merely understandable. That means refining transitions, trying the prototype across keyboard, gamepad and touch, and learning where structure helps flow—and where it gets in the way.`
+  },
+  {
+    category: 'devlog',
     slug: 'a-windmill-is-not-just-a-spin',
     sourceKind: 'local',
     title: 'A Windmill Is Not Just a Spin',
