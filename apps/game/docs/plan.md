@@ -420,6 +420,8 @@ All move execution and scoring must use the global musical clock rather than ren
 - [x] Normalize authored frames into beat positions and runtime tick offsets.
 - [x] Compute runtime move duration and animation time scale from BPM.
 - [x] Add four canonical default authored move definitions in local JSON.
+- [x] Add validated semantic stick cue tracks, normalized sampling, and Training diagnostics to the Toprock prototype.
+- [x] Queue canonical move-family presses during active moves and expose active, upcoming, and stick-path guidance in the gameplay HUD.
 - [ ] Add runtime validation and replaceable API loading for move definitions.
 - [ ] Add the generic `moveExecutionMachine` that interprets phases, loops, and transition windows.
 - [ ] Record canonical input evidence against the active move timeline.

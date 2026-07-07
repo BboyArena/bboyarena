@@ -30,7 +30,7 @@
       "skills": ["rhythm", "timing", "coordination"],
       "sourceFps": 24,
       "sourceFrameCount": 24,
-      "durationBeats": 2,
+      "durationBeats": 4,
       "loop": { "startFrame": 8, "endFrame": 24 },
       "phases": [
         { "id": "entry", "startFrame": 0, "endFrame": 8 },
@@ -41,6 +41,22 @@
         { "id": "toprock-m", "phaseId": "execution", "action": "action.toprock", "sourceFrame": 10, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
         { "id": "toprock-j", "phaseId": "execution", "action": "action.footwork", "sourceFrame": 12, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
         { "id": "toprock-i", "phaseId": "execution", "action": "action.toprock", "sourceFrame": 18, "earlyWindowFrames": 3, "lateWindowFrames": 3, "weight": 1.5 }
+      ],
+      "stickCueTracks": [
+        {
+          "id": "toprock-direction",
+          "label": "Toprock direction",
+          "controllerRole": "lower-body",
+          "targetInput": "movement",
+          "loop": true,
+          "points": [
+            { "t": 0, "x": 0, "y": 0, "tolerance": 0.2 },
+            { "t": 0.25, "x": 0.75, "y": 0.75, "tolerance": 0.25 },
+            { "t": 0.5, "x": 0, "y": 0, "tolerance": 0.2 },
+            { "t": 0.75, "x": -0.75, "y": -0.75, "tolerance": 0.25 },
+            { "t": 1, "x": 0, "y": 0, "tolerance": 0.2 }
+          ]
+        }
       ],
       "transitions": [
         { "intentId": "move.footwork.default", "windowStartFrame": 18, "windowEndFrame": 24 },
@@ -55,7 +71,7 @@
       "skills": ["rhythm", "timing", "coordination"],
       "sourceFps": 24,
       "sourceFrameCount": 24,
-      "durationBeats": 2,
+      "durationBeats": 4,
       "loop": { "startFrame": 8, "endFrame": 24 },
       "phases": [
         { "id": "entry", "startFrame": 0, "endFrame": 8 },
@@ -78,7 +94,7 @@
       "skills": ["timing", "direction", "flow"],
       "sourceFps": 30,
       "sourceFrameCount": 30,
-      "durationBeats": 2,
+      "durationBeats": 4,
       "loop": { "startFrame": 12, "endFrame": 30 },
       "phases": [
         { "id": "entry", "startFrame": 0, "endFrame": 10 },
@@ -89,6 +105,20 @@
         { "id": "footwork-open", "phaseId": "entry", "action": "action.footwork", "sourceFrame": 8, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
         { "id": "footwork-hit", "phaseId": "sweep", "action": "action.toprock", "sourceFrame": 12, "earlyWindowFrames": 2, "lateWindowFrames": 3, "weight": 1.5 },
         { "id": "comet-direction", "phaseId": "sweep", "action": "move", "sourceFrame": 18, "earlyWindowFrames": 3, "lateWindowFrames": 3, "weight": 1 }
+      ],
+      "stickCueTracks": [
+        {
+          "id": "footwork-direction",
+          "label": "Footwork path",
+          "controllerRole": "lower-body",
+          "targetInput": "movement",
+          "points": [
+            { "t": 0, "x": 0, "y": 0 },
+            { "t": 0.33, "x": -0.8, "y": 0.35 },
+            { "t": 0.66, "x": 0.8, "y": -0.35 },
+            { "t": 1, "x": 0, "y": 0 }
+          ]
+        }
       ],
       "transitions": [
         { "intentId": "move.freeze.default", "windowStartFrame": 24, "windowEndFrame": 30 }
@@ -102,7 +132,7 @@
       "skills": ["coordination", "precision", "balance"],
       "sourceFps": 24,
       "sourceFrameCount": 36,
-      "durationBeats": 3,
+      "durationBeats": 2,
       "loop": { "startFrame": 18, "endFrame": 36 },
       "phases": [
         { "id": "entry", "startFrame": 0, "endFrame": 12 },
@@ -113,6 +143,21 @@
         { "id": "power-open", "phaseId": "entry", "action": "action.powermove", "sourceFrame": 9, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
         { "id": "power-hit", "phaseId": "break", "action": "action.toprock", "sourceFrame": 14, "earlyWindowFrames": 2, "lateWindowFrames": 3, "weight": 1.5 },
         { "id": "axis-balance", "phaseId": "break", "action": "move", "sourceFrame": 24, "earlyWindowFrames": 4, "lateWindowFrames": 4, "weight": 1 }
+      ],
+      "stickCueTracks": [
+        {
+          "id": "powermove-spin",
+          "label": "Spin control",
+          "controllerRole": "spin",
+          "targetInput": "look",
+          "points": [
+            { "t": 0, "x": 0, "y": 1, "tolerance": 0.3 },
+            { "t": 0.25, "x": 1, "y": 0, "tolerance": 0.3 },
+            { "t": 0.5, "x": 0, "y": -1, "tolerance": 0.3 },
+            { "t": 0.75, "x": -1, "y": 0, "tolerance": 0.3 },
+            { "t": 1, "x": 0, "y": 1, "tolerance": 0.3 }
+          ]
+        }
       ],
       "transitions": [
         { "intentId": "move.toprock.default", "windowStartFrame": 28, "windowEndFrame": 36 }
@@ -126,7 +171,7 @@
       "skills": ["timing", "control", "hold"],
       "sourceFps": 24,
       "sourceFrameCount": 24,
-      "durationBeats": 2,
+      "durationBeats": 4,
       "loop": { "startFrame": 12, "endFrame": 24 },
       "phases": [
         { "id": "entry", "startFrame": 0, "endFrame": 8 },
@@ -136,6 +181,19 @@
       "cues": [
         { "id": "freeze-hit", "phaseId": "lock", "action": "action.freeze", "sourceFrame": 10, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1.5 },
         { "id": "freeze-hold", "phaseId": "hold", "action": "action.freeze", "sourceFrame": 18, "earlyWindowFrames": 3, "lateWindowFrames": 3, "weight": 1 }
+      ],
+      "stickCueTracks": [
+        {
+          "id": "freeze-balance",
+          "label": "Balance hold",
+          "controllerRole": "balance",
+          "targetInput": "movement",
+          "points": [
+            { "t": 0, "x": 0, "y": 0, "tolerance": 0.18 },
+            { "t": 0.5, "x": 0.15, "y": 0.15, "tolerance": 0.15 },
+            { "t": 1, "x": 0, "y": 0, "tolerance": 0.18 }
+          ]
+        }
       ],
       "transitions": [
         { "intentId": "movement.toprock", "windowStartFrame": 18, "windowEndFrame": 24 }

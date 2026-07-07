@@ -96,6 +96,12 @@ export class PlayerMoveHistory {
     }));
   }
 
+  completeActive(tick: number): boolean {
+    const changed = this.closeActiveEntry(tick, 'completed');
+    this.currentIntentId = null;
+    return changed;
+  }
+
   private attachAnimation(catalog: AnimationCatalog | null): boolean {
     if (this.activeEntryId === null || this.currentIntentId === null) return false;
     const animationId = resolveAnimationId(catalog, this.currentIntentId);

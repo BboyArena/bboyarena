@@ -10,7 +10,6 @@ import { GameInputProvider, useGameInputSnapshot } from './input/GameInputProvid
 import GamepadInputAdapter from './input/GamepadInputAdapter';
 import KeyboardMouseInputAdapter from './input/KeyboardMouseInputAdapter';
 import { useResolveActiveInputSource } from './input/useResolveActiveInputSource';
-import { PlayerIntentResolver, type VariationSelectionSnapshot } from './motion/playerIntentResolver';
 import {
   playerMotionMachine,
   selectPlayerMotionSnapshot
@@ -19,6 +18,10 @@ import { createAnimationCatalogSources } from './animation/animationCatalogLoade
 import { animationPlaybackMachine } from './animation/animationPlaybackMachine';
 import { PlayerMoveHistory } from './motion/playerMoveHistory';
 import { useRhythmClock, useRhythmClockSnapshot } from './rhythm/RhythmClockProvider';
+import { moveCatalog } from './move/moveCatalog';
+import { sampleStickCueTrack } from './move/stickCueTracks';
+import { getMoveQueueFamilyForButton, MoveQueueController } from './move/MoveQueueController';
+import type { GameInputButtonId } from './input/gameInputTypes';
 
 interface GamePlaySceneProps {
   mode: GamePlayMode;
@@ -76,14 +79,14 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
     input: { sources: animationSources }
   });
   const motionSnapshot = selectPlayerMotionSnapshot(motionActorState.context);
-  const intentResolverRef = useRef(new PlayerIntentResolver());
   const previousMotionInputRef = useRef(snapshot);
   const previousGameStateRef = useRef(gameState);
   const requestSequenceRef = useRef(0);
   const lastAnimationIntentRef = useRef<string | null>(null);
   const moveHistoryRef = useRef(new PlayerMoveHistory());
   const [moveHistory, setMoveHistory] = useState(() => moveHistoryRef.current.getSnapshot());
-  const [variationSelection, setVariationSelection] = useState<VariationSelectionSnapshot>(null);
+  const moveQueueRef = useRef(new MoveQueueController());
+  const [moveQueue, setMoveQueue] = useState(() => moveQueueRef.current.getSnapshot());
   const [diagnosticsVisible, setDiagnosticsVisible] = useState(true);
 
   useEffect(() => {
@@ -107,8 +110,8 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
     } else {
       motionSend({ type: 'DISABLE' });
       animationSend({ type: 'animation.reset', issuedAtTick: currentTick });
-      intentResolverRef.current.reset();
-      setVariationSelection(null);
+      moveQueueRef.current.reset();
+      setMoveQueue(moveQueueRef.current.getSnapshot());
       lastAnimationIntentRef.current = null;
       if (moveHistoryRef.current.reset(currentTick)) {
         setMoveHistory(moveHistoryRef.current.getSnapshot());
@@ -121,12 +124,29 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   useEffect(() => {
     if (gameState === 'playing') {
       motionSend({ type: 'TICK', tick: rhythmSnapshot.tick });
-      for (const intent of intentResolverRef.current.advance(rhythmSnapshot.beat)) {
-        motionSend({ type: 'INTENT', intent, tick: rhythmSnapshot.tick });
+      const transition = moveQueueRef.current.advance(rhythmSnapshot.beat);
+      if (transition) {
+        if (moveHistoryRef.current.completeActive(rhythmSnapshot.tick)) {
+          setMoveHistory(moveHistoryRef.current.getSnapshot());
+        }
+        animationSend({ type: 'animation.complete', completedAtTick: rhythmSnapshot.tick });
+        motionSend({
+          type: 'INTENT',
+          intent: { type: 'motion.release', intentId: transition.completed.intentId },
+          tick: rhythmSnapshot.tick
+        });
+        lastAnimationIntentRef.current = null;
+        if (transition.started) {
+          motionSend({
+            type: 'INTENT',
+            intent: { type: 'motion.perform', intentId: transition.started.intentId },
+            tick: rhythmSnapshot.tick
+          });
+        }
+        setMoveQueue(moveQueueRef.current.getSnapshot());
       }
-      setVariationSelection(intentResolverRef.current.getSelectionSnapshot());
     }
-  }, [gameState, motionSend, rhythmSnapshot.beat, rhythmSnapshot.tick]);
+  }, [animationSend, gameState, motionSend, rhythmSnapshot.beat, rhythmSnapshot.tick]);
 
   useEffect(() => {
     const previousSnapshot = previousMotionInputRef.current;
@@ -134,10 +154,31 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
 
     if (gameState !== 'playing') return;
 
-    for (const intent of intentResolverRef.current.resolve(previousSnapshot, snapshot, rhythmClock.getSnapshot().beat)) {
-      motionSend({ type: 'INTENT', intent, tick: rhythmClock.getSnapshot().tick });
+    const clock = rhythmClock.getSnapshot();
+    if (previousSnapshot.move.x !== snapshot.move.x || previousSnapshot.move.y !== snapshot.move.y) {
+      motionSend({
+        type: 'INTENT',
+        intent: { type: 'motion.move', movement: { ...snapshot.move } },
+        tick: clock.tick
+      });
     }
-    setVariationSelection(intentResolverRef.current.getSelectionSnapshot());
+
+    const moveButtons: GameInputButtonId[] = ['toprock', 'footwork', 'freeze', 'powermove'];
+    for (const button of moveButtons) {
+      if (previousSnapshot.buttons[button].pressed || !snapshot.buttons[button].pressed) continue;
+      const family = getMoveQueueFamilyForButton(button);
+      if (!family) continue;
+      const started = moveQueueRef.current.enqueue(family, clock.beat);
+      if (started) {
+        lastAnimationIntentRef.current = null;
+        motionSend({
+          type: 'INTENT',
+          intent: { type: 'motion.perform', intentId: started.intentId },
+          tick: clock.tick
+        });
+      }
+      setMoveQueue(moveQueueRef.current.getSnapshot());
+    }
   }, [gameState, motionSend, rhythmClock, snapshot]);
 
   useEffect(() => {
@@ -169,6 +210,35 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
 
   const animationStateLabel = JSON.stringify(animationActorState.value);
   const animationDefinition = animationActorState.context.current?.definition ?? null;
+  const stickCueDiagnostics = useMemo(() => {
+    const playback = animationActorState.context.current;
+    if (playback === null) return [];
+
+    const move = moveCatalog.moves.find(
+      (definition) => definition.intentId === playback.definition.intentId
+    );
+    if (!move?.stickCueTracks?.length) return [];
+
+    const durationTicks = move.durationBeats * (60 / rhythmSnapshot.bpm) * rhythmSnapshot.tickRate;
+    const progress = durationTicks > 0
+      ? (rhythmSnapshot.tick - playback.startedAtTick) / durationTicks
+      : 0;
+
+    return move.stickCueTracks.map((track) => ({
+      id: track.id,
+      label: track.label,
+      controllerRole: track.controllerRole,
+      targetInput: track.targetInput ?? 'movement',
+      points: track.points,
+      progress: track.loop ? ((progress % 1) + 1) % 1 : Math.min(1, Math.max(0, progress)),
+      sample: sampleStickCueTrack(track, progress)
+    }));
+  }, [
+    animationActorState.context.current,
+    rhythmSnapshot.bpm,
+    rhythmSnapshot.tick,
+    rhythmSnapshot.tickRate
+  ]);
 
   useEffect(() => {
     if (
@@ -227,8 +297,9 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
         animationContext={animationActorState.context}
         moveHistory={moveHistory}
         rhythmState={rhythmSnapshot}
-        variationSelection={variationSelection}
         diagnosticsVisible={diagnosticsVisible}
+        stickCueDiagnostics={stickCueDiagnostics}
+        moveQueue={moveQueue}
       />
     </>
   );

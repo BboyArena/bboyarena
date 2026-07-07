@@ -1,6 +1,6 @@
 import type { GameInputButtonId, GameInputSnapshot } from '../input/gameInputTypes';
 import type { MoveFamilyId, MoveVariationFamilyDefinition } from '../move/moveDefinitionTypes';
-import moveCatalog from '../move/data/moves.json';
+import { moveCatalog } from '../move/moveCatalog';
 import type { PlayerMotionIntent, PlayerMotionIntentId } from './playerMotionTypes';
 
 type Evidence = { button: MoveFamilyId; beatOffset: number };

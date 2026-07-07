@@ -1823,6 +1823,212 @@
   pointer-events: none;
 }
 
+.bboy-game-root .game-active-move-hud {
+  position: absolute;
+  z-index: 21;
+  top: 0.75rem;
+  left: 50%;
+  min-width: min(15rem, calc(100% - 2rem));
+  padding: 0.45rem 0.8rem 0.55rem;
+  transform: translateX(-50%);
+  border: 1px solid rgba(255, 217, 92, 0.5);
+  background: rgba(8, 8, 10, 0.86);
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.4);
+  color: var(--game-text);
+  text-align: center;
+  pointer-events: none;
+}
+
+.bboy-game-root .game-beat-pad {
+  position: absolute;
+  z-index: 22;
+  top: 0.8rem;
+  right: clamp(0.75rem, 2vw, 1.5rem);
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  color: rgba(255, 237, 172, 0.66);
+  font-size: 0.48rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+}
+
+.bboy-game-root .game-beat-pad i {
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 1px solid rgba(255, 217, 92, 0.55);
+  background: #5f501c;
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.22);
+  transition: background 60ms linear, box-shadow 60ms linear, transform 60ms linear;
+}
+
+.bboy-game-root .game-beat-pad[data-active="true"] i {
+  background: var(--game-gold-hot);
+  box-shadow: 0 0 14px rgba(255, 217, 92, 0.82), inset 0 0 0 2px rgba(255, 255, 255, 0.22);
+  transform: scale(1.08);
+}
+
+.bboy-game-root .game-active-move-hud span,
+.bboy-game-root .game-active-move-hud small {
+  display: block;
+  color: rgba(247, 241, 230, 0.65);
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.bboy-game-root .game-active-move-hud strong {
+  display: block;
+  margin: 0.08rem 0;
+  color: var(--game-gold-hot);
+  font-size: clamp(0.9rem, 2vw, 1.2rem);
+  letter-spacing: 0.09em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.bboy-game-root .game-active-move-hud__progress {
+  height: 0.22rem;
+  margin-top: 0.4rem;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.bboy-game-root .game-active-move-hud__progress i {
+  display: block;
+  height: 100%;
+  background: var(--game-gold-hot);
+  transition: width 80ms linear;
+}
+
+.bboy-game-root .game-active-move-hud__queue {
+  display: flex;
+  gap: 0.3rem;
+  margin: 0.42rem 0 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+}
+
+.bboy-game-root .game-active-move-hud__queue li {
+  flex: 0 0 auto;
+  padding: 0.2rem 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(247, 241, 230, 0.72);
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.bboy-game-root .game-active-move-hud__queue li[data-next="true"] {
+  border-color: rgba(255, 217, 92, 0.58);
+  color: var(--game-gold-hot);
+}
+
+.bboy-game-root .game-active-move-hud__queue li small {
+  display: none;
+}
+
+.bboy-game-root .game-active-move-hud__queue .is-empty {
+  opacity: 0.46;
+}
+
+.bboy-game-root .game-next-move-ghost {
+  position: absolute;
+  z-index: 18;
+  top: 42%;
+  right: clamp(1rem, 7vw, 6rem);
+  color: #fff;
+  opacity: 0.2;
+  text-align: right;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.bboy-game-root .game-next-move-ghost span,
+.bboy-game-root .game-next-move-ghost strong {
+  display: block;
+}
+
+.bboy-game-root .game-next-move-ghost span {
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+}
+
+.bboy-game-root .game-next-move-ghost strong {
+  font-size: clamp(1.4rem, 5vw, 3.5rem);
+  letter-spacing: 0.08em;
+}
+
+.bboy-game-root .game-stick-cue-hud {
+  position: absolute;
+  z-index: 19;
+  left: clamp(0.75rem, 2vw, 1.5rem);
+  bottom: clamp(0.75rem, 2vw, 1.5rem);
+  display: flex;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.bboy-game-root .game-stick-cue-hud section {
+  width: 8rem;
+  padding: 0.45rem;
+  border: 1px solid rgba(255, 217, 92, 0.35);
+  background: rgba(8, 8, 10, 0.72);
+  color: var(--game-text);
+}
+
+.bboy-game-root .game-stick-cue-hud header {
+  display: grid;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+}
+
+.bboy-game-root .game-stick-cue-hud header strong {
+  font-size: 0.58rem;
+}
+
+.bboy-game-root .game-stick-cue-hud header span,
+.bboy-game-root .game-stick-cue-hud small {
+  color: rgba(247, 241, 230, 0.55);
+  font-size: 0.43rem;
+  letter-spacing: 0.07em;
+}
+
+.bboy-game-root .game-stick-cue-hud svg {
+  display: block;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.bboy-game-root .game-stick-cue-hud line {
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 1;
+}
+
+.bboy-game-root .game-stick-cue-hud polyline {
+  fill: none;
+  stroke: rgba(255, 217, 92, 0.42);
+  stroke-dasharray: 4 3;
+  stroke-width: 2;
+}
+
+.bboy-game-root .game-stick-cue-hud__target {
+  fill: var(--game-gold-hot);
+  filter: drop-shadow(0 0 4px rgba(244, 190, 36, 0.8));
+}
+
+.bboy-game-root .game-stick-cue-hud__input {
+  fill: #fff;
+  stroke: #111;
+  stroke-width: 2;
+}
+
 .bboy-game-root .game-play-status-controls {
   position: absolute;
   z-index: 30;
@@ -1864,6 +2070,38 @@
 }
 
 @media (max-width: 640px), (max-height: 520px) {
+  .bboy-game-root .game-beat-pad {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .bboy-game-root .game-active-move-hud {
+    top: 3.55rem;
+    min-width: min(11rem, calc(100% - 1rem));
+    padding: 0.35rem 0.55rem 0.4rem;
+  }
+
+  .bboy-game-root .game-active-move-hud__queue {
+    max-width: 10rem;
+    margin-inline: auto;
+  }
+
+  .bboy-game-root .game-stick-cue-hud {
+    left: 50%;
+    bottom: 0.5rem;
+    transform: translateX(-50%);
+  }
+
+  .bboy-game-root .game-stick-cue-hud section {
+    width: 5.5rem;
+    padding: 0.3rem;
+  }
+
+  .bboy-game-root .game-next-move-ghost {
+    top: 48%;
+    right: 0.75rem;
+  }
+
   .bboy-game-root .game-training-input-hud {
     top: 3.25rem;
     right: 0.5rem;

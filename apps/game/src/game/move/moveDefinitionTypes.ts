@@ -23,6 +23,35 @@ export type MoveTransitionDefinition = {
   windowEndFrame: number;
 };
 
+export const STICK_CONTROLLER_ROLES = [
+  'left-stick',
+  'right-stick',
+  'upper-body',
+  'lower-body',
+  'balance',
+  'spin',
+  'custom'
+] as const;
+
+export type StickControllerRole = typeof STICK_CONTROLLER_ROLES[number];
+
+export type StickCuePoint = {
+  t: number;
+  x: number;
+  y: number;
+  tolerance?: number;
+};
+
+export type StickCueTrack = {
+  id: string;
+  label: string;
+  controllerRole: StickControllerRole;
+  targetInput?: 'movement' | 'look' | 'custom';
+  customTargetInputId?: string;
+  points: StickCuePoint[];
+  loop?: boolean;
+};
+
 export type MoveDefinition = {
   id: string;
   version: number;
@@ -39,6 +68,7 @@ export type MoveDefinition = {
   phases: MovePhaseDefinition[];
   cues: MoveCueDefinition[];
   transitions: MoveTransitionDefinition[];
+  stickCueTracks?: StickCueTrack[];
 };
 
 export type MoveDefinitionCatalog = {

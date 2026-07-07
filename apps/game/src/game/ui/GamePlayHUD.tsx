@@ -10,7 +10,20 @@ import type { AnimationPlaybackMachineContext } from '../animation/animationPlay
 import type { PlayerMoveHistoryEntry } from '../motion/playerMoveHistory';
 import { PLAYER_MOTION_INTENT_LABELS } from '../motion/playerMotionTypes';
 import type { RhythmClockSnapshot } from '../rhythm/RhythmClock';
-import type { VariationSelectionSnapshot } from '../motion/playerIntentResolver';
+import type { StickCueSample } from '../move/stickCueTracks';
+import { moveCatalog } from '../move/moveCatalog';
+import type { MoveQueueSnapshot } from '../move/MoveQueueController';
+import type { StickCuePoint } from '../move/moveDefinitionTypes';
+
+export type StickCueDiagnostic = {
+  id: string;
+  label: string;
+  controllerRole: string;
+  targetInput: 'movement' | 'look' | 'custom';
+  points: StickCuePoint[];
+  progress: number;
+  sample: StickCueSample;
+};
 
 interface GamePlayHudProps {
   mode: GamePlayMode;
@@ -23,8 +36,9 @@ interface GamePlayHudProps {
   animationContext: AnimationPlaybackMachineContext;
   moveHistory: PlayerMoveHistoryEntry[];
   rhythmState: RhythmClockSnapshot;
-  variationSelection: VariationSelectionSnapshot;
   diagnosticsVisible: boolean;
+  stickCueDiagnostics: StickCueDiagnostic[];
+  moveQueue: MoveQueueSnapshot;
 }
 
 const intentButtons: Array<{ id: GameInputButtonId; label: string }> = [
@@ -34,6 +48,14 @@ const intentButtons: Array<{ id: GameInputButtonId; label: string }> = [
   { id: 'powermove', label: 'Powermove' }
 ];
 
+const getMoveFamilyLabel = (intentId: PlayerMotionSnapshot['activeIntentId']) => {
+  if (intentId?.includes('.toprock')) return 'Toprock';
+  if (intentId?.includes('.footwork')) return 'Footwork';
+  if (intentId?.includes('.freeze')) return 'Freeze';
+  if (intentId?.includes('.powermove')) return 'Powermove';
+  return 'Ready';
+};
+
 export default function GamePlayHUD({
   mode,
   gameState,
@@ -42,8 +64,9 @@ export default function GamePlayHUD({
   animationContext,
   moveHistory,
   rhythmState,
-  variationSelection,
-  diagnosticsVisible
+  diagnosticsVisible,
+  stickCueDiagnostics,
+  moveQueue
 }: GamePlayHudProps) {
   const touchControlsVisible = useGameStore((state) => state.touchControlsVisible);
   const activeInputSource = useGameStore((state) => state.activeInputSource);
@@ -53,9 +76,73 @@ export default function GamePlayHUD({
   const pressedIntentButtons = intentButtons.filter(({ id }) => snapshot.buttons[id].pressed);
   const selectedGamepad = connectedGamepads.find((gamepad) => gamepad.index === selectedGamepadIndex)
     ?? (selectedGamepadIndex === null ? connectedGamepads[0] : undefined);
+  const activeMove = moveCatalog.moves.find((move) => move.intentId === moveQueue.active?.intentId);
+  const moveFamilyLabel = moveQueue.active?.family ?? getMoveFamilyLabel(motionState.activeIntentId);
+  const moveStyleLabel = moveQueue.active?.label ?? activeMove?.label
+    ?? (motionState.activeIntentId ? PLAYER_MOTION_INTENT_LABELS[motionState.activeIntentId] : 'Waiting for move');
+  const activeProgress = moveQueue.active
+    ? Math.min(1, Math.max(0, (rhythmState.beat - moveQueue.active.startedAtBeat) / moveQueue.active.durationBeats))
+    : 0;
+  const nextMove = moveQueue.queued[0] ?? null;
 
   return (
     <>
+      <div
+        className="game-beat-pad"
+        data-active={rhythmState.beatPhase < 0.18}
+        aria-label={`Beat ${(rhythmState.beatIndex % 4) + 1} of 4`}
+      >
+        <i />
+        <span>{(rhythmState.beatIndex % 4) + 1}/4</span>
+      </div>
+
+      <aside className="game-active-move-hud" aria-live="polite" aria-label="Active move">
+        <span>Move</span>
+        <strong>{moveFamilyLabel}</strong>
+        <small>Style: {moveStyleLabel}</small>
+        <div className="game-active-move-hud__progress" aria-label={`${Math.round(activeProgress * 100)}% complete`}>
+          <i style={{ width: `${activeProgress * 100}%` }} />
+        </div>
+        <ol className="game-active-move-hud__queue" aria-label="Queued moves">
+          {moveQueue.queued.length === 0 ? (
+            <li className="is-empty">Queue empty</li>
+          ) : moveQueue.queued.map((move, index) => (
+            <li key={move.id} data-next={index === 0}>
+              <b>{index + 1}</b> {move.family} <small>{move.label}</small>
+            </li>
+          ))}
+        </ol>
+      </aside>
+
+      {nextMove ? (
+        <div className="game-next-move-ghost" aria-hidden="true">
+          <span>Next</span>
+          <strong>{nextMove.family}</strong>
+        </div>
+      ) : null}
+
+      {stickCueDiagnostics.length > 0 ? (
+        <aside className="game-stick-cue-hud" aria-label="Stick path instructions">
+          {stickCueDiagnostics.map((cue) => {
+            const input = cue.targetInput === 'look' ? snapshot.look : snapshot.move;
+            const path = cue.points.map((point) => `${50 + point.x * 42},${50 - point.y * 42}`).join(' ');
+            return (
+              <section key={cue.id}>
+                <header><strong>{cue.label}</strong><span>{cue.controllerRole}</span></header>
+                <svg viewBox="0 0 100 100" role="img" aria-label={`${cue.label} path`}>
+                  <line x1="50" y1="7" x2="50" y2="93" />
+                  <line x1="7" y1="50" x2="93" y2="50" />
+                  <polyline points={path} />
+                  <circle className="game-stick-cue-hud__target" cx={50 + cue.sample.x * 42} cy={50 - cue.sample.y * 42} r="6" />
+                  <circle className="game-stick-cue-hud__input" cx={50 + input.x * 42} cy={50 - input.y * 42} r="4" />
+                </svg>
+                <small>Gold: target · White: input</small>
+              </section>
+            );
+          })}
+        </aside>
+      ) : null}
+
       {mode === 'training' && diagnosticsVisible ? (
         <aside className="game-training-input-hud" aria-label="Live input and motion monitor">
           <div className="game-training-input-hud__header">
@@ -94,9 +181,7 @@ export default function GamePlayHUD({
             <div>Subdivision: <output>{rhythmState.subdivision + 1}/{rhythmState.subdivisionsPerBeat}</output></div>
             <div>Motion: <output>{motionState.phase}</output></div>
             <div>Intent: <output>{motionState.activeIntentId ?? 'none'}</output></div>
-            <div>Selection: <output>{variationSelection?.family ?? 'none'}</output></div>
-            <div>Window: <output>{variationSelection ? Math.max(0, variationSelection.closesAtBeat - rhythmState.beat).toFixed(2) : '—'} beats</output></div>
-            <div>Evidence: <output>{variationSelection?.evidence.map((item) => item.button).join(' → ') || 'none'}</output></div>
+            <div>Queue: <output>{moveQueue.queued.length} move(s)</output></div>
             <div>Tick: <output>{motionState.tick}</output></div>
             <div>Animation state: <output>{animationStateLabel}</output></div>
             <div>Animation: <output>{animationContext.current?.definition.id ?? 'none'}</output></div>
@@ -111,6 +196,22 @@ export default function GamePlayHUD({
                   : 'none'}
               </output>
             </div>
+          </section>
+
+          <section aria-label="Stick cue diagnostics">
+            <strong>Stick cue targets (diagnostic only)</strong>
+            {stickCueDiagnostics.length === 0 ? (
+              <div>No cue tracks for the active move.</div>
+            ) : stickCueDiagnostics.map((cue) => (
+              <div key={cue.id}>
+                {cue.label} [{cue.controllerRole}]:{' '}
+                <output>
+                  ({cue.sample.x.toFixed(2)}, {cue.sample.y.toFixed(2)}) ±{cue.sample.tolerance.toFixed(2)}
+                  {' — '}{(cue.progress * 100).toFixed(0)}%
+                  {' — next #'}{cue.sample.toPointIndex + 1}
+                </output>
+              </div>
+            ))}
           </section>
 
           <section aria-label="Accepted move history">

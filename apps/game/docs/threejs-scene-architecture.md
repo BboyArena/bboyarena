@@ -84,13 +84,15 @@ Player intent is timestamped immediately with the current global tick. Authored 
 
 Move definitions under `apps/game/src/game/move` describe source FPS, frame count, musical duration, phases, loop regions, expected input cues, skills, and transition windows. Animation files remain separate presentation assets.
 
+Moves may also define normalized stick cue tracks. Each track names a semantic controller role (for example `lower-body`, `upper-body`, `balance`, or `spin`) rather than assuming that every move uses fixed left/right controls. This lets Top Rock and Footwork describe directional drills while future Powermoves can assign the same generic track system to body-control domains. Cue coordinates use `-1..1`, cue time uses `0..1`, and the data remains serializable.
+
 The normalization boundary is:
 
 ```text
 source frame → normalized move position → beat offset → runtime tick offset
 ```
 
-The local JSON data is currently a synthetic prototype. Runtime validation, API loading, phase execution, input-evidence evaluation, and scoring remain separate follow-up work.
+The local JSON data is currently a synthetic prototype. Stick cue tracks receive focused runtime validation and can be sampled for Training diagnostics; they do not yet evaluate player input or award score. Full move-catalog validation, API loading, phase execution, and scoring remain separate follow-up work.
 
 ## Input architecture
 
@@ -105,6 +107,10 @@ See the repository-level [Input Manager documentation](../../../docs/input-manag
 HUD elements remain HTML layered over the canvas. This is preferred for text, menus, diagnostics, buttons, and accessibility-sensitive controls.
 
 `GamePlayHUD` owns player-facing gameplay information. Training diagnostics should remain clearly distinct from release UI and should not leak device-specific details into gameplay state.
+
+The Training HUD currently exposes sampled semantic stick-cue coordinates for the active move. This is intentionally a text diagnostic, not a polished joystick renderer or scoring surface.
+
+The gameplay HUD also shows the active move family/style, beat-based completion progress, and a bounded queue of canonical move-family requests. Gamepad face buttons map through the canonical input layer (`A` Toprock, `B` Footwork, `X` Freeze, `Y` Powermove); presses during an active move are queued rather than interrupting it. A lightweight SVG guide displays each authored stick path, its current target, and the corresponding canonical player input. This remains guidance only: it does not score or fail execution.
 
 ## Persistent fullscreen ownership
 
