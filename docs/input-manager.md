@@ -18,6 +18,18 @@ The game input system centralizes physical input and produces a normalized snaps
 
 Keyboard movement is normalized so diagonal movement cannot exceed a magnitude of one. Logical actions are mapped from `KeyboardEvent.code`. Pointer dragging produces look intent, while pointer position remains available independently.
 
+The default gameplay bindings are:
+
+| Intent | Keyboard input |
+| --- | --- |
+| Movement directions | `W A S D` or arrow keys |
+| Toprock | `J` |
+| Footwork | `K` |
+| Freeze | `L` |
+| Powermove | `Space` |
+
+Move documentation uses these same defaults when Keyboard & Mouse is selected. A directional sequence is entered with `W A S D` or the equivalent arrow keys; diagonal directions require both component keys together.
+
 ### Gamepad
 
 The manager polls `navigator.getGamepads()` once per animation frame. Stick values pass through a configurable dead zone and are normalized. Button indices map to canonical actions, and connection metadata is exposed in each snapshot.

@@ -64,7 +64,7 @@ const isVariation = move.steps.length > 1;
           </li>
         ))}
       </ol>
-      {move.stickPath && <p class="mt-5 rounded-2xl border border-[#4f4337]/25 px-4 py-3 text-sm text-[#54483b]"><strong>{copy.path}:</strong> <span class="ml-2 text-lg tracking-widest">{move.stickPath}</span></p>}
+      {move.stickPath && <p class="mt-5 rounded-2xl border border-[#4f4337]/25 px-4 py-3 text-sm text-[#54483b]"><strong>{copy.path}:</strong> <span class="ml-2 text-lg tracking-widest" data-control-path data-stick-path={move.stickPath} data-keyboard-path={move.keyboardPath ?? move.stickPath}>{move.keyboardPath ?? move.stickPath}</span></p>}
       {move.status === 'prototype' && <p class="mt-5 border-l-4 border-[#a76543] pl-4 text-sm leading-relaxed text-[#67432f]">{copy.prototypeNote}</p>}
     </section>
 

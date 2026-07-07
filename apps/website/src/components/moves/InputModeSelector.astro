@@ -14,7 +14,7 @@ const copy = {
 <fieldset class="my-7 rounded-[1.75rem] border-2 border-[#4f4337] bg-[#f8f1e7] p-4 shadow-[0_7px_0_rgba(95,82,69,0.22)] sm:p-5" data-input-mode-selector>
   <legend class="px-2 text-[10px] font-black uppercase tracking-[0.24em] text-[#655544]">{copy.legend}</legend>
   <div class="grid gap-3 sm:grid-cols-3">
-    <button type="button" class="input-mode-button" data-input-mode="touch" aria-pressed="true">
+    <button type="button" class="input-mode-button" data-input-mode="touch" aria-pressed="false">
       <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="8" y="2" width="16" height="28" rx="3"/><circle cx="16" cy="25" r="1.5"/><path d="M16 8v10m0 0-3-3m3 3 3-3"/></svg>
       <span>{copy.touch}</span>
     </button>
@@ -22,7 +22,7 @@ const copy = {
       <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M9 10h14c4 0 7 4 7 9s-3 7-6 4l-3-3H11l-3 3c-3 3-6 1-6-4s3-9 7-9Z"/><path d="M10 14v6m-3-3h6m9-2h.1m3 3h.1"/></svg>
       <span>{copy.gamepad}</span>
     </button>
-    <button type="button" class="input-mode-button" data-input-mode="keyboard" aria-pressed="false">
+    <button type="button" class="input-mode-button" data-input-mode="keyboard" aria-pressed="true">
       <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="6" width="28" height="19" rx="3"/><path d="M6 11h2m3 0h2m3 0h2m3 0h2m3 0h1M6 16h2m3 0h2m3 0h2m3 0h2m-17 5h20"/></svg>
       <span>{copy.keyboard}</span>
     </button>
@@ -43,9 +43,9 @@ const copy = {
   const readMode = (): Mode => {
     try {
       const stored = window.localStorage.getItem(storageKey);
-      return isMode(stored) ? stored : 'touch';
+      return isMode(stored) ? stored : 'keyboard';
     } catch {
-      return 'touch';
+      return 'keyboard';
     }
   };
   const saveMode = (mode: Mode) => {
@@ -67,6 +67,10 @@ const copy = {
         const modeNode = control.querySelector<HTMLElement>('[data-control-mode]');
         if (valueNode) valueNode.textContent = value;
         if (modeNode) modeNode.textContent = mode === 'touch' ? 'Touch' : mode === 'gamepad' ? 'Gamepad' : 'Keyboard';
+      });
+      document.querySelectorAll<HTMLElement>('[data-control-path]').forEach((path) => {
+        const stickPath = path.dataset.stickPath ?? '';
+        path.textContent = mode === 'keyboard' ? (path.dataset.keyboardPath ?? stickPath) : stickPath;
       });
     };
     buttons.forEach((button) => button.addEventListener('click', () => {
