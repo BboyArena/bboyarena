@@ -18,12 +18,18 @@ import type { StickCuePoint } from '../move/moveDefinitionTypes';
 export type StickCueDiagnostic = {
   id: string;
   label: string;
+  stick: 'left' | 'right';
   controllerRole: string;
   targetInput: 'movement' | 'look' | 'custom';
   points: StickCuePoint[];
   progress: number;
   sample: StickCueSample;
 };
+
+const stickGrammar = {
+  left: { shortLabel: 'L', stickLabel: 'Left stick', bodyLabel: 'Upper body', inputLabel: 'torso + shoulders' },
+  right: { shortLabel: 'R', stickLabel: 'Right stick', bodyLabel: 'Lower body', inputLabel: 'hips + legs' }
+} as const;
 
 interface GamePlayHudProps {
   mode: GamePlayMode;
@@ -125,10 +131,16 @@ export default function GamePlayHUD({
         <aside className="game-stick-cue-hud" aria-label="Stick path instructions">
           {stickCueDiagnostics.map((cue) => {
             const input = cue.targetInput === 'look' ? snapshot.look : snapshot.move;
+            const grammar = stickGrammar[cue.stick];
+            const distance = Math.hypot(input.x - cue.sample.x, input.y - cue.sample.y);
+            const onTarget = distance <= cue.sample.tolerance;
             const path = cue.points.map((point) => `${50 + point.x * 42},${50 - point.y * 42}`).join(' ');
             return (
-              <section key={cue.id}>
-                <header><strong>{cue.label}</strong><span>{cue.controllerRole}</span></header>
+              <section key={cue.id} data-stick={cue.stick} data-on-target={onTarget}>
+                <header>
+                  <b aria-hidden="true">{grammar.shortLabel}</b>
+                  <span><strong>{grammar.stickLabel} · {grammar.bodyLabel}</strong><small>{grammar.inputLabel}</small></span>
+                </header>
                 <svg viewBox="0 0 100 100" role="img" aria-label={`${cue.label} path`}>
                   <line x1="50" y1="7" x2="50" y2="93" />
                   <line x1="7" y1="50" x2="93" y2="50" />
@@ -136,7 +148,7 @@ export default function GamePlayHUD({
                   <circle className="game-stick-cue-hud__target" cx={50 + cue.sample.x * 42} cy={50 - cue.sample.y * 42} r="6" />
                   <circle className="game-stick-cue-hud__input" cx={50 + input.x * 42} cy={50 - input.y * 42} r="4" />
                 </svg>
-                <small>Gold: target · White: input</small>
+                <footer><span>{cue.label}</span><strong>{onTarget ? 'On target' : 'Follow gold'}</strong></footer>
               </section>
             );
           })}

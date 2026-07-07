@@ -3,6 +3,7 @@ import Layout from '../layout/Layout.astro';
 import { buildLocalizedAlternates, buildLocalizedPath, getLocaleSwitcherLinks, type LocaleCode } from '../../lib/i18n';
 import { getMovesCopy, MOVE_FAMILIES, MOVES_PATH, PUBLIC_MOVES } from '../../lib/pages/moves';
 import InputModeSelector from '../moves/InputModeSelector.astro';
+import StickGrammar from '../moves/StickGrammar.astro';
 
 interface Props { locale: LocaleCode; }
 const { locale } = Astro.props as Props;
@@ -20,6 +21,7 @@ const copy = getMovesCopy(locale);
     </header>
 
     <InputModeSelector locale={locale} />
+    <StickGrammar title={copy.stickGrammarTitle} text={copy.stickGrammarText} />
 
     <aside class="my-8 rounded-3xl border-2 border-[#8b4f35] bg-[#f4e4d5] p-5 sm:p-6">
       <h2 class="text-sm font-black uppercase tracking-[0.14em] text-[#653721]">{copy.noticeTitle}</h2>

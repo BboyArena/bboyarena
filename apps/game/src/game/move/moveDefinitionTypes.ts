@@ -45,6 +45,7 @@ export type StickCuePoint = {
 export type StickCueTrack = {
   id: string;
   label: string;
+  stick: 'left' | 'right';
   controllerRole: StickControllerRole;
   targetInput?: 'movement' | 'look' | 'custom';
   customTargetInputId?: string;
@@ -68,7 +69,7 @@ export type MoveDefinition = {
   phases: MovePhaseDefinition[];
   cues: MoveCueDefinition[];
   transitions: MoveTransitionDefinition[];
-  stickCueTracks?: StickCueTrack[];
+  stickCueTracks: [StickCueTrack, StickCueTrack];
 };
 
 export type MoveDefinitionCatalog = {

@@ -43,6 +43,9 @@ export function validateStickCueTrack(
   if (typeof value.label !== 'string' || value.label.trim().length === 0) {
     issues.push(`${path}.label must be a non-empty string.`);
   }
+  if (value.stick !== 'left' && value.stick !== 'right') {
+    issues.push(`${path}.stick must be "left" or "right".`);
+  }
   if (typeof value.controllerRole !== 'string' || !controllerRoles.has(value.controllerRole)) {
     issues.push(`${path}.controllerRole is not supported.`);
   }
@@ -96,12 +99,19 @@ export function assertValidMoveStickCueTracks(moves: unknown): void {
   const issues: string[] = [];
   const warnings: string[] = [];
   moves.forEach((move, moveIndex) => {
-    if (!isRecord(move) || move.stickCueTracks === undefined) return;
+    if (!isRecord(move)) {
+      issues.push(`moves[${moveIndex}] must be an object.`);
+      return;
+    }
     if (!Array.isArray(move.stickCueTracks)) {
       issues.push(`moves[${moveIndex}].stickCueTracks must be an array.`);
       return;
     }
+    if (move.stickCueTracks.length !== 2) {
+      issues.push(`moves[${moveIndex}].stickCueTracks must contain exactly two tracks.`);
+    }
     const ids = new Set<string>();
+    const sticks = new Set<string>();
     move.stickCueTracks.forEach((track, trackIndex) => {
       const path = `moves[${moveIndex}].stickCueTracks[${trackIndex}]`;
       const result = validateStickCueTrack(track, path);
@@ -111,7 +121,22 @@ export function assertValidMoveStickCueTracks(moves: unknown): void {
         if (ids.has(track.id)) issues.push(`${path}.id duplicates "${track.id}" within the move.`);
         ids.add(track.id);
       }
+      if (isRecord(track) && typeof track.stick === 'string') {
+        if (sticks.has(track.stick)) issues.push(`${path}.stick duplicates "${track.stick}" within the move.`);
+        sticks.add(track.stick);
+        const expectedRole = track.stick === 'left' ? 'upper-body' : 'lower-body';
+        const expectedInput = track.stick === 'left' ? 'movement' : 'look';
+        if (track.controllerRole !== expectedRole) {
+          issues.push(`${path}.controllerRole must be "${expectedRole}" for the ${track.stick} stick.`);
+        }
+        if (track.targetInput !== expectedInput) {
+          issues.push(`${path}.targetInput must be "${expectedInput}" for the ${track.stick} stick.`);
+        }
+      }
     });
+    if (!sticks.has('left') || !sticks.has('right')) {
+      issues.push(`moves[${moveIndex}].stickCueTracks must assign one left and one right stick.`);
+    }
   });
 
   if (issues.length > 0) throw new Error(`Invalid move stick cue tracks:\n- ${issues.join('\n- ')}`);

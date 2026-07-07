@@ -3,6 +3,7 @@ import Layout from '../layout/Layout.astro';
 import { buildLocalizedAlternates, buildLocalizedPath, getLocaleSwitcherLinks, type LocaleCode } from '../../lib/i18n';
 import { getMovesCopy, MOVES_PATH, PUBLIC_MOVES, type MoveFamily } from '../../lib/pages/moves';
 import InputModeSelector from '../moves/InputModeSelector.astro';
+import StickGrammar from '../moves/StickGrammar.astro';
 
 interface Props { locale: LocaleCode; family: MoveFamily; }
 const { locale, family } = Astro.props as Props;
@@ -23,6 +24,7 @@ const pagePath = `${MOVES_PATH}/${family}`;
     </header>
 
     <InputModeSelector locale={locale} />
+    <StickGrammar title={copy.stickGrammarTitle} text={copy.stickGrammarText} />
 
     <div class="my-7 rounded-3xl border-2 border-[#4f4337] bg-[#f8f1e7] p-4 sm:p-5">
       <label for="move-family-search" class="block text-[10px] font-black uppercase tracking-[0.2em] text-[#655544]">{copy.searchLabel}</label>

@@ -1,0 +1,13 @@
+---
+interface Props { title: string; text: string; }
+const { title, text } = Astro.props as Props;
+---
+
+<aside class="my-7 rounded-[1.75rem] border-2 border-[#4f4337] bg-[#eee3d3] p-5 sm:p-6">
+  <h2 class="text-sm font-black uppercase tracking-[0.14em] text-[#453a2f]">{title}</h2>
+  <div class="mt-4 grid gap-3 sm:grid-cols-2" aria-hidden="true">
+    <div class="rounded-2xl bg-[#2f281f] px-4 py-3 text-[#f8f1e7]"><strong class="text-xs uppercase tracking-[0.14em]">L · Upper body</strong><span class="mt-1 block text-xs text-[#d9c9b1]">Torso · Shoulders</span></div>
+    <div class="rounded-2xl bg-[#2f281f] px-4 py-3 text-[#f8f1e7]"><strong class="text-xs uppercase tracking-[0.14em]">R · Lower body</strong><span class="mt-1 block text-xs text-[#d9c9b1]">Hips · Legs</span></div>
+  </div>
+  <p class="mt-4 max-w-4xl text-sm leading-relaxed text-[#54483b] sm:text-base">{text}</p>
+</aside>

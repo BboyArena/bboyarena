@@ -1,7 +1,7 @@
 {
   "version": 1,
   "catalogId": "synthetic-move-prototypes",
-  "catalogRevision": "2026.07.3",
+  "catalogRevision": "2026.07.4",
   "variationSelection": [
     {
       "family": "toprock",
@@ -44,10 +44,26 @@
       ],
       "stickCueTracks": [
         {
-          "id": "toprock-direction",
-          "label": "Toprock direction",
-          "controllerRole": "lower-body",
+          "id": "toprock-upper-body",
+          "label": "Left stick · upper body",
+          "stick": "left",
+          "controllerRole": "upper-body",
           "targetInput": "movement",
+          "loop": true,
+          "points": [
+            { "t": 0, "x": 0, "y": 0, "tolerance": 0.25 },
+            { "t": 0.25, "x": -0.5, "y": 0.35, "tolerance": 0.3 },
+            { "t": 0.5, "x": 0, "y": 0, "tolerance": 0.25 },
+            { "t": 0.75, "x": 0.5, "y": -0.35, "tolerance": 0.3 },
+            { "t": 1, "x": 0, "y": 0, "tolerance": 0.25 }
+          ]
+        },
+        {
+          "id": "toprock-lower-body",
+          "label": "Right stick · lower body",
+          "stick": "right",
+          "controllerRole": "lower-body",
+          "targetInput": "look",
           "loop": true,
           "points": [
             { "t": 0, "x": 0, "y": 0, "tolerance": 0.2 },
@@ -82,6 +98,38 @@
         { "id": "indian-cross", "phaseId": "cross-step", "action": "action.freeze", "sourceFrame": 10, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
         { "id": "indian-open", "phaseId": "cross-step", "action": "action.powermove", "sourceFrame": 14, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1.5 }
       ],
+      "stickCueTracks": [
+        {
+          "id": "indian-step-upper-body",
+          "label": "Left stick · upper body",
+          "stick": "left",
+          "controllerRole": "upper-body",
+          "targetInput": "movement",
+          "loop": true,
+          "points": [
+            { "t": 0, "x": 0, "y": 0 },
+            { "t": 0.25, "x": -0.65, "y": 0.5 },
+            { "t": 0.5, "x": 0, "y": 0 },
+            { "t": 0.75, "x": 0.65, "y": 0.5 },
+            { "t": 1, "x": 0, "y": 0 }
+          ]
+        },
+        {
+          "id": "indian-step-lower-body",
+          "label": "Right stick · lower body",
+          "stick": "right",
+          "controllerRole": "lower-body",
+          "targetInput": "look",
+          "loop": true,
+          "points": [
+            { "t": 0, "x": 0, "y": 0 },
+            { "t": 0.25, "x": 0.7, "y": 0.7 },
+            { "t": 0.5, "x": 0, "y": 0 },
+            { "t": 0.75, "x": -0.7, "y": 0.7 },
+            { "t": 1, "x": 0, "y": 0 }
+          ]
+        }
+      ],
       "transitions": [
         { "intentId": "move.footwork.default", "windowStartFrame": 18, "windowEndFrame": 24 }
       ]
@@ -108,10 +156,24 @@
       ],
       "stickCueTracks": [
         {
-          "id": "footwork-direction",
-          "label": "Footwork path",
-          "controllerRole": "lower-body",
+          "id": "footwork-upper-body",
+          "label": "Left stick · upper body",
+          "stick": "left",
+          "controllerRole": "upper-body",
           "targetInput": "movement",
+          "points": [
+            { "t": 0, "x": 0, "y": 0 },
+            { "t": 0.33, "x": 0.55, "y": 0.25 },
+            { "t": 0.66, "x": -0.55, "y": 0.25 },
+            { "t": 1, "x": 0, "y": 0 }
+          ]
+        },
+        {
+          "id": "footwork-lower-body",
+          "label": "Right stick · lower body",
+          "stick": "right",
+          "controllerRole": "lower-body",
+          "targetInput": "look",
           "points": [
             { "t": 0, "x": 0, "y": 0 },
             { "t": 0.33, "x": -0.8, "y": 0.35 },
@@ -146,9 +208,24 @@
       ],
       "stickCueTracks": [
         {
-          "id": "powermove-spin",
-          "label": "Spin control",
-          "controllerRole": "spin",
+          "id": "powermove-upper-body",
+          "label": "Left stick · upper body",
+          "stick": "left",
+          "controllerRole": "upper-body",
+          "targetInput": "movement",
+          "points": [
+            { "t": 0, "x": 0, "y": -0.65, "tolerance": 0.35 },
+            { "t": 0.25, "x": -0.65, "y": 0, "tolerance": 0.35 },
+            { "t": 0.5, "x": 0, "y": 0.65, "tolerance": 0.35 },
+            { "t": 0.75, "x": 0.65, "y": 0, "tolerance": 0.35 },
+            { "t": 1, "x": 0, "y": -0.65, "tolerance": 0.35 }
+          ]
+        },
+        {
+          "id": "powermove-lower-body",
+          "label": "Right stick · lower body",
+          "stick": "right",
+          "controllerRole": "lower-body",
           "targetInput": "look",
           "points": [
             { "t": 0, "x": 0, "y": 1, "tolerance": 0.3 },
@@ -184,10 +261,23 @@
       ],
       "stickCueTracks": [
         {
-          "id": "freeze-balance",
-          "label": "Balance hold",
-          "controllerRole": "balance",
+          "id": "freeze-upper-body",
+          "label": "Left stick · upper body",
+          "stick": "left",
+          "controllerRole": "upper-body",
           "targetInput": "movement",
+          "points": [
+            { "t": 0, "x": 0, "y": 0, "tolerance": 0.18 },
+            { "t": 0.5, "x": -0.15, "y": 0.15, "tolerance": 0.15 },
+            { "t": 1, "x": 0, "y": 0, "tolerance": 0.18 }
+          ]
+        },
+        {
+          "id": "freeze-lower-body",
+          "label": "Right stick · lower body",
+          "stick": "right",
+          "controllerRole": "lower-body",
+          "targetInput": "look",
           "points": [
             { "t": 0, "x": 0, "y": 0, "tolerance": 0.18 },
             { "t": 0.5, "x": 0.15, "y": 0.15, "tolerance": 0.15 },

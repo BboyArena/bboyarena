@@ -84,7 +84,7 @@ Player intent is timestamped immediately with the current global tick. Authored 
 
 Move definitions under `apps/game/src/game/move` describe source FPS, frame count, musical duration, phases, loop regions, expected input cues, skills, and transition windows. Animation files remain separate presentation assets.
 
-Moves may also define normalized stick cue tracks. Each track names a semantic controller role (for example `lower-body`, `upper-body`, `balance`, or `spin`) rather than assuming that every move uses fixed left/right controls. This lets Top Rock and Footwork describe directional drills while future Powermoves can assign the same generic track system to body-control domains. Cue coordinates use `-1..1`, cue time uses `0..1`, and the data remains serializable.
+Every move defines two normalized stick cue tracks with a stable body grammar: the left stick represents `upper-body` control for torso and shoulders through canonical `movement` input, while the right stick represents `lower-body` control for hips and legs through canonical `look` input. Both trajectories share the move timeline. Cue coordinates use `-1..1`, cue time uses `0..1`, and the data remains serializable.
 
 The normalization boundary is:
 
@@ -106,9 +106,9 @@ See the repository-level [Input Manager documentation](../../../docs/input-manag
 
 HUD elements remain HTML layered over the canvas. This is preferred for text, menus, diagnostics, buttons, and accessibility-sensitive controls.
 
-`GamePlayHUD` owns player-facing gameplay information. Training diagnostics should remain clearly distinct from release UI and should not leak device-specific details into gameplay state.
+`GamePlayHUD` owns player-facing gameplay information. Training diagnostics should remain clearly distinct from release UI. The fixed left-stick/upper-body and right-stick/lower-body labels present semantic cue roles; gameplay state continues to consume canonical inputs rather than device APIs.
 
-The Training HUD currently exposes sampled semantic stick-cue coordinates for the active move. This is intentionally a text diagnostic, not a polished joystick renderer or scoring surface.
+The Training HUD exposes the sampled upper-body and lower-body stick cues for the active move. These guides explain which stick controls each body domain and where both sticks should move; they remain guidance rather than a scoring surface.
 
 The gameplay HUD also shows the active move family/style, beat-based completion progress, and a bounded queue of canonical move-family requests. Gamepad face buttons map through the canonical input layer (`A` Toprock, `B` Footwork, `X` Freeze, `Y` Powermove); presses during an active move are queued rather than interrupting it. A lightweight SVG guide displays each authored stick path, its current target, and the corresponding canonical player input. This remains guidance only: it does not score or fail execution.
 

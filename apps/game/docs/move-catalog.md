@@ -66,7 +66,7 @@ Each entry in `moves` contains:
 | `loop` | Optional source-frame loop region. |
 | `phases` | Named source-frame ranges such as entry, execution, hold, or recovery. |
 | `cues` | Expected canonical actions and their early/late timing windows. |
-| `stickCueTracks` | Optional normalized directional guidance. |
+| `stickCueTracks` | The two normalized directional guides authored for the move. |
 | `transitions` | Authored windows in which another intent may follow. |
 
 ## Timing and normalization
@@ -82,18 +82,25 @@ This produces beat and fixed-step tick positions for loops, cues, and transition
 
 The normalization utilities exist, but the current queue only consumes `label` and `durationBeats`. Cue scoring, phase execution, and enforcement of transition windows are not yet connected to the active gameplay path.
 
-## Stick cue tracks
+## Two-stick movement grammar
 
-A stick cue track describes a path with normalized time and coordinates:
+Every move authors two cue tracks that run over the same move timeline:
+
+- the **left stick** follows the `upper-body` track for torso and shoulder direction and maps to canonical `movement` input;
+- the **right stick** follows the `lower-body` track for hip and leg direction and maps to canonical `look` input.
+
+This is the base control grammar across Toprock, Footwork, Freeze, and Powermove. The paths change from move to move, but the body assignment stays stable so a first-time player does not have to relearn what each stick represents.
+
+Each track describes its trajectory with normalized time and coordinates:
 
 - `t` ranges from `0` to `1` over the move;
 - `x` and `y` range from `-1` to `1`;
 - `tolerance` optionally describes the accepted distance from a point;
-- `controllerRole` names a semantic body/control role such as `lower-body`, `balance`, or `spin`;
-- `targetInput` selects `movement`, `look`, or `custom`;
+- `controllerRole` is `upper-body` or `lower-body`;
+- `targetInput` is `movement` for the upper-body track and `look` for the lower-body track;
 - `loop` repeats the path for HUD sampling.
 
-`stickCueTracks.ts` validates these tracks when the local catalog is imported. The Training HUD samples and draws them as guidance. It does not yet compare the path with player input or award score.
+`stickCueTracks.ts` validates these tracks when the local catalog is imported. The Training HUD samples and draws both trajectories as guidance, including their current targets and the player's corresponding stick positions. It does not yet compare the paths with player input, fail a move, or award score.
 
 ## Current move inventory
 

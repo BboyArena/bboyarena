@@ -1982,11 +1982,34 @@
   color: var(--game-text);
 }
 
+.bboy-game-root .game-stick-cue-hud section[data-stick="movement"] { --stick-accent: #63d8ff; }
+.bboy-game-root .game-stick-cue-hud section[data-stick="look"] { --stick-accent: #ff77ba; }
+.bboy-game-root .game-stick-cue-hud section[data-stick="custom"] { --stick-accent: var(--game-gold-hot); }
+.bboy-game-root .game-stick-cue-hud section[data-on-target="true"] {
+  border-color: #65ed8e;
+  box-shadow: 0 0 0.8rem rgba(101, 237, 142, 0.24);
+}
+
 .bboy-game-root .game-stick-cue-hud header {
-  display: grid;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   margin-bottom: 0.25rem;
   text-transform: uppercase;
 }
+
+.bboy-game-root .game-stick-cue-hud header > b {
+  display: grid;
+  flex: 0 0 1.25rem;
+  height: 1.25rem;
+  place-items: center;
+  border: 1px solid var(--stick-accent);
+  border-radius: 50%;
+  color: var(--stick-accent);
+  font-size: 0.65rem;
+}
+
+.bboy-game-root .game-stick-cue-hud header > span { display: grid; }
 
 .bboy-game-root .game-stick-cue-hud header strong {
   font-size: 0.58rem;
@@ -1998,6 +2021,17 @@
   font-size: 0.43rem;
   letter-spacing: 0.07em;
 }
+
+.bboy-game-root .game-stick-cue-hud footer {
+  display: grid;
+  gap: 0.1rem;
+  margin-top: 0.25rem;
+  font-size: 0.45rem;
+  letter-spacing: 0.05em;
+}
+
+.bboy-game-root .game-stick-cue-hud footer strong { color: var(--stick-accent); text-transform: uppercase; }
+.bboy-game-root .game-stick-cue-hud section[data-on-target="true"] footer strong { color: #65ed8e; }
 
 .bboy-game-root .game-stick-cue-hud svg {
   display: block;
@@ -2028,6 +2062,24 @@
   stroke: #111;
   stroke-width: 2;
 }
+
+.bboy-game-root .touch-controls__joystick-group {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+}
+
+.bboy-game-root .touch-controls__joystick-label {
+  display: grid;
+  color: rgba(247, 241, 230, 0.78);
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 1px 3px #000;
+  pointer-events: none;
+}
+
+.bboy-game-root .touch-controls__joystick-label b { font-size: 0.58rem; letter-spacing: 0.1em; }
+.bboy-game-root .touch-controls__joystick-label small { font-size: 0.42rem; letter-spacing: 0.06em; }
 
 .bboy-game-root .game-play-status-controls {
   position: absolute;
@@ -2347,7 +2399,7 @@
 .bboy-game-root .touch-controls__side--right { justify-content: flex-end; }
 
 @media (orientation: landscape) {
-  .bboy-game-root .touch-controls__side--right .touch-controls__joystick-zone {
+  .bboy-game-root .touch-controls__side--right .touch-controls__joystick-group {
     order: -1;
   }
 }
@@ -2537,7 +2589,7 @@
     padding-bottom: 2.75rem;
   }
 
-  .bboy-game-root .touch-controls__side--right .touch-controls__joystick-zone {
+  .bboy-game-root .touch-controls__side--right .touch-controls__joystick-group {
     order: initial;
   }
 

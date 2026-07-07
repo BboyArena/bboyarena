@@ -233,6 +233,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
     return move.stickCueTracks.map((track) => ({
       id: track.id,
       label: track.label,
+      stick: track.stick,
       controllerRole: track.controllerRole,
       targetInput: track.targetInput ?? 'movement',
       points: track.points,

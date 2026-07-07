@@ -549,6 +549,40 @@ Suggested replay envelope:
 
 ## Test checklist
 
+## Dual-stick gameplay plan by move family
+
+The shared rule stays fixed across every family: left stick controls upper-body direction (torso and shoulders), right stick controls lower-body direction (hips and legs). Family identity comes from timing, path shape, tolerance, and the relationship between the two tracks—not from swapping stick meanings.
+
+### Phase A — Teach the grammar
+
+- [x] Author exactly two validated tracks for every current move.
+- [x] Show both target paths, both live stick positions, body labels, and immediate visual proximity feedback.
+- [ ] Add a short, skippable first-play drill: move only left, move only right, then follow both together.
+- [ ] Test legibility and reach on keyboard/mouse, gamepad, and small touch screens before adding penalties.
+
+### Phase B — Give each family a readable skill
+
+- [ ] **Toprock — rhythm and opposition:** alternate lower-body steps while the upper body counters or opens on the beat; start with broad tolerances and mirrored repetitions.
+- [ ] **Footwork — weight transfer and coordination:** use wider lower-body sweeps with shorter upper-body support shifts; introduce direction changes only after the base pattern reads clearly.
+- [ ] **Freeze — balance and stillness:** guide both sticks into small hold zones, measure stability over time, and visualize drift without instantly failing the move.
+- [ ] **Powermove — continuous coordination:** use phase-offset circular tracks for torso and hips; teach one slow rotation before increasing speed or chaining loops.
+- [ ] Tune path density, tolerance, duration, and tempo per family from playtest evidence rather than one global difficulty curve.
+
+### Phase C — Turn guidance into gameplay
+
+- [ ] Record timestamped left/right input samples against the active move timeline.
+- [ ] Evaluate timing, path distance, and hold stability separately so feedback explains what the player can improve.
+- [ ] Add per-stick and combined feedback states before introducing scores, failure, or combo consequences.
+- [ ] Scale difficulty progressively: guide mode, practice mode, then performance mode with reduced assistance.
+- [ ] Preserve deterministic evaluation so the same replay produces the same result.
+
+### Acceptance criteria
+
+- [ ] A first-time player can identify each stick's body role without opening documentation.
+- [ ] Each family feels different while preserving the same left/right body grammar.
+- [ ] Feedback distinguishes upper-body, lower-body, timing, and stability errors.
+- [ ] No move becomes unplayable solely because one device exposes input differently.
+
 ### Unit-level behavior
 
 - [ ] Catalog validator accepts the default catalog.

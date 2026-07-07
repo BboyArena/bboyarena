@@ -111,9 +111,12 @@ export default function TouchControlsOverlay() {
 
     <div className="touch-controls__side touch-controls__side--left">
       <DirectionPad />
-      <div className="touch-controls__joystick-zone" ref={leftStickRef} aria-label="Left analog stick">
-        <span className="touch-controls__joystick-visual" aria-hidden="true" />
-        <TouchInputAdapter joystickZoneRef={leftStickRef} channel="move" />
+      <div className="touch-controls__joystick-group">
+        <span className="touch-controls__joystick-label"><b>L · Upper body</b><small>Torso + shoulders</small></span>
+        <div className="touch-controls__joystick-zone" ref={leftStickRef} aria-label="Left analog stick: upper body, torso and shoulders">
+          <span className="touch-controls__joystick-visual" aria-hidden="true" />
+          <TouchInputAdapter joystickZoneRef={leftStickRef} channel="move" />
+        </div>
       </div>
     </div>
 
@@ -129,9 +132,12 @@ export default function TouchControlsOverlay() {
         <TouchButton buttonId="footwork" className="touch-controls__face-button touch-controls__face-button--b" />
         <TouchButton buttonId="toprock" className="touch-controls__face-button touch-controls__face-button--a" />
       </div>
-      <div className="touch-controls__joystick-zone" ref={rightStickRef} aria-label="Right analog stick">
-        <span className="touch-controls__joystick-visual" aria-hidden="true" />
-        <TouchInputAdapter joystickZoneRef={rightStickRef} channel="look" />
+      <div className="touch-controls__joystick-group">
+        <span className="touch-controls__joystick-label"><b>R · Lower body</b><small>Hips + legs</small></span>
+        <div className="touch-controls__joystick-zone" ref={rightStickRef} aria-label="Right analog stick: lower body, hips and legs">
+          <span className="touch-controls__joystick-visual" aria-hidden="true" />
+          <TouchInputAdapter joystickZoneRef={rightStickRef} channel="look" />
+        </div>
       </div>
     </div>
   </div>;

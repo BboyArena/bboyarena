@@ -1,0 +1,77 @@
+---
+import type { MovesCopy, PublicStickPoint, PublicStickTracks } from '../../lib/pages/moves';
+
+interface Props {
+  tracks: PublicStickTracks;
+  copy: MovesCopy;
+}
+
+const { tracks, copy } = Astro.props as Props;
+const times = [...new Set([...tracks.left, ...tracks.right].map((point) => point.t))].sort((a, b) => a - b);
+
+const sampleAt = (points: PublicStickPoint[], t: number): PublicStickPoint => {
+  const exact = points.find((point) => point.t === t);
+  if (exact) return exact;
+  const nextIndex = points.findIndex((point) => point.t > t);
+  if (nextIndex <= 0) return points[Math.max(0, nextIndex)] ?? points[points.length - 1];
+  const from = points[nextIndex - 1];
+  const to = points[nextIndex];
+  const progress = (t - from.t) / (to.t - from.t);
+  return { t, x: from.x + (to.x - from.x) * progress, y: from.y + (to.y - from.y) * progress };
+};
+
+const directionKey = ({ x, y }: PublicStickPoint): keyof MovesCopy['direction'] => {
+  if (Math.hypot(x, y) < 0.12) return 'center';
+  const horizontal = Math.abs(x) >= 0.25 ? (x < 0 ? 'Left' : 'Right') : '';
+  const vertical = Math.abs(y) >= 0.25 ? (y < 0 ? 'down' : 'up') : '';
+  if (vertical && horizontal) return `${vertical}${horizontal}` as keyof MovesCopy['direction'];
+  if (horizontal) return horizontal.toLowerCase() as 'left' | 'right';
+  return vertical as 'up' | 'down';
+};
+
+const pathPoints = (points: PublicStickPoint[]) => points.map((point) => `${50 + point.x * 34},${50 - point.y * 34}`).join(' ');
+const frames = times.map((t, index) => ({
+  t,
+  index,
+  left: sampleAt(tracks.left, t),
+  right: sampleAt(tracks.right, t)
+}));
+---
+
+<div class="mt-6 grid grid-cols-1 gap-4" role="list">
+  {frames.map((frame) => (
+    <article class="rounded-3xl border border-[#4f4337]/25 bg-[#eee3d3] p-4" role="listitem">
+      <header class="flex items-center justify-between gap-3">
+        <strong class="text-xs font-black uppercase tracking-[0.16em] text-[#453a2f]">
+          {frame.index === 0 ? copy.start : frame.index === frames.length - 1 ? copy.finish : `${copy.step} ${frame.index}`}
+        </strong>
+        <span class="text-[10px] font-bold tabular-nums text-[#756553]">{Math.round(frame.t * 100)}%</span>
+      </header>
+
+      <div class="mt-4 grid grid-cols-2 gap-3">
+        {([
+          { side: 'left', point: frame.left, title: copy.leftStick, body: copy.upperBody, color: '#d8a229', path: tracks.left },
+          { side: 'right', point: frame.right, title: copy.rightStick, body: copy.lowerBody, color: '#b96745', path: tracks.right }
+        ] as const).map((stick) => (
+          <figure class="min-w-0 rounded-2xl bg-[#2f281f] p-3 text-[#f8f1e7]">
+            <figcaption>
+              <strong class="block text-[10px] font-black uppercase tracking-[0.12em]">{stick.side === 'left' ? 'L' : 'R'} · {stick.title}</strong>
+              <span class="mt-1 block text-[9px] text-[#d9c9b1]">{stick.body}</span>
+            </figcaption>
+            <svg class="mx-auto mt-3 block w-full max-w-32" viewBox="0 0 100 100" role="img" aria-label={`${stick.title}: ${copy.direction[directionKey(stick.point)]}`}>
+              <circle cx="50" cy="50" r="39" fill="#17130f" stroke="#786855" stroke-width="2" />
+              <line x1="50" y1="13" x2="50" y2="87" stroke="#5d5144" stroke-width="1" />
+              <line x1="13" y1="50" x2="87" y2="50" stroke="#5d5144" stroke-width="1" />
+              <polyline points={pathPoints(stick.path)} fill="none" stroke={stick.color} stroke-opacity="0.35" stroke-width="2" stroke-dasharray="3 3" />
+              <line x1="50" y1="50" x2={50 + stick.point.x * 34} y2={50 - stick.point.y * 34} stroke={stick.color} stroke-width="4" stroke-linecap="round" />
+              <circle cx={50 + stick.point.x * 34} cy={50 - stick.point.y * 34} r="7" fill={stick.color} stroke="#fff4df" stroke-width="2" />
+            </svg>
+            <p class="mt-2 text-center text-[10px] font-black uppercase tracking-[0.1em]" style={`color:${stick.color}`}>
+              {copy.direction[directionKey(stick.point)]}
+            </p>
+          </figure>
+        ))}
+      </div>
+    </article>
+  ))}
+</div>
