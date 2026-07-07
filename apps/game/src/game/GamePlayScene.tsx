@@ -217,17 +217,16 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const animationStateLabel = JSON.stringify(animationActorState.value);
   const animationDefinition = animationActorState.context.current?.definition ?? null;
   const stickCueDiagnostics = useMemo(() => {
-    const playback = animationActorState.context.current;
-    if (playback === null) return [];
+    const activeMove = moveQueue.active;
+    if (activeMove === null) return [];
 
     const move = moveCatalog.moves.find(
-      (definition) => definition.intentId === playback.definition.intentId
+      (definition) => definition.intentId === activeMove.intentId
     );
     if (!move?.stickCueTracks?.length) return [];
 
-    const durationTicks = move.durationBeats * (60 / rhythmSnapshot.bpm) * rhythmSnapshot.tickRate;
-    const progress = durationTicks > 0
-      ? (rhythmSnapshot.tick - playback.startedAtTick) / durationTicks
+    const progress = activeMove.durationBeats > 0
+      ? (rhythmSnapshot.beat - activeMove.startedAtBeat) / activeMove.durationBeats
       : 0;
 
     return move.stickCueTracks.map((track) => ({
@@ -241,10 +240,8 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
       sample: sampleStickCueTrack(track, progress)
     }));
   }, [
-    animationActorState.context.current,
-    rhythmSnapshot.bpm,
-    rhythmSnapshot.tick,
-    rhythmSnapshot.tickRate
+    moveQueue.active,
+    rhythmSnapshot.beat
   ]);
 
   useEffect(() => {

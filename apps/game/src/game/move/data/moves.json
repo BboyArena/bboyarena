@@ -1,7 +1,7 @@
 {
   "version": 1,
   "catalogId": "synthetic-move-prototypes",
-  "catalogRevision": "2026.07.4",
+  "catalogRevision": "2026.07.5",
   "variationSelection": [
     {
       "family": "toprock",
@@ -17,7 +17,7 @@
         }
       ]
     },
-    { "family": "footwork", "defaultIntentId": "move.footwork.default", "selectionWindowBeats": 1, "variations": [] },
+    { "family": "footwork", "defaultIntentId": "move.footwork.threestep", "selectionWindowBeats": 1, "variations": [] },
     { "family": "freeze", "defaultIntentId": "move.freeze.default", "selectionWindowBeats": 1, "variations": [] },
     { "family": "powermove", "defaultIntentId": "move.powermove.default", "selectionWindowBeats": 1, "variations": [] }
   ],
@@ -75,7 +75,7 @@
         }
       ],
       "transitions": [
-        { "intentId": "move.footwork.default", "windowStartFrame": 18, "windowEndFrame": 24 },
+        { "intentId": "move.footwork.threestep", "windowStartFrame": 18, "windowEndFrame": 24 },
         { "intentId": "move.powermove.default", "windowStartFrame": 18, "windowEndFrame": 24 }
       ]
     },
@@ -131,59 +131,117 @@
         }
       ],
       "transitions": [
-        { "intentId": "move.footwork.default", "windowStartFrame": 18, "windowEndFrame": 24 }
+        { "intentId": "move.footwork.threestep", "windowStartFrame": 18, "windowEndFrame": 24 }
       ]
     },
     {
-      "id": "default-footwork",
+      "id": "footwork-threestep",
       "version": 1,
-      "intentId": "move.footwork.default",
-      "label": "Default Footwork",
+      "intentId": "move.footwork.threestep",
+      "label": "Three-step",
       "skills": ["timing", "direction", "flow"],
       "sourceFps": 30,
       "sourceFrameCount": 30,
-      "durationBeats": 4,
-      "loop": { "startFrame": 12, "endFrame": 30 },
+      "durationBeats": 3,
+      "loop": { "startFrame": 0, "endFrame": 30 },
       "phases": [
-        { "id": "entry", "startFrame": 0, "endFrame": 10 },
-        { "id": "sweep", "startFrame": 10, "endFrame": 24 },
-        { "id": "recovery", "startFrame": 24, "endFrame": 30 }
+        { "id": "step-one", "startFrame": 0, "endFrame": 10 },
+        { "id": "step-two", "startFrame": 10, "endFrame": 20 },
+        { "id": "step-three", "startFrame": 20, "endFrame": 30 }
       ],
       "cues": [
-        { "id": "footwork-open", "phaseId": "entry", "action": "action.footwork", "sourceFrame": 8, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
-        { "id": "footwork-hit", "phaseId": "sweep", "action": "action.toprock", "sourceFrame": 12, "earlyWindowFrames": 2, "lateWindowFrames": 3, "weight": 1.5 },
-        { "id": "comet-direction", "phaseId": "sweep", "action": "move", "sourceFrame": 18, "earlyWindowFrames": 3, "lateWindowFrames": 3, "weight": 1 }
+        { "id": "three-step-one", "phaseId": "step-one", "action": "action.footwork", "sourceFrame": 5, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
+        { "id": "three-step-two", "phaseId": "step-two", "action": "move", "sourceFrame": 15, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
+        { "id": "three-step-three", "phaseId": "step-three", "action": "move", "sourceFrame": 25, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 }
       ],
       "stickCueTracks": [
         {
-          "id": "footwork-upper-body",
+          "id": "three-step-upper-body",
           "label": "Left stick · upper body",
           "stick": "left",
           "controllerRole": "upper-body",
           "targetInput": "movement",
           "points": [
             { "t": 0, "x": 0, "y": 0 },
-            { "t": 0.33, "x": 0.55, "y": 0.25 },
-            { "t": 0.66, "x": -0.55, "y": 0.25 },
+            { "t": 0.333333, "x": 0.55, "y": 0.25 },
+            { "t": 0.666667, "x": -0.55, "y": 0.25 },
             { "t": 1, "x": 0, "y": 0 }
           ]
         },
         {
-          "id": "footwork-lower-body",
+          "id": "three-step-lower-body",
           "label": "Right stick · lower body",
           "stick": "right",
           "controllerRole": "lower-body",
           "targetInput": "look",
           "points": [
             { "t": 0, "x": 0, "y": 0 },
-            { "t": 0.33, "x": -0.8, "y": 0.35 },
-            { "t": 0.66, "x": 0.8, "y": -0.35 },
+            { "t": 0.333333, "x": -0.8, "y": 0.35 },
+            { "t": 0.666667, "x": 0.8, "y": -0.35 },
             { "t": 1, "x": 0, "y": 0 }
           ]
         }
       ],
       "transitions": [
         { "intentId": "move.freeze.default", "windowStartFrame": 24, "windowEndFrame": 30 }
+      ]
+    },
+    {
+      "id": "footwork-sixstep",
+      "version": 1,
+      "intentId": "move.footwork.sixstep",
+      "label": "Six-step",
+      "skills": ["timing", "direction", "flow", "coordination"],
+      "sourceFps": 30,
+      "sourceFrameCount": 60,
+      "durationBeats": 6,
+      "loop": { "startFrame": 0, "endFrame": 60 },
+      "phases": [
+        { "id": "first-half", "startFrame": 0, "endFrame": 30 },
+        { "id": "second-half", "startFrame": 30, "endFrame": 60 }
+      ],
+      "cues": [
+        { "id": "six-step-open", "phaseId": "first-half", "action": "action.footwork", "sourceFrame": 5, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 },
+        { "id": "six-step-half", "phaseId": "second-half", "action": "move", "sourceFrame": 35, "earlyWindowFrames": 2, "lateWindowFrames": 2, "weight": 1 }
+      ],
+      "stickCueTracks": [
+        {
+          "id": "six-step-upper-body",
+          "label": "Left stick · upper body",
+          "stick": "left",
+          "controllerRole": "upper-body",
+          "targetInput": "movement",
+          "loop": true,
+          "points": [
+            { "t": 0, "x": 0, "y": 0 },
+            { "t": 0.166667, "x": 0.45, "y": 0.35 },
+            { "t": 0.333333, "x": 0.6, "y": 0 },
+            { "t": 0.5, "x": 0, "y": -0.35 },
+            { "t": 0.666667, "x": -0.6, "y": 0 },
+            { "t": 0.833333, "x": -0.45, "y": 0.35 },
+            { "t": 1, "x": 0, "y": 0 }
+          ]
+        },
+        {
+          "id": "six-step-lower-body",
+          "label": "Right stick · lower body",
+          "stick": "right",
+          "controllerRole": "lower-body",
+          "targetInput": "look",
+          "loop": true,
+          "points": [
+            { "t": 0, "x": 0, "y": 0 },
+            { "t": 0.166667, "x": -0.7, "y": 0.55 },
+            { "t": 0.333333, "x": -0.85, "y": 0 },
+            { "t": 0.5, "x": 0, "y": -0.7 },
+            { "t": 0.666667, "x": 0.85, "y": 0 },
+            { "t": 0.833333, "x": 0.7, "y": 0.55 },
+            { "t": 1, "x": 0, "y": 0 }
+          ]
+        }
+      ],
+      "transitions": [
+        { "intentId": "move.freeze.default", "windowStartFrame": 50, "windowEndFrame": 60 }
       ]
     },
     {

@@ -1966,11 +1966,13 @@
 
 .bboy-game-root .game-stick-cue-hud {
   position: absolute;
-  z-index: 19;
-  left: clamp(0.75rem, 2vw, 1.5rem);
+  z-index: 18;
+  left: 50%;
   bottom: clamp(0.75rem, 2vw, 1.5rem);
   display: flex;
   gap: 0.5rem;
+  opacity: 0.62;
+  transform: translateX(-50%);
   pointer-events: none;
 }
 
@@ -1978,16 +1980,15 @@
   width: 8rem;
   padding: 0.45rem;
   border: 1px solid rgba(255, 217, 92, 0.35);
-  background: rgba(8, 8, 10, 0.72);
+  background: rgba(8, 8, 10, 0.46);
   color: var(--game-text);
 }
 
-.bboy-game-root .game-stick-cue-hud section[data-stick="movement"] { --stick-accent: #63d8ff; }
-.bboy-game-root .game-stick-cue-hud section[data-stick="look"] { --stick-accent: #ff77ba; }
-.bboy-game-root .game-stick-cue-hud section[data-stick="custom"] { --stick-accent: var(--game-gold-hot); }
+.bboy-game-root .game-stick-cue-hud section[data-stick="left"] { --stick-accent: #63d8ff; }
+.bboy-game-root .game-stick-cue-hud section[data-stick="right"] { --stick-accent: #ff77ba; }
 .bboy-game-root .game-stick-cue-hud section[data-on-target="true"] {
   border-color: #65ed8e;
-  box-shadow: 0 0 0.8rem rgba(101, 237, 142, 0.24);
+  box-shadow: 0 0 0.55rem rgba(101, 237, 142, 0.16);
 }
 
 .bboy-game-root .game-stick-cue-hud header {

@@ -45,16 +45,34 @@ export const PUBLIC_MOVES: PublicMove[] = [
     }
   },
   {
-    id: 'default-footwork', label: 'Footwork', family: 'footwork', durationBeats: 4,
+    id: 'footwork-threestep', label: 'Three-step', family: 'footwork', durationBeats: 3,
     status: 'playable', skills: ['timing', 'direction', 'flow'],
     stickTracks: {
       left: [
-        { t: 0, x: 0, y: 0 }, { t: 0.33, x: 0.55, y: 0.25 },
-        { t: 0.66, x: -0.55, y: 0.25 }, { t: 1, x: 0, y: 0 }
+        { t: 0, x: 0, y: 0 }, { t: 0.333333, x: 0.55, y: 0.25 },
+        { t: 0.666667, x: -0.55, y: 0.25 }, { t: 1, x: 0, y: 0 }
       ],
       right: [
-        { t: 0, x: 0, y: 0 }, { t: 0.33, x: -0.8, y: 0.35 },
-        { t: 0.66, x: 0.8, y: -0.35 }, { t: 1, x: 0, y: 0 }
+        { t: 0, x: 0, y: 0 }, { t: 0.333333, x: -0.8, y: 0.35 },
+        { t: 0.666667, x: 0.8, y: -0.35 }, { t: 1, x: 0, y: 0 }
+      ]
+    }
+  },
+  {
+    id: 'footwork-sixstep', label: 'Six-step', family: 'footwork', durationBeats: 6,
+    status: 'prototype', skills: ['timing', 'direction', 'flow', 'coordination'],
+    stickTracks: {
+      left: [
+        { t: 0, x: 0, y: 0 }, { t: 0.166667, x: 0.45, y: 0.35 },
+        { t: 0.333333, x: 0.6, y: 0 }, { t: 0.5, x: 0, y: -0.35 },
+        { t: 0.666667, x: -0.6, y: 0 }, { t: 0.833333, x: -0.45, y: 0.35 },
+        { t: 1, x: 0, y: 0 }
+      ],
+      right: [
+        { t: 0, x: 0, y: 0 }, { t: 0.166667, x: -0.7, y: 0.55 },
+        { t: 0.333333, x: -0.85, y: 0 }, { t: 0.5, x: 0, y: -0.7 },
+        { t: 0.666667, x: 0.85, y: 0 }, { t: 0.833333, x: 0.7, y: 0.55 },
+        { t: 1, x: 0, y: 0 }
       ]
     }
   },

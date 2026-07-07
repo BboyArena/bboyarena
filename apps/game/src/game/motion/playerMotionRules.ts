@@ -7,7 +7,8 @@ import type {
 const performingIntentIds = new Set<PlayerMotionIntentId>([
   'move.toprock.default',
   'move.toprock.indianstep',
-  'move.footwork.default',
+  'move.footwork.threestep',
+  'move.footwork.sixstep',
   'move.freeze.default',
   'move.powermove.default'
 ]);

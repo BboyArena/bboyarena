@@ -1,7 +1,7 @@
 {
   "version": 1,
   "catalogId": "prototype-player",
-  "catalogRevision": "2026.07.4",
+  "catalogRevision": "2026.07.5",
   "animations": [
     {
       "id": "prototype-idle",
@@ -52,10 +52,22 @@
       }
     },
     {
-      "id": "default-footwork",
-      "intentId": "move.footwork.default",
+      "id": "footwork-threestep",
+      "intentId": "move.footwork.threestep",
       "source": "procedural://prototype-player",
-      "clip": "DefaultFootwork",
+      "clip": "ThreeStep",
+      "playback": {
+        "loop": "repeat",
+        "speed": 1,
+        "fadeInMs": 120,
+        "fadeOutMs": 160
+      }
+    },
+    {
+      "id": "footwork-sixstep",
+      "intentId": "move.footwork.sixstep",
+      "source": "procedural://prototype-player",
+      "clip": "SixStep",
       "playback": {
         "loop": "repeat",
         "speed": 1,

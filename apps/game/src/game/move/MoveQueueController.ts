@@ -20,7 +20,7 @@ const buttonFamilies: Partial<Record<GameInputButtonId, MoveQueueFamily>> = {
 };
 const defaultIntentByFamily: Record<MoveQueueFamily, PlayerMotionIntentId> = {
   toprock: 'move.toprock.default',
-  footwork: 'move.footwork.default',
+  footwork: 'move.footwork.threestep',
   freeze: 'move.freeze.default',
   powermove: 'move.powermove.default'
 };

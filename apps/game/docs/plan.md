@@ -186,7 +186,8 @@ Initial intent candidates:
 movement.idle
 movement.toprock
 move.toprock.default
-move.footwork.default
+move.footwork.threestep
+move.footwork.sixstep
 move.freeze.default
 move.powermove.default
 ```

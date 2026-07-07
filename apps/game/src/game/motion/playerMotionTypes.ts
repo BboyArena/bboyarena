@@ -3,7 +3,8 @@ export const PLAYER_MOTION_INTENT_IDS = [
   'movement.toprock',
   'move.toprock.default',
   'move.toprock.indianstep',
-  'move.footwork.default',
+  'move.footwork.threestep',
+  'move.footwork.sixstep',
   'move.freeze.default',
   'move.powermove.default'
 ] as const;
@@ -15,7 +16,8 @@ export const PLAYER_MOTION_INTENT_LABELS: Record<PlayerMotionIntentId, string> =
   'movement.toprock': 'Toprock',
   'move.toprock.default': 'Default Toprock',
   'move.toprock.indianstep': 'Indian Step',
-  'move.footwork.default': 'Default Footwork',
+  'move.footwork.threestep': 'Three-step',
+  'move.footwork.sixstep': 'Six-step',
   'move.freeze.default': 'Default Freeze',
   'move.powermove.default': 'Default Powermove'
 };

@@ -108,11 +108,14 @@ Each track describes its trajectory with normalized time and coordinates:
 | --- | --- | --- | ---: | --- |
 | Default Toprock | `move.toprock.default` | Toprock | 4 beats | Activatable |
 | Indian Step | `move.toprock.indianstep` | Toprock variation | 4 beats | Defined but unreachable |
-| Default Footwork | `move.footwork.default` | Footwork | 4 beats | Activatable |
+| Three-step | `move.footwork.threestep` | Footwork | 3 beats | Activatable |
+| Six-step | `move.footwork.sixstep` | Footwork | 6 beats | Defined but unreachable |
 | Default Powermove | `move.powermove.default` | Powermove | 2 beats | Activatable |
 | Default Freeze | `move.freeze.default` | Freeze | 4 beats | Activatable |
 
-The four default moves are the currently functioning input-to-runtime paths. Each has a canonical button mapping, a queue mapping, a motion intent, and a local procedural animation definition.
+The four default family moves are the currently functioning input-to-runtime paths. Three-step is the default Footwork request. Each has a canonical button mapping, a queue mapping, a motion intent, and a local procedural animation definition.
+
+Footwork cycles are intentionally not forced into a four-beat move duration. Three-step spans 3 beats and Six-step spans 6 beats while the global music remains in 4/4, so their cycle boundary shifts against the musical bar. Six-step has catalog, intent, animation, and stick-guide definitions, but no active selection recipe yet.
 
 Indian Step is present in the move and animation catalogs and is accepted by the player motion types. Its variation recipe opens with Toprock, then expects Freeze near beat offset `0.25` and Powermove near `0.5`, with `0.18` beat tolerance for each step. However, `PlayerIntentResolver` is not instantiated by `GamePlayScene`; the active queue always chooses the default intent for a family. Indian Step therefore cannot currently be selected through gameplay input.
 
