@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import Player from './Player';
 import type { PlayerMotionSnapshot } from './motion/playerMotionTypes';
 import type { AnimationDefinition } from './animation/animationCatalogTypes';
+import { useGameInputController } from './input/GameInputProvider';
 
 interface CanvasSceneProps {
   gameState: string;
@@ -48,6 +49,19 @@ function WebGLContextGuard({ onContextLost }: { onContextLost: () => void }) {
 
 export default function CanvasScene({ gameState, playerMotionState, animationDefinition }: CanvasSceneProps) {
   const [hasWebGLContext, setHasWebGLContext] = useState(true);
+  const inputController = useGameInputController();
+  const threeFingerGestureActive = useRef(false);
+
+  const handleTouchStart = (touchCount: number) => {
+    if (touchCount !== 3 || threeFingerGestureActive.current) return;
+
+    threeFingerGestureActive.current = true;
+    inputController.triggerSystemAction('touch', 'system.quickMenu');
+  };
+
+  const handleTouchEnd = (touchCount: number) => {
+    if (touchCount < 3) threeFingerGestureActive.current = false;
+  };
 
   if (!hasWebGLContext) {
     return (
@@ -59,7 +73,12 @@ export default function CanvasScene({ gameState, playerMotionState, animationDef
   }
 
   return (
-    <div className="game-canvas">
+    <div
+      className="game-canvas"
+      onTouchStartCapture={(event) => handleTouchStart(event.touches.length)}
+      onTouchEndCapture={(event) => handleTouchEnd(event.touches.length)}
+      onTouchCancelCapture={() => handleTouchEnd(0)}
+    >
       <Canvas
         className="game-canvas__surface"
         shadows

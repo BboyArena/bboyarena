@@ -6,6 +6,7 @@ import GameHUD from './ui/GameHUD';
 import GamePlayScene from './GamePlayScene';
 import { getDefaultGameCopy, loadGameCopy, type GameCopy, type LocaleCode } from './copy';
 import { RhythmClockProvider } from './rhythm/RhythmClockProvider';
+import { useHasTouchControls } from './input/useHasTouchControls';
 import './game.css';
 
 interface GameAppProps {
@@ -14,6 +15,7 @@ interface GameAppProps {
 
 export default function GameApp({ locale = 'en-US' }: GameAppProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const hasTouchControls = useHasTouchControls();
   const [copy, setCopy] = useState<GameCopy>(() => getDefaultGameCopy());
   const [resolvedLocale, setResolvedLocale] = useState<LocaleCode>('en-US');
   const screen = useGameStore((state) => state.screen);
@@ -60,7 +62,12 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
   console.log('GameApp: rendering screen', screen, 'with mode', selectedMode, 'and locale', resolvedLocale);
   return (
     <RhythmClockProvider>
-      <div id="bboyarena-game-root" className="bboy-game-root" ref={rootRef}>
+      <div
+        id="bboyarena-game-root"
+        className="bboy-game-root"
+        ref={rootRef}
+        data-has-touchscreen={hasTouchControls ? 'true' : 'false'}
+      >
         <div className="game-shell">
           <div className="game-stage" data-scene={screen}>
             {isPlayableScreen ? (

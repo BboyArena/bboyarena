@@ -6,6 +6,7 @@ import {
   type GameInputButtonId,
   type GameInputButtonState,
   type GameInputSnapshot,
+  type GameInputSystemAction,
   type GameInputVector
 } from './gameInputTypes';
 
@@ -26,6 +27,7 @@ function areSnapshotsEqual(a: GameInputSnapshot, b: GameInputSnapshot) {
   if (a.source !== b.source) return false;
   if (!areVectorsEqual(a.move, b.move)) return false;
   if (!areVectorsEqual(a.look, b.look)) return false;
+  if (a.lastSystemEvent?.sequence !== b.lastSystemEvent?.sequence) return false;
 
   return (
     areButtonStatesEqual(a.buttons.toprock, b.buttons.toprock) &&
@@ -44,6 +46,7 @@ function areSnapshotsEqual(a: GameInputSnapshot, b: GameInputSnapshot) {
 export class GameInputController {
   private snapshot: GameInputSnapshot = createDefaultGameInputSnapshot();
   private readonly listeners = new Set<GameInputListener>();
+  private systemEventSequence = 0;
 
   subscribe = (listener: GameInputListener) => {
     this.listeners.add(listener);
@@ -97,6 +100,21 @@ export class GameInputController {
       source,
       buttons: nextButtons,
       updatedAt: this.getTimestamp()
+    });
+  }
+
+  triggerSystemAction(source: ActiveInputSource, action: GameInputSystemAction): void {
+    const timestamp = this.getTimestamp();
+
+    this.commitSnapshot({
+      ...this.snapshot,
+      source,
+      lastSystemEvent: {
+        action,
+        sequence: ++this.systemEventSequence,
+        timestamp
+      },
+      updatedAt: timestamp
     });
   }
 

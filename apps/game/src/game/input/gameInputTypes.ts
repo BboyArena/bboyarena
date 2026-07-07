@@ -14,7 +14,16 @@ export type GameInputAction =
   | 'action.r1'
   | 'action.r2'
   | 'system.start'
-  | 'system.pause';
+  | 'system.pause'
+  | 'system.quickMenu';
+
+export type GameInputSystemAction = 'system.quickMenu';
+
+export type GameInputSystemEvent = {
+  action: GameInputSystemAction;
+  sequence: number;
+  timestamp: number;
+};
 
 export type GameInputButtonId =
   | 'toprock'
@@ -72,6 +81,7 @@ export type GameInputSnapshot = {
   move: GameInputVector;
   look: GameInputVector;
   buttons: Record<GameInputButtonId, GameInputButtonState>;
+  lastSystemEvent: GameInputSystemEvent | null;
   updatedAt: number;
 };
 
@@ -110,6 +120,7 @@ export function createDefaultGameInputSnapshot(
     buttons: Object.fromEntries(
       buttonIds.map((button) => [button, { pressed: false, value: 0 }])
     ) as Record<GameInputButtonId, GameInputButtonState>,
+    lastSystemEvent: null,
     updatedAt: typeof performance !== 'undefined' && typeof performance.now === 'function'
       ? performance.now()
       : Date.now()

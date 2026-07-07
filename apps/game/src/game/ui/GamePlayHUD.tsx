@@ -103,6 +103,14 @@ export default function GamePlayHUD({
             <div>Catalog: <output>{animationContext.sourceId ?? 'loading'}</output></div>
             <div>Fallback: <output>{animationContext.usedFallback ? 'yes' : 'no'}</output></div>
             <div>Outcome: <output>{animationContext.lastEvent?.type ?? 'none'}</output></div>
+            <div>
+              Special event:{' '}
+              <output>
+                {snapshot.lastSystemEvent?.action === 'system.quickMenu'
+                  ? `Quick Menu #${snapshot.lastSystemEvent.sequence}`
+                  : 'none'}
+              </output>
+            </div>
           </section>
 
           <section aria-label="Accepted move history">

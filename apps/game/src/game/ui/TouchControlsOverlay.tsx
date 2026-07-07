@@ -68,8 +68,8 @@ export default function TouchControlsOverlay() {
 
   return <div className="touch-controls" data-input-source={activeInputSource}>
     <div className="touch-controls__shoulders touch-controls__shoulders--left">
-      <TouchButton buttonId="l2" className="touch-controls__shoulder" />
       <TouchButton buttonId="l1" className="touch-controls__shoulder" />
+      <TouchButton buttonId="l2" className="touch-controls__shoulder" />
     </div>
     <div className="touch-controls__shoulders touch-controls__shoulders--right">
       <TouchButton buttonId="r2" className="touch-controls__shoulder" />

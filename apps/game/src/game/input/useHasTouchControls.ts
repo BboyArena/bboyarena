@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 
-function detectTouchControls() {
+export function detectTouchControls() {
   if (typeof window === 'undefined') return false;
+
+  if (navigator.maxTouchPoints > 0) return true;
 
   if (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches) {
     return true;
