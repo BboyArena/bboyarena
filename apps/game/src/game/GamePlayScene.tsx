@@ -22,6 +22,14 @@ import { moveCatalog } from './move/moveCatalog';
 import { sampleStickCueTrack } from './move/stickCueTracks';
 import { getMoveQueueFamilyForButton, MoveQueueController } from './move/MoveQueueController';
 import type { GameInputButtonId } from './input/gameInputTypes';
+import {
+  accuracyToMoveScore,
+  sampleMoveInputAccuracy,
+  scoreToStaminaReward
+} from './move/moveScoring';
+
+const MAXIMUM_STAMINA = 100;
+const MOVE_STAMINA_COST = 5;
 
 interface GamePlaySceneProps {
   mode: GamePlayMode;
@@ -86,6 +94,8 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   });
   const motionSnapshot = selectPlayerMotionSnapshot(motionActorState.context);
   const previousMotionInputRef = useRef(snapshot);
+  const liveInputRef = useRef(snapshot);
+  liveInputRef.current = snapshot;
   const previousGameStateRef = useRef(gameState);
   const requestSequenceRef = useRef(0);
   const lastAnimationIntentRef = useRef<string | null>(null);
@@ -94,6 +104,10 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const moveQueueRef = useRef(new MoveQueueController());
   const [moveQueue, setMoveQueue] = useState(() => moveQueueRef.current.getSnapshot());
   const [diagnosticsVisible, setDiagnosticsVisible] = useState(import.meta.env.DEV);
+  const staminaRef = useRef(MAXIMUM_STAMINA);
+  const [stamina, setStamina] = useState(MAXIMUM_STAMINA);
+  const [moveScore, setMoveScore] = useState<number | null>(null);
+  const scoreAccumulatorRef = useRef<{ moveId: number; total: number; samples: number } | null>(null);
 
   useEffect(() => {
     if (mode === 'training' && gameState === 'idle') {
@@ -118,6 +132,10 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
       animationSend({ type: 'animation.reset', issuedAtTick: currentTick });
       moveQueueRef.current.reset();
       setMoveQueue(moveQueueRef.current.getSnapshot());
+      staminaRef.current = MAXIMUM_STAMINA;
+      setStamina(MAXIMUM_STAMINA);
+      setMoveScore(null);
+      scoreAccumulatorRef.current = null;
       lastAnimationIntentRef.current = null;
       if (moveHistoryRef.current.reset(currentTick)) {
         setMoveHistory(moveHistoryRef.current.getSnapshot());
@@ -130,10 +148,50 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   useEffect(() => {
     if (gameState === 'playing') {
       motionSend({ type: 'TICK', tick: rhythmSnapshot.tick });
+      const activeBeforeAdvance = moveQueueRef.current.getSnapshot().active;
+      if (mode === 'training' && activeBeforeAdvance) {
+        const accuracy = sampleMoveInputAccuracy(activeBeforeAdvance, rhythmSnapshot.beat, liveInputRef.current);
+        if (accuracy !== null) {
+          const accumulator = scoreAccumulatorRef.current?.moveId === activeBeforeAdvance.id
+            ? scoreAccumulatorRef.current
+            : { moveId: activeBeforeAdvance.id, total: 0, samples: 0 };
+          accumulator.total += accuracy;
+          accumulator.samples += 1;
+          scoreAccumulatorRef.current = accumulator;
+          setMoveScore(accuracyToMoveScore(accumulator.total / accumulator.samples));
+        }
+      }
       const transition = moveQueueRef.current.advance(rhythmSnapshot.beat);
       if (transition) {
-        if (moveHistoryRef.current.completeActive(rhythmSnapshot.tick)) {
+        const accumulator = scoreAccumulatorRef.current;
+        const completedScore = mode === 'training' && accumulator?.moveId === transition.completed.id
+          ? accuracyToMoveScore(accumulator.total / Math.max(1, accumulator.samples))
+          : undefined;
+        scoreAccumulatorRef.current = null;
+
+        if (moveHistoryRef.current.completeActive(rhythmSnapshot.tick, completedScore)) {
           setMoveHistory(moveHistoryRef.current.getSnapshot());
+        }
+        let started = transition.started;
+        if (mode === 'training') {
+          const staminaReward = scoreToStaminaReward(completedScore ?? 20);
+          const nextStamina = Math.max(
+            0,
+            Math.min(MAXIMUM_STAMINA, staminaRef.current - MOVE_STAMINA_COST + staminaReward)
+          );
+          staminaRef.current = nextStamina;
+          setStamina(nextStamina);
+          setMoveScore(completedScore ?? 20);
+
+          if (nextStamina <= 0) {
+            moveQueueRef.current.reset();
+            started = null;
+          } else if (!started) {
+            started = moveQueueRef.current.enqueue(
+              transition.completed.family,
+              transition.completed.startedAtBeat + transition.completed.durationBeats
+            );
+          }
         }
         animationSend({ type: 'animation.complete', completedAtTick: rhythmSnapshot.tick });
         motionSend({
@@ -142,17 +200,17 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
           tick: rhythmSnapshot.tick
         });
         lastAnimationIntentRef.current = null;
-        if (transition.started) {
+        if (started) {
           motionSend({
             type: 'INTENT',
-            intent: { type: 'motion.perform', intentId: transition.started.intentId },
+            intent: { type: 'motion.perform', intentId: started.intentId },
             tick: rhythmSnapshot.tick
           });
         }
         setMoveQueue(moveQueueRef.current.getSnapshot());
       }
     }
-  }, [animationSend, gameState, motionSend, rhythmSnapshot.beat, rhythmSnapshot.tick]);
+  }, [animationSend, gameState, mode, motionSend, rhythmSnapshot.beat, rhythmSnapshot.tick]);
 
   useEffect(() => {
     const previousSnapshot = previousMotionInputRef.current;
@@ -174,6 +232,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
       if (previousSnapshot.buttons[button].pressed || !snapshot.buttons[button].pressed) continue;
       const family = getMoveQueueFamilyForButton(button);
       if (!family) continue;
+      if (mode === 'training' && staminaRef.current <= 0) continue;
       const started = moveQueueRef.current.enqueue(family, clock.beat);
       if (started) {
         lastAnimationIntentRef.current = null;
@@ -185,7 +244,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
       }
       setMoveQueue(moveQueueRef.current.getSnapshot());
     }
-  }, [gameState, motionSend, rhythmClock, snapshot]);
+  }, [gameState, mode, motionSend, rhythmClock, snapshot]);
 
   useEffect(() => {
     const intentId = motionSnapshot.activeIntentId;
@@ -304,6 +363,8 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
         diagnosticsVisible={diagnosticsVisible}
         stickCueDiagnostics={stickCueDiagnostics}
         moveQueue={moveQueue}
+        stamina={stamina}
+        moveScore={moveScore}
       />
     </>
   );

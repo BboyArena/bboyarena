@@ -4,10 +4,9 @@ import type { PlayerMotionIntentId } from './playerMotionTypes';
 
 export type PlayerMoveHistoryOutcome = 'active' | 'completed' | 'interrupted';
 
-export type PlayerMoveScoreEvaluation = {
-  status: 'not-evaluated';
-  score: null;
-};
+export type PlayerMoveScoreEvaluation =
+  | { status: 'not-evaluated'; score: null }
+  | { status: 'evaluated'; score: number };
 
 export type PlayerMoveHistoryEntry = {
   id: string;
@@ -96,8 +95,8 @@ export class PlayerMoveHistory {
     }));
   }
 
-  completeActive(tick: number): boolean {
-    const changed = this.closeActiveEntry(tick, 'completed');
+  completeActive(tick: number, score?: number): boolean {
+    const changed = this.closeActiveEntry(tick, 'completed', score);
     this.currentIntentId = null;
     return changed;
   }
@@ -118,7 +117,8 @@ export class PlayerMoveHistory {
 
   private closeActiveEntry(
     tick: number,
-    outcome: Exclude<PlayerMoveHistoryOutcome, 'active'>
+    outcome: Exclude<PlayerMoveHistoryOutcome, 'active'>,
+    score?: number
   ): boolean {
     if (this.activeEntryId === null) return false;
 
@@ -128,7 +128,10 @@ export class PlayerMoveHistory {
             ...entry,
             endedAtTick: tick,
             durationTicks: Math.max(0, tick - entry.startedAtTick),
-            outcome
+            outcome,
+            scoring: score === undefined
+              ? entry.scoring
+              : { status: 'evaluated', score: Math.max(0, Math.min(100, Math.round(score))) }
           }
         : entry
     );

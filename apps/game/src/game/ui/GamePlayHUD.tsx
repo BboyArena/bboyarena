@@ -48,6 +48,8 @@ interface GamePlayHudProps {
   diagnosticsVisible: boolean;
   stickCueDiagnostics: StickCueDiagnostic[];
   moveQueue: MoveQueueSnapshot;
+  stamina: number;
+  moveScore: number | null;
 }
 
 const intentButtons: Array<{ id: GameInputButtonId; label: string }> = [
@@ -75,7 +77,9 @@ export default function GamePlayHUD({
   rhythmState,
   diagnosticsVisible,
   stickCueDiagnostics,
-  moveQueue
+  moveQueue,
+  stamina,
+  moveScore
 }: GamePlayHudProps) {
   const [compactTraining, setCompactTraining] = useState(() => (
     typeof window !== 'undefined' && window.matchMedia('(max-width: 640px), (max-height: 520px)').matches
@@ -162,6 +166,8 @@ export default function GamePlayHUD({
           compact={compactTraining}
           learning={learningActive}
           onLearningChange={setLearning}
+          stamina={stamina}
+          score={moveScore}
         />
       ) : null}
 
@@ -283,7 +289,7 @@ export default function GamePlayHUD({
                     {' — '}{entry.outcome}
                     {' — '}{entry.animationId ?? 'animation pending'}
                     {' — ticks '}{entry.startedAtTick}–{entry.endedAtTick ?? 'active'}
-                    {' — score '}{entry.scoring.status}
+                    {' — score '}{entry.scoring.status === 'evaluated' ? `${entry.scoring.score}%` : entry.scoring.status}
                   </li>
                 ))}
               </ol>

@@ -16,6 +16,8 @@ interface TrainingCoachPanelProps {
   compact: boolean;
   learning: boolean;
   onLearningChange: (learning: boolean) => void;
+  stamina: number;
+  score: number | null;
 }
 
 export default function TrainingCoachPanel({
@@ -25,7 +27,9 @@ export default function TrainingCoachPanel({
   feedback,
   compact,
   learning,
-  onLearningChange
+  onLearningChange,
+  stamina,
+  score
 }: TrainingCoachPanelProps) {
   const [expanded, setExpanded] = useState(() => !compact);
 
@@ -43,6 +47,10 @@ export default function TrainingCoachPanel({
         <div className="game-training-learn__card">
           <span className="game-training-learn__eyebrow">Prototype move catalog</span>
           <h2>{displayName}</h2>
+          <div className="game-training-learn__performance">
+            <div><small>Accuracy</small><strong>{score ?? 20}%</strong></div>
+            <div><small>Stamina</small><strong>{Math.round(stamina)}%</strong></div>
+          </div>
           {move && family ? (
             <>
               <p>{move.durationBeats} beats · {family} · {move.skills.join(' · ')}</p>
@@ -82,7 +90,7 @@ export default function TrainingCoachPanel({
         <div>
           <span>Current move</span>
           <strong>{displayName}</strong>
-          <small>{move ? `${progressPercent}% · ${move.durationBeats} beats` : 'A / B / X / Y'}</small>
+          <small>{move ? `${progressPercent}% · score ${score ?? 20}% · stamina ${Math.round(stamina)}%` : `A / B / X / Y · stamina ${Math.round(stamina)}%`}</small>
         </div>
         <button
           type="button"
@@ -107,6 +115,7 @@ export default function TrainingCoachPanel({
               <div><dt>Button</dt><dd>{mainButton} · {family}</dd></div>
               <div><dt>Skills</dt><dd>{move.skills.join(', ')}</dd></div>
               <div><dt>Sticks</dt><dd>Left: upper body · Right: lower body</dd></div>
+              <div><dt>Energy</dt><dd>Score {score ?? 20}% · Stamina {Math.round(stamina)}%</dd></div>
               {feedback ? <div><dt>Feedback</dt><dd>{feedback}</dd></div> : null}
             </dl>
           ) : <p>Choose A Toprock, B Footwork, X Freeze, or Y Powermove.</p>}

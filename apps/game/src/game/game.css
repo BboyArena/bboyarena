@@ -1982,6 +1982,27 @@
   line-height: 1.55;
 }
 
+.bboy-game-root .game-training-learn__performance {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.bboy-game-root .game-training-learn__performance > div {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.65rem;
+  border: 1px solid rgba(255, 217, 92, 0.24);
+  border-radius: 0.55rem;
+  background: rgba(255, 217, 92, 0.05);
+}
+
+.bboy-game-root .game-training-learn__performance strong {
+  color: var(--game-gold-hot);
+  font-size: 1.15rem;
+}
+
 .bboy-game-root .game-training-learn__input {
   display: flex;
   align-items: center;
