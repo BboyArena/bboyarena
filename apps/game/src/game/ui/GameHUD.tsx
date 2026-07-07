@@ -19,7 +19,10 @@ export default function GameHUD({ copy }: GameHudProps) {
   const preferredInputMode = useGameStore((state) => state.preferredInputMode);
   const activeInputSource = useGameStore((state) => state.activeInputSource);
   const bpm = useGameStore((state) => state.bpm);
+  const difficultyMode = useGameStore((state) => state.difficultyMode);
+  const adaptiveSkillRating = useGameStore((state) => state.adaptiveSkillRating);
   const setBpm = useGameStore((state) => state.setBpm);
+  const setDifficultyMode = useGameStore((state) => state.setDifficultyMode);
   const setPreferredInputMode = useGameStore((state) => state.setPreferredInputMode);
   const selectedGamepadIndex = useGameStore((state) => state.selectedGamepadIndex);
   const keyboardInputMap = useGameStore((state) => state.keyboardInputMap);
@@ -96,6 +99,11 @@ export default function GameHUD({ copy }: GameHudProps) {
     { id: 'touch', label: 'Touch', note: 'virtual joystick' },
     { id: 'gamepad', label: 'Gamepad', note: 'controller input' },
     { id: 'keyboardMouse', label: 'Keyboard + Mouse', note: 'fallback input' }
+  ];
+  const difficultyModes = [
+    { id: 'assisted' as const, label: 'Assisted', note: 'Generous tracking windows' },
+    { id: 'adaptive' as const, label: 'Adaptive', note: 'Grows with your consistency' },
+    { id: 'expert' as const, label: 'Expert', note: 'Authored precision' }
   ];
   const selectedSettingsCard = settingsCards.find((item) => item.id === selectedSettingsTab) ?? settingsCards[2];
   const inputActions: Array<{ id: GameInputButtonId; label: string }> = [
@@ -330,6 +338,27 @@ export default function GameHUD({ copy }: GameHudProps) {
                       ))}
                     </div>
                   </div>
+                </div>
+              ) : selectedSettingsTab === 'accessibility' ? (
+                <div className="game-input-mode-card">
+                  <p className="game-input-config__heading">Training difficulty</p>
+                  <div className="game-input-mode-card__grid" role="group" aria-label="Training difficulty">
+                    {difficultyModes.map((mode) => (
+                      <GameButton
+                        key={mode.id}
+                        variant={difficultyMode === mode.id ? 'primary' : 'secondary'}
+                        active={difficultyMode === mode.id}
+                        className="game-input-mode-card__button"
+                        onClick={() => setDifficultyMode(mode.id)}
+                      >
+                        <span className="game-input-mode-card__button-label">{mode.label}</span>
+                        <span className="game-input-mode-card__button-note">{mode.note}</span>
+                      </GameButton>
+                    ))}
+                  </div>
+                  <p className="game-input-config__status">
+                    Adaptive level: {Math.round(adaptiveSkillRating * 100)}%. It changes slowly after each completed move.
+                  </p>
                 </div>
               ) : selectedSettingsTab === 'audio' ? (
                 <div className="game-input-config">

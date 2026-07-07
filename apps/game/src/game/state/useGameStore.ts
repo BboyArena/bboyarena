@@ -10,6 +10,7 @@ import { defaultGamepadInputMap, defaultKeyboardInputMap } from '../input/gameIn
 
 export type GameMenuScreen = 'splashscreen' | 'mainMenu' | 'settings' | 'credits';
 export type GamePlayMode = 'career' | 'training';
+export type GameDifficultyMode = 'assisted' | 'adaptive' | 'expert';
 export type GameScreen = GameMenuScreen | GamePlayMode;
 
 interface GameState {
@@ -18,6 +19,8 @@ interface GameState {
   selectedCharacter: string;
   score: number;
   bpm: number;
+  difficultyMode: GameDifficultyMode;
+  adaptiveSkillRating: number;
   isMuted: boolean;
   preferredInputMode: PreferredInputMode;
   activeInputSource: ActiveInputSource;
@@ -41,6 +44,8 @@ interface GameState {
   setSelectedCharacter: (character: string) => void;
   incrementScore: (amount: number) => void;
   setBpm: (bpm: number) => void;
+  setDifficultyMode: (mode: GameDifficultyMode) => void;
+  recordAdaptivePerformance: (score: number) => void;
   toggleMute: () => void;
   resetGame: () => void;
 }
@@ -51,6 +56,8 @@ export const useGameStore = create<GameState>((set) => ({
   selectedCharacter: 'Dust Crew',
   score: 0,
   bpm: 110,
+  difficultyMode: 'adaptive',
+  adaptiveSkillRating: 0,
   isMuted: false,
   preferredInputMode: 'auto',
   activeInputSource: 'keyboardMouse',
@@ -78,6 +85,14 @@ export const useGameStore = create<GameState>((set) => ({
   setSelectedCharacter: (selectedCharacter) => set({ selectedCharacter }),
   incrementScore: (amount) => set((state) => ({ score: state.score + amount })),
   setBpm: (bpm) => set({ bpm }),
+  setDifficultyMode: (difficultyMode) => set({ difficultyMode }),
+  recordAdaptivePerformance: (score) => set((state) => {
+    const performance = Math.max(0, Math.min(1, (score - 20) / 80));
+    const sampleWeight = 0.12;
+    return {
+      adaptiveSkillRating: state.adaptiveSkillRating * (1 - sampleWeight) + performance * sampleWeight
+    };
+  }),
   toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
   resetGame: () => set({ score: 0 }),
 }));

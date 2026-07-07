@@ -14,6 +14,12 @@ export type StickCueSample = {
   toPointIndex: number;
 };
 
+export type StickCueStepSample = StickCueSample & {
+  pointIndex: number;
+  active: boolean;
+  beatsUntilStep: number;
+};
+
 export type StickCueTrackValidationResult = {
   issues: string[];
   warnings: string[];
@@ -170,5 +176,42 @@ export function sampleStickCueTrack(track: StickCueTrack, progress: number): Sti
     tolerance: fromTolerance + (toTolerance - fromTolerance) * amount,
     fromPointIndex,
     toPointIndex
+  };
+}
+
+/** Treat authored cue points as timed gameplay steps, not a path the player must trace. */
+export function sampleStickCueStep(
+  track: StickCueTrack,
+  progress: number,
+  durationBeats: number,
+  timingWindowBeats: number
+): StickCueStepSample {
+  if (track.points.length === 0) throw new Error(`Stick cue track "${track.id}" needs at least one point.`);
+
+  const safeDuration = Math.max(Number.EPSILON, durationBeats);
+  const normalizedProgress = Math.min(1, Math.max(0, Number.isFinite(progress) ? progress : 0));
+  const nearestIndex = track.points.reduce((bestIndex, point, index) => (
+    Math.abs(point.t - normalizedProgress) < Math.abs(track.points[bestIndex].t - normalizedProgress)
+      ? index
+      : bestIndex
+  ), 0);
+  const nearestPoint = track.points[nearestIndex];
+  const distanceBeats = Math.abs(nearestPoint.t - normalizedProgress) * safeDuration;
+  const upcomingIndex = track.points.findIndex((point) => point.t >= normalizedProgress);
+  const pointIndex = distanceBeats <= timingWindowBeats
+    ? nearestIndex
+    : (upcomingIndex >= 0 ? upcomingIndex : track.points.length - 1);
+  const point = track.points[pointIndex];
+  const beatsUntilStep = (point.t - normalizedProgress) * safeDuration;
+
+  return {
+    x: point.x,
+    y: point.y,
+    tolerance: point.tolerance ?? DEFAULT_STICK_CUE_TOLERANCE,
+    fromPointIndex: pointIndex,
+    toPointIndex: pointIndex,
+    pointIndex,
+    active: Math.abs(beatsUntilStep) <= timingWindowBeats,
+    beatsUntilStep
   };
 }

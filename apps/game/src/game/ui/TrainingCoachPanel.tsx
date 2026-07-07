@@ -60,7 +60,7 @@ export default function TrainingCoachPanel({
               </div>
               <div className="game-training-learn__focus">
                 <small>Stick sequence</small>
-                <p>Follow both guides together: left stick for torso and shoulders, right stick for hips and legs.</p>
+                <p>Hit the gold checkpoints on the beat. Movement between steps is free.</p>
               </div>
             </>
           ) : (
@@ -114,7 +114,7 @@ export default function TrainingCoachPanel({
             <dl>
               <div><dt>Button</dt><dd>{mainButton} · {family}</dd></div>
               <div><dt>Skills</dt><dd>{move.skills.join(', ')}</dd></div>
-              <div><dt>Sticks</dt><dd>Left: upper body · Right: lower body</dd></div>
+              <div><dt>Steps</dt><dd>Hit both gold checkpoints when they become active</dd></div>
               <div><dt>Energy</dt><dd>Score {score ?? 20}% · Stamina {Math.round(stamina)}%</dd></div>
               {feedback ? <div><dt>Feedback</dt><dd>{feedback}</dd></div> : null}
             </dl>

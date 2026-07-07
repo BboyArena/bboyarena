@@ -1930,6 +1930,47 @@
 .bboy-game-root .game-training-coach__details dl > div { display: grid; grid-template-columns: 3.6rem 1fr; gap: 0.45rem; }
 .bboy-game-root .game-training-coach__details dd { margin: 0; }
 
+.bboy-game-root .game-stamina-reward {
+  position: absolute;
+  z-index: 32;
+  left: 50%;
+  top: 42%;
+  display: grid;
+  min-width: 10rem;
+  justify-items: center;
+  gap: 0.15rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid rgba(101, 237, 142, 0.82);
+  border-radius: 0.7rem;
+  background: rgba(7, 27, 15, 0.92);
+  box-shadow: 0 0 0 0.3rem rgba(101, 237, 142, 0.12), 0 0 2rem rgba(101, 237, 142, 0.42);
+  color: #dfffea;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: game-stamina-reward-pop 1.35s ease-out both;
+}
+
+.bboy-game-root .game-stamina-reward span {
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.bboy-game-root .game-stamina-reward strong {
+  color: #65ed8e;
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+@keyframes game-stamina-reward-pop {
+  0% { opacity: 0; transform: translate(-50%, -30%) scale(0.78); }
+  18% { opacity: 1; transform: translate(-50%, -50%) scale(1.06); }
+  72% { opacity: 1; transform: translate(-50%, -58%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -90%) scale(0.94); }
+}
+
 .bboy-game-root .game-training-learn {
   position: absolute;
   z-index: 50;
@@ -2243,6 +2284,14 @@
 
 .bboy-game-root .game-stick-cue-hud section[data-stick="left"] { --stick-accent: #63d8ff; }
 .bboy-game-root .game-stick-cue-hud section[data-stick="right"] { --stick-accent: #ff77ba; }
+.bboy-game-root .game-stick-cue-hud section[data-step-active="false"] {
+  opacity: 0.58;
+}
+.bboy-game-root .game-stick-cue-hud section[data-step-active="true"] {
+  border-color: var(--game-gold-hot);
+  box-shadow: 0 0 0.7rem rgba(244, 190, 36, 0.2);
+  opacity: 1;
+}
 .bboy-game-root .game-stick-cue-hud section[data-on-target="true"] {
   border-color: #65ed8e;
   box-shadow: 0 0 0.55rem rgba(101, 237, 142, 0.16);
@@ -2660,6 +2709,18 @@
   transform: translate(-50%, -50%);
   transition: left 70ms linear, top 70ms linear, border-color 90ms linear, background 90ms linear;
   animation: game-joystick-target-pulse 760ms ease-in-out infinite alternate;
+}
+
+.bboy-game-root .touch-controls__joystick-target[data-active="false"] {
+  border-style: dashed;
+  opacity: 0.45;
+  box-shadow: 0 0 0 0.18rem rgba(244, 190, 36, 0.08);
+  animation: none;
+}
+
+.bboy-game-root .touch-controls__joystick-target[data-active="true"] {
+  opacity: 1;
+  animation: game-joystick-target-pulse 420ms ease-in-out infinite alternate;
 }
 
 .bboy-game-root .touch-controls__joystick-target::after {

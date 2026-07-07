@@ -49,6 +49,7 @@ export type TouchStickTarget = {
   y: number;
   tolerance: number;
   onTarget: boolean;
+  active: boolean;
   step: string;
 };
 
@@ -70,7 +71,7 @@ function JoystickTarget({ target }: { target?: TouchStickTarget }) {
     '--target-size': `${targetSize}px`
   } as CSSProperties;
 
-  return <span className="touch-controls__joystick-target" data-on-target={target.onTarget} data-step={target.step} style={style} aria-hidden="true" />;
+  return <span className="touch-controls__joystick-target" data-on-target={target.onTarget} data-active={target.active} data-step={target.step} style={style} aria-hidden="true" />;
 }
 
 function DirectionPad() {
