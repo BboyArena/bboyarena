@@ -4,7 +4,7 @@ import { useGameInputSnapshot } from '../input/GameInputProvider';
 import { useConnectedGamepads } from '../input/useConnectedGamepads';
 import type { GameInputButtonId } from '../input/gameInputTypes';
 import type { GamePlayMode } from '../state/useGameStore';
-import TouchControlsOverlay from './TouchControlsOverlay';
+import TouchControlsOverlay, { type TouchStickTarget } from './TouchControlsOverlay';
 import type { GameCopy } from '../copy';
 import type { PlayerMotionSnapshot } from '../motion/playerMotionTypes';
 import type { AnimationPlaybackMachineContext } from '../animation/animationPlaybackMachine';
@@ -114,6 +114,16 @@ export default function GamePlayHUD({
         return Math.hypot(input.x - cue.sample.x, input.y - cue.sample.y) <= cue.sample.tolerance;
       }) ? 'On target — keep the rhythm.' : 'Follow the suggested stick path.')
     : undefined;
+  const touchStickTargets = Object.fromEntries(stickCueDiagnostics.map((cue) => {
+    const input = cue.targetInput === 'look' ? snapshot.look : snapshot.move;
+    return [cue.stick, {
+      x: cue.sample.x,
+      y: cue.sample.y,
+      tolerance: cue.sample.tolerance,
+      onTarget: Math.hypot(input.x - cue.sample.x, input.y - cue.sample.y) <= cue.sample.tolerance,
+      step: `${cue.sample.toPointIndex + 1}/${cue.points.length}`
+    }];
+  })) as Partial<Record<'left' | 'right', TouchStickTarget>>;
 
   useEffect(() => {
     const compactViewport = window.matchMedia('(max-width: 640px), (max-height: 520px)');
@@ -298,7 +308,7 @@ export default function GamePlayHUD({
         </aside>
       ) : null}
 
-      {touchControlsVisible && !learningActive ? <TouchControlsOverlay /> : null}
+      {touchControlsVisible && !learningActive ? <TouchControlsOverlay targets={touchStickTargets} /> : null}
     </>
   );
 }

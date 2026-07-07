@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useGameInputController } from '../input/GameInputProvider';
 import TouchInputAdapter from '../input/TouchInputAdapter';
 import { useGameStore } from '../state/useGameStore';
@@ -44,6 +44,35 @@ function TouchButton({ buttonId, className }: { buttonId: GameInputButtonId; cla
 
 type Direction = 'up' | 'down' | 'left' | 'right';
 
+export type TouchStickTarget = {
+  x: number;
+  y: number;
+  tolerance: number;
+  onTarget: boolean;
+  step: string;
+};
+
+const touchDeadzone = 0.18;
+const touchResponseExponent = 1.35;
+
+function JoystickTarget({ target }: { target?: TouchStickTarget }) {
+  if (!target) return null;
+  const magnitude = Math.min(1, Math.hypot(target.x, target.y));
+  const physicalMagnitude = magnitude === 0
+    ? 0
+    : touchDeadzone + (1 - touchDeadzone) * Math.pow(magnitude, 1 / touchResponseExponent);
+  const physicalX = magnitude > 0 ? (target.x / magnitude) * physicalMagnitude : 0;
+  const physicalY = magnitude > 0 ? (target.y / magnitude) * physicalMagnitude : 0;
+  const targetSize = Math.max(20, Math.min(40, 18 + target.tolerance * 48));
+  const style = {
+    left: `${50 + physicalX * 30}%`,
+    top: `${50 - physicalY * 30}%`,
+    '--target-size': `${targetSize}px`
+  } as CSSProperties;
+
+  return <span className="touch-controls__joystick-target" data-on-target={target.onTarget} data-step={target.step} style={style} aria-hidden="true" />;
+}
+
 function DirectionPad() {
   const controller = useGameInputController();
   const active = useRef(new Set<Direction>());
@@ -71,7 +100,7 @@ function DirectionPad() {
   </div>;
 }
 
-export default function TouchControlsOverlay() {
+export default function TouchControlsOverlay({ targets = {} }: { targets?: Partial<Record<'left' | 'right', TouchStickTarget>> }) {
   const controller = useGameInputController();
   const [resetVersion, setResetVersion] = useState(0);
   const touchControlsVisible = useGameStore((state) => state.touchControlsVisible);
@@ -114,6 +143,7 @@ export default function TouchControlsOverlay() {
       <div className="touch-controls__joystick-group">
         <span className="touch-controls__joystick-label"><b>L · Upper body</b><small>Torso + shoulders</small></span>
         <div className="touch-controls__joystick-zone" ref={leftStickRef} aria-label="Left analog stick: upper body, torso and shoulders">
+          <JoystickTarget target={targets.left} />
           <span className="touch-controls__joystick-visual" aria-hidden="true" />
           <TouchInputAdapter joystickZoneRef={leftStickRef} channel="move" />
         </div>
@@ -135,6 +165,7 @@ export default function TouchControlsOverlay() {
       <div className="touch-controls__joystick-group">
         <span className="touch-controls__joystick-label"><b>R · Lower body</b><small>Hips + legs</small></span>
         <div className="touch-controls__joystick-zone" ref={rightStickRef} aria-label="Right analog stick: lower body, hips and legs">
+          <JoystickTarget target={targets.right} />
           <span className="touch-controls__joystick-visual" aria-hidden="true" />
           <TouchInputAdapter joystickZoneRef={rightStickRef} channel="look" />
         </div>

@@ -2647,6 +2647,50 @@
   pointer-events: none;
 }
 
+.bboy-game-root .touch-controls__joystick-target {
+  position: absolute;
+  z-index: 2;
+  width: var(--target-size);
+  height: var(--target-size);
+  border: 2px solid var(--game-gold-hot);
+  border-radius: 50%;
+  background: rgba(244, 190, 36, 0.18);
+  box-shadow: 0 0 0 0.25rem rgba(244, 190, 36, 0.1), 0 0 1rem rgba(244, 190, 36, 0.72);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: left 70ms linear, top 70ms linear, border-color 90ms linear, background 90ms linear;
+  animation: game-joystick-target-pulse 760ms ease-in-out infinite alternate;
+}
+
+.bboy-game-root .touch-controls__joystick-target::after {
+  content: attr(data-step);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff3c5;
+  font-size: 0.48rem;
+  font-weight: 950;
+  text-shadow: 0 1px 3px #000;
+}
+
+.bboy-game-root .touch-controls__joystick-target[data-on-target="true"] {
+  border-color: #65ed8e;
+  background: rgba(101, 237, 142, 0.34);
+  box-shadow: 0 0 0 0.28rem rgba(101, 237, 142, 0.14), 0 0 1.2rem rgba(101, 237, 142, 0.82);
+  animation: none;
+}
+
+.bboy-game-root .touch-controls__joystick-target[data-on-target="true"]::after {
+  color: #07170d;
+  text-shadow: none;
+}
+
+@keyframes game-joystick-target-pulse {
+  from { opacity: 0.62; scale: 0.92; }
+  to { opacity: 1; scale: 1.08; }
+}
+
 .bboy-game-root .touch-controls__joystick-visual {
   position: absolute;
   z-index: 3;
