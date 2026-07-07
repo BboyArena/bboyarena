@@ -87,9 +87,15 @@ export default function TouchInputAdapter({ joystickZoneRef, channel }: TouchInp
       if (activePointerId !== null) return;
       event.preventDefault();
       activePointerId = event.pointerId;
-      zone.setPointerCapture(event.pointerId);
+      if (typeof zone.setPointerCapture === 'function') {
+        try {
+          zone.setPointerCapture(event.pointerId);
+        } catch {
+          // Capture may race with a browser/system gesture in embedded contexts.
+        }
+      }
       zone.dataset.joystickActive = 'true';
-      render(0, 0, 0);
+      updateFromPointer(event);
     };
     const handlePointerMove = (event: PointerEvent) => {
       if (event.pointerId !== activePointerId) return;
@@ -106,12 +112,14 @@ export default function TouchInputAdapter({ joystickZoneRef, channel }: TouchInp
     zone.addEventListener('pointermove', handlePointerMove);
     zone.addEventListener('pointerup', handlePointerEnd);
     zone.addEventListener('pointercancel', handlePointerEnd);
+    zone.addEventListener('lostpointercapture', handlePointerEnd);
 
     return () => {
       zone.removeEventListener('pointerdown', handlePointerDown);
       zone.removeEventListener('pointermove', handlePointerMove);
       zone.removeEventListener('pointerup', handlePointerEnd);
       zone.removeEventListener('pointercancel', handlePointerEnd);
+      zone.removeEventListener('lostpointercapture', handlePointerEnd);
       reset();
     };
   }, [channel, controller, joystickZoneRef]);

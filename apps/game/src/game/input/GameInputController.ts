@@ -50,7 +50,6 @@ export class GameInputController {
 
   subscribe = (listener: GameInputListener) => {
     this.listeners.add(listener);
-    listener(this.getSnapshot());
 
     return () => {
       this.listeners.delete(listener);
@@ -62,10 +61,13 @@ export class GameInputController {
   }
 
   updateMove(source: ActiveInputSource, vector: GameInputVector): void {
+    const normalizedVector = normalizeInputVector(vector);
+    if (!this.activateSource(source, normalizedVector.x !== 0 || normalizedVector.y !== 0)) return;
+
     const nextSnapshot: GameInputSnapshot = {
       ...this.snapshot,
       source,
-      move: normalizeInputVector(vector),
+      move: normalizedVector,
       updatedAt: this.getTimestamp()
     };
 
@@ -73,10 +75,13 @@ export class GameInputController {
   }
 
   updateLook(source: ActiveInputSource, vector: GameInputVector): void {
+    const normalizedVector = normalizeInputVector(vector);
+    if (!this.activateSource(source, normalizedVector.x !== 0 || normalizedVector.y !== 0)) return;
+
     this.commitSnapshot({
       ...this.snapshot,
       source,
-      look: normalizeInputVector(vector),
+      look: normalizedVector,
       updatedAt: this.getTimestamp()
     });
   }
@@ -87,6 +92,8 @@ export class GameInputController {
     pressed: boolean,
     value = pressed ? 1 : 0
   ): void {
+    if (!this.activateSource(source, pressed || value > 0)) return;
+
     const nextButtons = {
       ...this.snapshot.buttons,
       [button]: {
@@ -122,6 +129,14 @@ export class GameInputController {
     if (this.snapshot.source !== source) return;
 
     this.commitSnapshot(createDefaultGameInputSnapshot(source));
+  }
+
+  private activateSource(source: ActiveInputSource, hasMeaningfulInput: boolean) {
+    if (this.snapshot.source === source) return true;
+    if (!hasMeaningfulInput) return false;
+
+    this.snapshot = createDefaultGameInputSnapshot(source);
+    return true;
   }
 
   private commitSnapshot(nextSnapshot: GameInputSnapshot) {

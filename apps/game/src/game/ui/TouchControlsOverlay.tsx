@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGameInputController } from '../input/GameInputProvider';
 import TouchInputAdapter from '../input/TouchInputAdapter';
 import { useGameStore } from '../state/useGameStore';
@@ -8,6 +8,14 @@ const labels: Record<GameInputButtonId, string> = {
   toprock: 'A', footwork: 'B', freeze: 'X', powermove: 'Y',
   l1: 'L1', l2: 'L2', r1: 'R1', r2: 'R2', start: 'Options', pause: 'Esc'
 };
+
+function capturePointer(target: Element & { setPointerCapture(pointerId: number): void }, pointerId: number) {
+  try {
+    target.setPointerCapture(pointerId);
+  } catch {
+    // Some embedded/mobile browsers can cancel the pointer before capture.
+  }
+}
 
 function TouchButton({ buttonId, className }: { buttonId: GameInputButtonId; className: string }) {
   const controller = useGameInputController();
@@ -21,12 +29,15 @@ function TouchButton({ buttonId, className }: { buttonId: GameInputButtonId; cla
     <button type="button" className={className} aria-label={`${labels[buttonId]}: ${buttonId}`} aria-pressed={pressed}
       onPointerDown={(event) => {
         event.preventDefault();
-        event.currentTarget.setPointerCapture(event.pointerId);
+        if (typeof event.currentTarget.setPointerCapture === 'function') {
+          capturePointer(event.currentTarget, event.pointerId);
+        }
         setPressed(true);
         controller.updateButton('touch', buttonId, true);
       }}
       onPointerUp={(event) => { event.preventDefault(); release(); }}
       onPointerCancel={release}
+      onLostPointerCapture={release}
     >{labels[buttonId]}</button>
   );
 }
@@ -52,21 +63,43 @@ function DirectionPad() {
     {(['up', 'left', 'right', 'down'] as const).map((direction) => (
       <button key={direction} type="button" className={`touch-controls__dpad-button touch-controls__dpad-button--${direction}`}
         aria-label={direction} aria-pressed={active.current.has(direction)}
-        onPointerDown={(event) => { event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId); setDirection(direction, true); }}
+        onPointerDown={(event) => { event.preventDefault(); if (typeof event.currentTarget.setPointerCapture === 'function') capturePointer(event.currentTarget, event.pointerId); setDirection(direction, true); }}
         onPointerUp={() => setDirection(direction, false)} onPointerCancel={() => setDirection(direction, false)}
+        onLostPointerCapture={() => setDirection(direction, false)}
       ><span className={`touch-controls__dpad-icon touch-controls__dpad-icon--${direction}`} aria-hidden="true" /></button>
     ))}
   </div>;
 }
 
 export default function TouchControlsOverlay() {
+  const controller = useGameInputController();
+  const [resetVersion, setResetVersion] = useState(0);
   const touchControlsVisible = useGameStore((state) => state.touchControlsVisible);
   const activeInputSource = useGameStore((state) => state.activeInputSource);
   const leftStickRef = useRef<HTMLDivElement | null>(null);
   const rightStickRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const resetTouch = () => {
+      controller.resetSource('touch');
+      setResetVersion((version) => version + 1);
+    };
+    const resetWhenHidden = () => {
+      if (document.visibilityState !== 'visible') resetTouch();
+    };
+    window.addEventListener('blur', resetTouch);
+    window.addEventListener('pagehide', resetTouch);
+    document.addEventListener('visibilitychange', resetWhenHidden);
+    return () => {
+      window.removeEventListener('blur', resetTouch);
+      window.removeEventListener('pagehide', resetTouch);
+      document.removeEventListener('visibilitychange', resetWhenHidden);
+      controller.resetSource('touch');
+    };
+  }, [controller]);
   if (!touchControlsVisible) return null;
 
-  return <div className="touch-controls" data-input-source={activeInputSource}>
+  return <div key={resetVersion} className="touch-controls" data-input-source={activeInputSource}>
     <div className="touch-controls__shoulders touch-controls__shoulders--left">
       <TouchButton buttonId="l1" className="touch-controls__shoulder" />
       <TouchButton buttonId="l2" className="touch-controls__shoulder" />

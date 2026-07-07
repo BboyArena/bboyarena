@@ -76,7 +76,7 @@ Device adapters must not manipulate Three.js objects directly.
 
 ## Rhythm timing
 
-`RhythmClockProvider` owns the global fixed-step musical clock. It reads BPM from the game store and exposes simulation tick, beat position, beat phase, and subdivision independently from the render frame rate.
+`RhythmClockProvider` owns the global fixed-step musical clock. It reads BPM from the game store and exposes simulation tick, beat position, beat phase, and subdivision independently from the render frame rate. Browser visibility transitions reset the animation-frame time origin, so returning from a suspended tab or iframe does not inject a large catch-up interval.
 
 Player intent is timestamped immediately with the current global tick. Authored move frames are converted to beat positions and then to runtime tick offsets; input is never delayed to imitate animation timing. BPM changes preserve the continuous beat position and alter the duration of future musical intervals.
 

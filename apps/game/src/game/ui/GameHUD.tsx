@@ -18,6 +18,8 @@ export default function GameHUD({ copy }: GameHudProps) {
   const selectedMode = useGameStore((state) => state.selectedMode);
   const preferredInputMode = useGameStore((state) => state.preferredInputMode);
   const activeInputSource = useGameStore((state) => state.activeInputSource);
+  const bpm = useGameStore((state) => state.bpm);
+  const setBpm = useGameStore((state) => state.setBpm);
   const setPreferredInputMode = useGameStore((state) => state.setPreferredInputMode);
   const selectedGamepadIndex = useGameStore((state) => state.selectedGamepadIndex);
   const keyboardInputMap = useGameStore((state) => state.keyboardInputMap);
@@ -328,6 +330,23 @@ export default function GameHUD({ copy }: GameHudProps) {
                       ))}
                     </div>
                   </div>
+                </div>
+              ) : selectedSettingsTab === 'audio' ? (
+                <div className="game-input-config">
+                  <label className="game-input-config__field">
+                    <span>Tempo: {bpm} BPM</span>
+                    <input
+                      type="range"
+                      min="60"
+                      max="180"
+                      step="1"
+                      value={bpm}
+                      onChange={(event) => setBpm(Number(event.target.value))}
+                    />
+                  </label>
+                  <p className="game-input-config__status">
+                    Changes apply immediately to the musical clock and future move timing.
+                  </p>
                 </div>
               ) : (
                 <div className="game-meter" aria-hidden="true">

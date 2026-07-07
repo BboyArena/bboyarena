@@ -39,7 +39,18 @@ export function RhythmClockProvider({ children }: { children: ReactNode }) {
     };
 
     frame = window.requestAnimationFrame(update);
-    return () => window.cancelAnimationFrame(frame);
+    const resetFrameOrigin = () => {
+      previousTime = null;
+    };
+    document.addEventListener('visibilitychange', resetFrameOrigin);
+    window.addEventListener('pageshow', resetFrameOrigin);
+    window.addEventListener('pagehide', resetFrameOrigin);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      document.removeEventListener('visibilitychange', resetFrameOrigin);
+      window.removeEventListener('pageshow', resetFrameOrigin);
+      window.removeEventListener('pagehide', resetFrameOrigin);
+    };
   }, []);
 
   return (

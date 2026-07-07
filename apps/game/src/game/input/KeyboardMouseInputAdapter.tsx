@@ -79,12 +79,24 @@ export default function KeyboardMouseInputAdapter() {
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
+    const reset = () => {
+      pressedKeys.clear();
+      pressedButtons.clear();
+      controller.resetSource('keyboardMouse');
+    };
+    const resetWhenHidden = () => {
+      if (document.visibilityState !== 'visible') reset();
+    };
+    window.addEventListener('blur', reset);
+    document.addEventListener('visibilitychange', resetWhenHidden);
     syncMove();
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
-      controller.resetSource('keyboardMouse');
+      window.removeEventListener('blur', reset);
+      document.removeEventListener('visibilitychange', resetWhenHidden);
+      reset();
     };
   }, [controller, keyboardInputMap]);
 

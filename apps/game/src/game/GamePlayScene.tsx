@@ -29,9 +29,15 @@ interface GamePlaySceneProps {
 }
 
 function GameInputSceneBindings({ gameState, send }: { gameState: string; send: (event: { type: string }) => void }) {
-  const activeInputSource = useResolveActiveInputSource();
+  const resolvedInputSource = useResolveActiveInputSource();
+  const preferredInputMode = useGameStore((store) => store.preferredInputMode);
+  const setActiveInputSource = useGameStore((store) => store.setActiveInputSource);
   const snapshot = useGameInputSnapshot();
   const previousSnapshotRef = useRef(snapshot);
+
+  useEffect(() => {
+    setActiveInputSource(snapshot.source);
+  }, [setActiveInputSource, snapshot.source]);
 
   useEffect(() => {
     const previousSnapshot = previousSnapshotRef.current;
@@ -55,8 +61,8 @@ function GameInputSceneBindings({ gameState, send }: { gameState: string; send: 
 
   return (
     <>
-      {activeInputSource === 'gamepad' ? <GamepadInputAdapter /> : null}
-      {activeInputSource === 'keyboardMouse' ? <KeyboardMouseInputAdapter /> : null}
+      {preferredInputMode === 'auto' || resolvedInputSource === 'gamepad' ? <GamepadInputAdapter /> : null}
+      {preferredInputMode === 'auto' || resolvedInputSource === 'keyboardMouse' ? <KeyboardMouseInputAdapter /> : null}
     </>
   );
 }
@@ -87,7 +93,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const [moveHistory, setMoveHistory] = useState(() => moveHistoryRef.current.getSnapshot());
   const moveQueueRef = useRef(new MoveQueueController());
   const [moveQueue, setMoveQueue] = useState(() => moveQueueRef.current.getSnapshot());
-  const [diagnosticsVisible, setDiagnosticsVisible] = useState(true);
+  const [diagnosticsVisible, setDiagnosticsVisible] = useState(import.meta.env.DEV);
 
   useEffect(() => {
     if (mode === 'training' && gameState === 'idle') {
@@ -268,7 +274,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
         >
           {copy.playStatus} / {mode} / {gameState}
         </button>
-        {mode === 'training' ? (
+        {import.meta.env.DEV && mode === 'training' ? (
           <button
             type="button"
             className="game-training-input-hud__toggle"

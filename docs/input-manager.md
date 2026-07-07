@@ -36,7 +36,7 @@ The manager polls `navigator.getGamepads()` once per animation frame. Stick valu
 
 ### Touch controller
 
-The overlay provides a D-pad, two virtual analog sticks, ABXY, L1/L2/R1/R2, Options, and Esc. `nipplejs` supplies independent movement and look vectors from the two stick zones. Pointer capture keeps button releases reliable during multi-touch input.
+The overlay provides a D-pad, two virtual analog sticks, ABXY, L1/L2/R1/R2, Options, and Esc. Pointer Events supply independent movement and look vectors from the two stick zones. Pointer capture plus cancellation, lost-capture, page visibility, and focus cleanup keep releases reliable during multi-touch input.
 
 ABXY are presentation labels for the four semantic move families: A maps to Toprock, B to Footwork, X to Freeze, and Y to Powermove. The move resolver never depends on the displayed controller label.
 
@@ -55,7 +55,9 @@ Snapshots are immutable from the consumer's point of view. Consumers subscribe t
 
 ## Source resolution
 
-The game resolves an active source from recent and available input. Device adapters translate hardware-specific events into the same canonical contract. Switching devices must not require gameplay changes.
+In automatic mode the game listens to keyboard, gamepad, and available touch controls together. Meaningful input selects the active source; neutral polling from another device cannot steal it. Explicit device preferences limit the active adapters. Device adapters translate hardware-specific events into the same canonical contract, so switching devices does not require gameplay changes.
+
+The current gameplay consumes movement, the four move-family buttons, and contextual start/pause actions. Look and shoulder inputs remain part of the canonical diagnostic contract but do not yet trigger a camera or gameplay action.
 
 ## Integration rules
 

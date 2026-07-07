@@ -1,6 +1,5 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useGameStore } from '../state/useGameStore';
-import { useGamepadAvailability } from './useGamepadAvailability';
 import { useHasTouchControls } from './useHasTouchControls';
 import type { ActiveInputSource } from './gameInputTypes';
 
@@ -18,33 +17,23 @@ function getDevTouchOverride() {
 
 export function useResolveActiveInputSource(): ActiveInputSource {
   const preferredInputMode = useGameStore((state) => state.preferredInputMode);
+  const currentInputSource = useGameStore((state) => state.activeInputSource);
   const hasTouchControls = useHasTouchControls();
-  const hasGamepad = useGamepadAvailability();
   const setActiveInputSource = useGameStore((state) => state.setActiveInputSource);
   const setTouchControlsVisible = useGameStore((state) => state.setTouchControlsVisible);
 
-  const activeInputSource = useMemo<ActiveInputSource>(() => {
-    if (preferredInputMode !== 'auto') {
-      return preferredInputMode;
-    }
+  const activeInputSource: ActiveInputSource = preferredInputMode === 'auto'
+    ? currentInputSource
+    : preferredInputMode;
 
-    if (hasTouchControls) {
-      return 'touch';
-    }
-
-    if (hasGamepad) {
-      return 'gamepad';
-    }
-
-    return 'keyboardMouse';
-  }, [hasGamepad, hasTouchControls, preferredInputMode]);
-
-  const touchControlsVisible = activeInputSource === 'touch' || getDevTouchOverride();
+  const touchControlsVisible = (
+    (preferredInputMode === 'auto' && hasTouchControls) || preferredInputMode === 'touch'
+  ) || getDevTouchOverride();
 
   useEffect(() => {
-    setActiveInputSource(activeInputSource);
+    if (preferredInputMode !== 'auto') setActiveInputSource(activeInputSource);
     setTouchControlsVisible(touchControlsVisible);
-  }, [activeInputSource, setActiveInputSource, setTouchControlsVisible, touchControlsVisible]);
+  }, [activeInputSource, preferredInputMode, setActiveInputSource, setTouchControlsVisible, touchControlsVisible]);
 
   return activeInputSource;
 }
