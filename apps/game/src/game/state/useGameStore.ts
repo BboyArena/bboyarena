@@ -50,7 +50,7 @@ export const useGameStore = create<GameState>((set) => ({
   selectedMode: 'career',
   selectedCharacter: 'Dust Crew',
   score: 0,
-  bpm: 120,
+  bpm: 110,
   isMuted: false,
   preferredInputMode: 'auto',
   activeInputSource: 'keyboardMouse',

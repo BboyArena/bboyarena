@@ -31,6 +31,22 @@ export type PublicMove = {
 // Keep this data local to the website: the website must not import game runtime source.
 export const PUBLIC_MOVES: PublicMove[] = [
   {
+    id: 'default-toprock', label: 'Default Toprock', family: 'toprock', durationBeats: 4,
+    status: 'playable', skills: ['rhythm', 'timing', 'coordination'],
+    stickTracks: {
+      left: [
+        { t: 0, x: 0, y: 0, tolerance: 0.25 }, { t: 0.25, x: -0.5, y: 0.35, tolerance: 0.3 },
+        { t: 0.5, x: 0, y: 0, tolerance: 0.25 }, { t: 0.75, x: 0.5, y: -0.35, tolerance: 0.3 },
+        { t: 1, x: 0, y: 0, tolerance: 0.25 }
+      ],
+      right: [
+        { t: 0, x: 0, y: 0, tolerance: 0.2 }, { t: 0.25, x: 0.75, y: 0.75, tolerance: 0.25 },
+        { t: 0.5, x: 0, y: 0, tolerance: 0.2 }, { t: 0.75, x: -0.75, y: -0.75, tolerance: 0.25 },
+        { t: 1, x: 0, y: 0, tolerance: 0.2 }
+      ]
+    }
+  },
+  {
     id: 'toprock-indianstep', label: 'Indian Step', family: 'toprock', durationBeats: 4,
     status: 'prototype', skills: ['rhythm', 'timing', 'coordination'],
     stickTracks: {
@@ -77,7 +93,7 @@ export const PUBLIC_MOVES: PublicMove[] = [
     }
   },
   {
-    id: 'default-powermove', label: 'Powermove', family: 'powermove', durationBeats: 2,
+    id: 'default-powermove', label: 'Default Powermove', family: 'powermove', durationBeats: 2,
     status: 'playable', skills: ['coordination', 'precision', 'balance'],
     stickTracks: {
       left: [
@@ -93,7 +109,7 @@ export const PUBLIC_MOVES: PublicMove[] = [
     }
   },
   {
-    id: 'default-freeze', label: 'Freeze', family: 'freeze', durationBeats: 4,
+    id: 'default-freeze', label: 'Default Freeze', family: 'freeze', durationBeats: 4,
     status: 'playable', skills: ['timing', 'control', 'hold'],
     stickTracks: {
       left: [

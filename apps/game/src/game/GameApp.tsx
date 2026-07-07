@@ -7,6 +7,7 @@ import GamePlayScene from './GamePlayScene';
 import { getDefaultGameCopy, loadGameCopy, type GameCopy, type LocaleCode } from './copy';
 import { RhythmClockProvider } from './rhythm/RhythmClockProvider';
 import { useHasTouchControls } from './input/useHasTouchControls';
+import GameMusic from './audio/GameMusic';
 import './game.css';
 
 interface GameAppProps {
@@ -71,7 +72,10 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
         <div className="game-shell">
           <div className="game-stage" data-scene={screen}>
             {isPlayableScreen ? (
-              <GamePlayScene mode={selectedMode} copy={copy} />
+              <>
+                <GameMusic />
+                <GamePlayScene mode={selectedMode} copy={copy} />
+              </>
             ) : (
               <>
                 {isDev ? (

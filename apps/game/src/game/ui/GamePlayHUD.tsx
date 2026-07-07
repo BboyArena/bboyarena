@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useGameStore } from '../state/useGameStore';
 import { useGameInputSnapshot } from '../input/GameInputProvider';
 import { useConnectedGamepads } from '../input/useConnectedGamepads';
@@ -14,6 +15,8 @@ import type { StickCueSample } from '../move/stickCueTracks';
 import { moveCatalog } from '../move/moveCatalog';
 import type { MoveQueueSnapshot } from '../move/MoveQueueController';
 import type { StickCuePoint } from '../move/moveDefinitionTypes';
+import type { MoveFamilyId } from '../move/moveDefinitionTypes';
+import TrainingCoachPanel from './TrainingCoachPanel';
 
 export type StickCueDiagnostic = {
   id: string;
@@ -74,6 +77,14 @@ export default function GamePlayHUD({
   stickCueDiagnostics,
   moveQueue
 }: GamePlayHudProps) {
+  const [compactTraining, setCompactTraining] = useState(() => (
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 640px), (max-height: 520px)').matches
+  ));
+  const [learning, setLearning] = useState(() => (
+    mode === 'training'
+    && typeof window !== 'undefined'
+    && window.matchMedia('(max-width: 640px), (max-height: 520px)').matches
+  ));
   const touchControlsVisible = useGameStore((state) => state.touchControlsVisible);
   const activeInputSource = useGameStore((state) => state.activeInputSource);
   const selectedGamepadIndex = useGameStore((state) => state.selectedGamepadIndex);
@@ -83,6 +94,9 @@ export default function GamePlayHUD({
   const selectedGamepad = connectedGamepads.find((gamepad) => gamepad.index === selectedGamepadIndex)
     ?? (selectedGamepadIndex === null ? connectedGamepads[0] : undefined);
   const activeMove = moveCatalog.moves.find((move) => move.intentId === moveQueue.active?.intentId);
+  const documentedMove = activeMove
+    ?? moveCatalog.moves.find((move) => move.intentId === motionState.activeIntentId)
+    ?? null;
   const moveFamilyLabel = moveQueue.active?.family ?? getMoveFamilyLabel(motionState.activeIntentId);
   const moveStyleLabel = moveQueue.active?.label ?? activeMove?.label
     ?? (motionState.activeIntentId ? PLAYER_MOTION_INTENT_LABELS[motionState.activeIntentId] : 'Waiting for move');
@@ -90,19 +104,38 @@ export default function GamePlayHUD({
     ? Math.min(1, Math.max(0, (rhythmState.beat - moveQueue.active.startedAtBeat) / moveQueue.active.durationBeats))
     : 0;
   const nextMove = moveQueue.queued[0] ?? null;
+  const coachFeedback = stickCueDiagnostics.length > 0
+    ? (stickCueDiagnostics.every((cue) => {
+        const input = cue.targetInput === 'look' ? snapshot.look : snapshot.move;
+        return Math.hypot(input.x - cue.sample.x, input.y - cue.sample.y) <= cue.sample.tolerance;
+      }) ? 'On target — keep the rhythm.' : 'Follow the suggested stick path.')
+    : undefined;
+
+  useEffect(() => {
+    const compactViewport = window.matchMedia('(max-width: 640px), (max-height: 520px)');
+    const syncTrainingLayout = (matches: boolean) => {
+      setCompactTraining(matches);
+      setLearning(mode === 'training' && matches);
+    };
+    const handleChange = (event: MediaQueryListEvent) => syncTrainingLayout(event.matches);
+    compactViewport.addEventListener('change', handleChange);
+    return () => compactViewport.removeEventListener('change', handleChange);
+  }, [mode]);
+
+  const learningActive = mode === 'training' && compactTraining && learning;
 
   return (
     <>
-      <div
+      {!learningActive ? <div
         className="game-beat-pad"
         data-active={rhythmState.beatPhase < 0.18}
         aria-label={`Beat ${(rhythmState.beatIndex % 4) + 1} of 4`}
       >
         <i />
         <span>{(rhythmState.beatIndex % 4) + 1}/4</span>
-      </div>
+      </div> : null}
 
-      <aside className="game-active-move-hud" aria-live="polite" aria-label="Active move">
+      {!learningActive ? <aside className="game-active-move-hud" data-training={mode === 'training'} aria-live="polite" aria-label="Active move">
         <span>Move</span>
         <strong>{moveFamilyLabel}</strong>
         <small>Style: {moveStyleLabel}</small>
@@ -118,17 +151,29 @@ export default function GamePlayHUD({
             </li>
           ))}
         </ol>
-      </aside>
+      </aside> : null}
 
-      {nextMove ? (
+      {mode === 'training' ? (
+        <TrainingCoachPanel
+          move={documentedMove}
+          family={(moveQueue.active?.family ?? (documentedMove?.intentId.split('.')[1] ?? null)) as MoveFamilyId | null}
+          progress={activeProgress}
+          feedback={coachFeedback}
+          compact={compactTraining}
+          learning={learningActive}
+          onLearningChange={setLearning}
+        />
+      ) : null}
+
+      {!learningActive && nextMove ? (
         <div className="game-next-move-ghost" aria-hidden="true">
           <span>Next</span>
           <strong>{nextMove.family}</strong>
         </div>
       ) : null}
 
-      {stickCueDiagnostics.length > 0 ? (
-        <aside className="game-stick-cue-hud" aria-label="Stick path instructions">
+      {!learningActive && stickCueDiagnostics.length > 0 ? (
+        <aside className="game-stick-cue-hud" data-training={mode === 'training'} aria-label="Stick path instructions">
           {stickCueDiagnostics.map((cue) => {
             const input = cue.targetInput === 'look' ? snapshot.look : snapshot.move;
             const grammar = stickGrammar[cue.stick];
@@ -155,7 +200,7 @@ export default function GamePlayHUD({
         </aside>
       ) : null}
 
-      {mode === 'training' && diagnosticsVisible ? (
+      {mode === 'training' && diagnosticsVisible && !learningActive ? (
         <aside className="game-training-input-hud" aria-label="Live input and motion monitor">
           <div className="game-training-input-hud__header">
             <div>
@@ -247,7 +292,7 @@ export default function GamePlayHUD({
         </aside>
       ) : null}
 
-      {touchControlsVisible ? <TouchControlsOverlay /> : null}
+      {touchControlsVisible && !learningActive ? <TouchControlsOverlay /> : null}
     </>
   );
 }
