@@ -2206,6 +2206,38 @@
   transform: scale(1.08);
 }
 
+.bboy-game-root .game-session-stats {
+  position: absolute;
+  z-index: 21;
+  top: 3.15rem;
+  right: clamp(0.75rem, 2vw, 1.5rem);
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.38rem 0.55rem;
+  border: 1px solid rgba(255, 217, 92, 0.25);
+  border-radius: 0.45rem;
+  background: rgba(8, 8, 10, 0.72);
+  color: var(--game-text);
+  pointer-events: none;
+}
+
+.bboy-game-root .game-session-stats div { display: grid; gap: 0.08rem; }
+
+.bboy-game-root .game-session-stats span {
+  color: rgba(247, 241, 230, 0.56);
+  font-size: 0.46rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.bboy-game-root .game-session-stats strong {
+  color: #fff2cf;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+}
+
 .bboy-game-root .game-active-move-hud span,
 .bboy-game-root .game-active-move-hud small {
   display: block;
@@ -2469,6 +2501,13 @@
 }
 
 @media (max-width: 640px), (max-height: 520px) {
+  .bboy-game-root .game-session-stats {
+    top: calc(3rem + env(safe-area-inset-top, 0px));
+    right: 0.5rem;
+    gap: 0.45rem;
+    padding: 0.3rem 0.4rem;
+  }
+
   .bboy-game-root .game-training-coach {
     top: calc(0.45rem + env(safe-area-inset-top, 0px));
     left: 50%;

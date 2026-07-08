@@ -136,6 +136,8 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const [moveScore, setMoveScore] = useState<number | null>(null);
   const [loopPoints, setLoopPoints] = useState(0);
   const [totalPoints, setTotalPoints] = useState(0);
+  const lastPlayTimeTickRef = useRef(rhythmSnapshot.tick);
+  const [playTimeSeconds, setPlayTimeSeconds] = useState(0);
   const staminaRewardSequenceRef = useRef(0);
   const [staminaRewardFeedback, setStaminaRewardFeedback] = useState<{ amount: number; sequence: number } | null>(null);
   const scoreAccumulatorRef = useRef<{ moveId: number; earned: number; possible: number } | null>(null);
@@ -173,6 +175,8 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
       setMoveScore(null);
       setLoopPoints(0);
       setTotalPoints(0);
+      lastPlayTimeTickRef.current = currentTick;
+      setPlayTimeSeconds(0);
       setStaminaRewardFeedback(null);
       scoreAccumulatorRef.current = null;
       awardedStickStepsRef.current.clear();
@@ -187,6 +191,12 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   }, [animationSend, gameState, motionSend, rhythmClock]);
 
   useEffect(() => {
+    const elapsedTicks = Math.max(0, rhythmSnapshot.tick - lastPlayTimeTickRef.current);
+    if (gameState === 'playing' && elapsedTicks > 0) {
+      setPlayTimeSeconds((seconds) => seconds + elapsedTicks / rhythmSnapshot.tickRate);
+    }
+    lastPlayTimeTickRef.current = rhythmSnapshot.tick;
+
     if (gameState === 'playing') {
       motionSend({ type: 'TICK', tick: rhythmSnapshot.tick });
       const activeBeforeAdvance = moveQueueRef.current.getSnapshot().active;
@@ -466,6 +476,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
         moveScore={moveScore}
         loopPoints={loopPoints}
         totalPoints={totalPoints}
+        playTimeSeconds={playTimeSeconds}
         staminaRewardFeedback={staminaRewardFeedback}
         stickFeedbacks={stickFeedbacks}
       />

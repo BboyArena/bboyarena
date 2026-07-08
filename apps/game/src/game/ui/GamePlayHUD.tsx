@@ -52,6 +52,7 @@ interface GamePlayHudProps {
   moveScore: number | null;
   loopPoints: number;
   totalPoints: number;
+  playTimeSeconds: number;
   staminaRewardFeedback: { amount: number; sequence: number } | null;
   stickFeedbacks: TouchStickFeedback[];
 }
@@ -86,6 +87,7 @@ export default function GamePlayHUD({
   moveScore,
   loopPoints,
   totalPoints,
+  playTimeSeconds,
   staminaRewardFeedback,
   stickFeedbacks
 }: GamePlayHudProps) {
@@ -147,9 +149,18 @@ export default function GamePlayHUD({
   }, [mode]);
 
   const learningActive = mode === 'training' && compactTraining && learning;
+  const wholePlaySeconds = Math.max(0, Math.floor(playTimeSeconds));
+  const playMinutes = Math.floor(wholePlaySeconds / 60);
+  const playSeconds = wholePlaySeconds % 60;
+  const formattedPlayTime = `${String(playMinutes).padStart(2, '0')}:${String(playSeconds).padStart(2, '0')}`;
 
   return (
     <>
+      <aside className="game-session-stats" aria-label={`Total score ${totalPoints}, play time ${formattedPlayTime}`}>
+        <div><span>Total score</span><strong>{totalPoints}</strong></div>
+        <div><span>Play time</span><strong>{formattedPlayTime}</strong></div>
+      </aside>
+
       {staminaRewardFeedback && !learningActive ? (
         <div
           key={staminaRewardFeedback.sequence}
