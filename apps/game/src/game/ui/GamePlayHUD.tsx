@@ -53,7 +53,7 @@ interface GamePlayHudProps {
   loopPoints: number;
   totalPoints: number;
   playTimeSeconds: number;
-  staminaRewardFeedback: { amount: number; sequence: number } | null;
+  staminaRewardFeedback: { amount: number; score: number; sequence: number } | null;
   stickFeedbacks: TouchStickFeedback[];
 }
 
@@ -168,7 +168,7 @@ export default function GamePlayHUD({
           role="status"
           aria-live="polite"
         >
-          <span>Good movement</span>
+          <span>Loop score {staminaRewardFeedback.score}%</span>
           <strong>+{staminaRewardFeedback.amount.toFixed(1)} stamina</strong>
         </div>
       ) : null}

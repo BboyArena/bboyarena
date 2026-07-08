@@ -139,7 +139,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const lastPlayTimeTickRef = useRef(rhythmSnapshot.tick);
   const [playTimeSeconds, setPlayTimeSeconds] = useState(0);
   const staminaRewardSequenceRef = useRef(0);
-  const [staminaRewardFeedback, setStaminaRewardFeedback] = useState<{ amount: number; sequence: number } | null>(null);
+  const [staminaRewardFeedback, setStaminaRewardFeedback] = useState<{ amount: number; score: number; sequence: number } | null>(null);
   const scoreAccumulatorRef = useRef<{ moveId: number; earned: number; possible: number } | null>(null);
   const awardedStickStepsRef = useRef(new Set<string>());
   const stickFeedbackSequenceRef = useRef(0);
@@ -201,6 +201,49 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
       motionSend({ type: 'TICK', tick: rhythmSnapshot.tick });
       const activeBeforeAdvance = moveQueueRef.current.getSnapshot().active;
       if (mode === 'training' && activeBeforeAdvance) {
+        const definition = moveCatalog.moves.find((move) => move.intentId === activeBeforeAdvance.intentId);
+        const progress = activeBeforeAdvance.durationBeats > 0
+          ? (rhythmSnapshot.beat - activeBeforeAdvance.startedAtBeat) / activeBeforeAdvance.durationBeats
+          : 0;
+        const possible = (definition?.stickCueTracks.reduce((sum, track) => sum + track.points.length, 0) ?? 1)
+          * PERFECT_STEP_POINTS;
+        const nextFeedbacks: TouchStickFeedback[] = [];
+
+        for (const track of definition?.stickCueTracks ?? []) {
+          const cue = sampleStickCueStep(track, progress, activeBeforeAdvance.durationBeats, timingWindowBeats);
+          if (!cue.active) continue;
+          const input = (track.targetInput ?? 'movement') === 'look'
+            ? liveInputRef.current.look
+            : liveInputRef.current.move;
+          const tolerance = cue.tolerance * toleranceMultiplier;
+          const distance = Math.hypot(input.x - cue.x, input.y - cue.y);
+          if (distance > tolerance) continue;
+
+          const stepKey = `${activeBeforeAdvance.id}:${track.id}:${cue.pointIndex}`;
+          if (awardedStickStepsRef.current.has(stepKey)) continue;
+          awardedStickStepsRef.current.add(stepKey);
+
+          const distanceRatio = distance / Math.max(Number.EPSILON, tolerance);
+          const timingRatio = Math.abs(cue.beatsUntilStep) / Math.max(Number.EPSILON, timingWindowBeats);
+          const grade = distanceRatio <= 0.45 && timingRatio <= 0.35 ? 'perfect' : 'good';
+          const accumulator = scoreAccumulatorRef.current?.moveId === activeBeforeAdvance.id
+            ? scoreAccumulatorRef.current
+            : { moveId: activeBeforeAdvance.id, earned: 0, possible };
+          const awardedPoints = grade === 'perfect' ? PERFECT_STEP_POINTS : GOOD_STEP_POINTS;
+          accumulator.earned += awardedPoints;
+          scoreAccumulatorRef.current = accumulator;
+          setLoopPoints(accumulator.earned);
+          setTotalPoints((points) => points + awardedPoints);
+          setMoveScore(Math.round((accumulator.earned / Math.max(1, accumulator.possible)) * 100));
+          stickFeedbackSequenceRef.current += 1;
+          nextFeedbacks.push({
+            stick: track.stick,
+            grade,
+            sequence: stickFeedbackSequenceRef.current
+          });
+        }
+        if (nextFeedbacks.length > 0) setStickFeedbacks(nextFeedbacks);
+
         const elapsedBeats = Math.max(0, rhythmSnapshot.beat - lastStaminaBeatRef.current);
         const staminaDrain = elapsedBeats * (
           MOVE_STAMINA_COST / Math.max(Number.EPSILON, activeBeforeAdvance.durationBeats)
@@ -242,6 +285,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
             staminaRewardSequenceRef.current += 1;
             setStaminaRewardFeedback({
               amount: staminaReward,
+              score: completedScore ?? 0,
               sequence: staminaRewardSequenceRef.current
             });
           }
@@ -371,46 +415,6 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
     timingWindowBeats,
     toleranceMultiplier
   ]);
-
-  useEffect(() => {
-    const activeMove = moveQueue.active;
-    if (!activeMove || mode !== 'training' || gameState !== 'playing') return;
-    const nextFeedbacks: TouchStickFeedback[] = [];
-
-    for (const cue of stickCueDiagnostics) {
-      if (!cue.sample.active) continue;
-      const input = cue.targetInput === 'look' ? snapshot.look : snapshot.move;
-      const distance = Math.hypot(input.x - cue.sample.x, input.y - cue.sample.y);
-      if (distance > cue.sample.tolerance) continue;
-
-      const stepKey = `${activeMove.id}:${cue.id}:${cue.sample.pointIndex}`;
-      if (awardedStickStepsRef.current.has(stepKey)) continue;
-      awardedStickStepsRef.current.add(stepKey);
-
-      const distanceRatio = distance / Math.max(Number.EPSILON, cue.sample.tolerance);
-      const timingRatio = Math.abs(cue.sample.beatsUntilStep) / Math.max(Number.EPSILON, timingWindowBeats);
-      const grade = distanceRatio <= 0.45 && timingRatio <= 0.35 ? 'perfect' : 'good';
-      const definition = moveCatalog.moves.find((move) => move.intentId === activeMove.intentId);
-      const possible = (definition?.stickCueTracks.reduce((sum, track) => sum + track.points.length, 0) ?? 1)
-        * PERFECT_STEP_POINTS;
-      const accumulator = scoreAccumulatorRef.current?.moveId === activeMove.id
-        ? scoreAccumulatorRef.current
-        : { moveId: activeMove.id, earned: 0, possible };
-      const awardedPoints = grade === 'perfect' ? PERFECT_STEP_POINTS : GOOD_STEP_POINTS;
-      accumulator.earned += awardedPoints;
-      scoreAccumulatorRef.current = accumulator;
-      setLoopPoints(accumulator.earned);
-      setTotalPoints((points) => points + awardedPoints);
-      setMoveScore(Math.round((accumulator.earned / Math.max(1, accumulator.possible)) * 100));
-      stickFeedbackSequenceRef.current += 1;
-      nextFeedbacks.push({
-        stick: cue.stick,
-        grade,
-        sequence: stickFeedbackSequenceRef.current
-      });
-    }
-    if (nextFeedbacks.length > 0) setStickFeedbacks(nextFeedbacks);
-  }, [gameState, mode, moveQueue.active, snapshot.look, snapshot.move, stickCueDiagnostics, timingWindowBeats]);
 
   useEffect(() => {
     if (
