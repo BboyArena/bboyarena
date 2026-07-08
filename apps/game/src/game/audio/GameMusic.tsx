@@ -6,8 +6,11 @@ const TRACK_URL = `${import.meta.env.BASE_URL}audio/saturday-afternoon-sole.mp3`
 
 export default function GameMusic() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const isMuted = useGameStore((state) => state.isMuted);
+  const internalMusicEnabled = useGameStore((state) => state.internalMusicEnabled);
+  const selectedMode = useGameStore((state) => state.selectedMode);
+  const trainingAudioMode = useGameStore((state) => state.trainingAudioMode);
   const rhythmClock = useRhythmClock();
+  const shouldPlay = internalMusicEnabled && (selectedMode !== 'training' || trainingAudioMode === 'internal');
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -21,13 +24,18 @@ export default function GameMusic() {
       void audio.play().then(removeUnlockListeners).catch(() => undefined);
     };
 
+    if (!shouldPlay) {
+      audio.pause();
+      return removeUnlockListeners;
+    }
+
     void audio.play().catch(() => {
       window.addEventListener('pointerdown', unlockAudio, { once: true });
       window.addEventListener('keydown', unlockAudio, { once: true });
     });
 
     return removeUnlockListeners;
-  }, []);
+  }, [shouldPlay]);
 
   return (
     <audio
@@ -35,7 +43,7 @@ export default function GameMusic() {
       src={TRACK_URL}
       autoPlay
       loop
-      muted={isMuted}
+      muted={!shouldPlay}
       preload="auto"
       onPlay={() => rhythmClock.reset()}
     />

@@ -211,6 +211,7 @@ Localization configuration and path helpers live in `apps/website/src/lib/i18n.t
 - `motion/` — semantic intent resolution, XState player motion, transition rules, and accepted move history.
 - `input/` — unified keyboard/mouse, touch, virtual joystick, gesture, and gamepad input infrastructure.
 - `rhythm/` — global fixed-step musical clock driven by the game BPM.
+- `audio/` — internal music playback and the Training manual-BPM metronome. “Bring Your Music” never captures external audio: the user plays music independently and sets the session tempo through the touch R1 Tap BPM control; the 4/4 HUD is read-only feedback. The metronome temporarily occupies the future basic drum-solo track slot.
 - `move/` — authored move phases, loops, cues, skills, transitions, and frame-to-beat normalization.
 - `replay/` — versioned replay contracts and future deterministic timeline support.
 - `locales/` — game copy for the same five supported locales as the website.

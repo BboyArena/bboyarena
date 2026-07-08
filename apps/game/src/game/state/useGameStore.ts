@@ -11,6 +11,7 @@ import { defaultGamepadInputMap, defaultKeyboardInputMap } from '../input/gameIn
 export type GameMenuScreen = 'splashscreen' | 'mainMenu' | 'settings' | 'credits';
 export type GamePlayMode = 'career' | 'training';
 export type GameDifficultyMode = 'assisted' | 'adaptive' | 'expert';
+export type TrainingAudioMode = 'internal' | 'bring-your-music' | 'manual';
 export type GameScreen = GameMenuScreen | GamePlayMode;
 
 interface GameState {
@@ -21,7 +22,8 @@ interface GameState {
   bpm: number;
   difficultyMode: GameDifficultyMode;
   adaptiveSkillRating: number;
-  isMuted: boolean;
+  internalMusicEnabled: boolean;
+  trainingAudioMode: TrainingAudioMode;
   preferredInputMode: PreferredInputMode;
   activeInputSource: ActiveInputSource;
   touchControlsVisible: boolean;
@@ -46,7 +48,8 @@ interface GameState {
   setBpm: (bpm: number) => void;
   setDifficultyMode: (mode: GameDifficultyMode) => void;
   recordAdaptivePerformance: (score: number) => void;
-  toggleMute: () => void;
+  setInternalMusicEnabled: (enabled: boolean) => void;
+  setTrainingAudioMode: (mode: TrainingAudioMode) => void;
   resetGame: () => void;
 }
 
@@ -58,7 +61,8 @@ export const useGameStore = create<GameState>((set) => ({
   bpm: 110,
   difficultyMode: 'adaptive',
   adaptiveSkillRating: 0,
-  isMuted: false,
+  internalMusicEnabled: true,
+  trainingAudioMode: 'internal',
   preferredInputMode: 'auto',
   activeInputSource: 'keyboardMouse',
   touchControlsVisible: false,
@@ -93,6 +97,7 @@ export const useGameStore = create<GameState>((set) => ({
       adaptiveSkillRating: state.adaptiveSkillRating * (1 - sampleWeight) + performance * sampleWeight
     };
   }),
-  toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
+  setInternalMusicEnabled: (internalMusicEnabled) => set({ internalMusicEnabled }),
+  setTrainingAudioMode: (trainingAudioMode) => set({ trainingAudioMode }),
   resetGame: () => set({ score: 0 }),
 }));

@@ -8,6 +8,7 @@ import { getDefaultGameCopy, loadGameCopy, type GameCopy, type LocaleCode } from
 import { RhythmClockProvider } from './rhythm/RhythmClockProvider';
 import { useHasTouchControls } from './input/useHasTouchControls';
 import GameMusic from './audio/GameMusic';
+import ManualMetronome from './audio/ManualMetronome';
 import './game.css';
 
 interface GameAppProps {
@@ -21,6 +22,7 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
   const [resolvedLocale, setResolvedLocale] = useState<LocaleCode>('en-US');
   const screen = useGameStore((state) => state.screen);
   const selectedMode = useGameStore((state) => state.selectedMode);
+  const trainingAudioMode = useGameStore((state) => state.trainingAudioMode);
   const setScreen = useGameStore((state) => state.setScreen);
   const isDev = import.meta.env.DEV;
   const isPlayableScreen = screen === 'career' || screen === 'training';
@@ -63,7 +65,7 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
   console.log('GameApp: rendering screen', screen, 'with mode', selectedMode, 'and locale', resolvedLocale);
   return (
     <RhythmClockProvider>
-      <div
+       <div
         id="bboyarena-game-root"
         className="bboy-game-root"
         ref={rootRef}
@@ -74,6 +76,7 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
             {isPlayableScreen ? (
               <>
                 <GameMusic />
+                {selectedMode === 'training' && trainingAudioMode === 'manual' ? <ManualMetronome /> : null}
                 <GamePlayScene mode={selectedMode} copy={copy} />
               </>
             ) : (
@@ -95,7 +98,7 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
             <GameFullscreenReticle targetRef={rootRef} />
           </div>
         </div>
-      </div>
+       </div>
     </RhythmClockProvider>
   );
 }

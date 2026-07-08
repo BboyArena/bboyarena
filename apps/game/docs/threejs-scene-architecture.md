@@ -78,6 +78,8 @@ Device adapters must not manipulate Three.js objects directly.
 
 `RhythmClockProvider` owns the global fixed-step musical clock. It reads BPM from the game store and exposes simulation tick, beat position, beat phase, and subdivision independently from the render frame rate. Browser visibility transitions reset the animation-frame time origin, so returning from a suspended tab or iframe does not inject a large catch-up interval.
 
+Training can source BPM from the internal track, the manual metronome, or user tap tempo. Manual mode mounts `ManualMetronome`, which synthesizes a short click on each rhythm-clock beat and accents every fourth beat; it is the temporary fallback for a future game-owned drum-solo asset. “Bring Your Music” does not capture, record, or analyze device audio. It assigns tap tempo to the touch R1 control, starts the session at 100 BPM, and measures the interval between two taps on consecutive beats. The first tap arms a three-second measurement window; the second sets the session BPM and closes it. If the window expires, the session falls back to 100 BPM. The 4/4 beat pad remains a read-only tempo indicator. This keeps external playback independent, works consistently across touch devices, and adds no audio-analysis work to the Three.js frame path.
+
 Player intent is timestamped immediately with the current global tick. Authored move frames are converted to beat positions and then to runtime tick offsets; input is never delayed to imitate animation timing. BPM changes preserve the continuous beat position and alter the duration of future musical intervals.
 
 ## Authored move definitions

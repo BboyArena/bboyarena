@@ -54,6 +54,7 @@ The Vite application owns:
 - the React entry point and game screen selector;
 - Three.js/React Three Fiber scenes;
 - player, gameplay, input, UI, and lifecycle state;
+- game-owned music, manual metronome, and user-driven tap-tempo control;
 - game localization and game-specific CSS;
 - assets under `apps/game/public`.
 

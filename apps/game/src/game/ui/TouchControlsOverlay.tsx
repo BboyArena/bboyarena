@@ -17,7 +17,17 @@ function capturePointer(target: Element & { setPointerCapture(pointerId: number)
   }
 }
 
-function TouchButton({ buttonId, className }: { buttonId: GameInputButtonId; className: string }) {
+function TouchButton({
+  buttonId,
+  className,
+  onPress,
+  children
+}: {
+  buttonId: GameInputButtonId;
+  className: string;
+  onPress?: () => void;
+  children?: React.ReactNode;
+}) {
   const controller = useGameInputController();
   const [pressed, setPressed] = useState(false);
   const release = () => {
@@ -34,11 +44,12 @@ function TouchButton({ buttonId, className }: { buttonId: GameInputButtonId; cla
         }
         setPressed(true);
         controller.updateButton('touch', buttonId, true);
+        onPress?.();
       }}
       onPointerUp={(event) => { event.preventDefault(); release(); }}
       onPointerCancel={release}
       onLostPointerCapture={release}
-    >{labels[buttonId]}</button>
+    >{children ?? labels[buttonId]}</button>
   );
 }
 
@@ -109,10 +120,12 @@ function DirectionPad() {
 
 export default function TouchControlsOverlay({
   targets = {},
-  feedbacks = []
+  feedbacks = [],
+  tapTempo
 }: {
   targets?: Partial<Record<'left' | 'right', TouchStickTarget>>;
   feedbacks?: TouchStickFeedback[];
+  tapTempo?: { bpm: number; isArmed: boolean; isTooFast: boolean; tap: () => void };
 }) {
   const controller = useGameInputController();
   const [resetVersion, setResetVersion] = useState(0);
@@ -155,7 +168,16 @@ export default function TouchControlsOverlay({
     </div>
     <div className="touch-controls__shoulders touch-controls__shoulders--right">
       <TouchButton buttonId="r2" className="touch-controls__shoulder" />
-      <TouchButton buttonId="r1" className="touch-controls__shoulder" />
+      <TouchButton
+        buttonId="r1"
+        className={`touch-controls__shoulder${tapTempo ? ' touch-controls__shoulder--tap-tempo' : ''}`}
+        onPress={tapTempo?.tap}
+      >
+        {tapTempo ? <>
+          <span>R1 · {tapTempo.isTooFast ? 'TAP AGAIN' : tapTempo.isArmed ? 'TAP 2/2' : 'TAP BPM'}</span>
+          <small>{tapTempo.isTooFast ? 'TOO FAST' : `${tapTempo.bpm} BPM${tapTempo.isArmed ? ' · 1/2' : ''}`}</small>
+        </> : null}
+      </TouchButton>
     </div>
 
     <div className="touch-controls__side touch-controls__side--left">

@@ -940,6 +940,25 @@
   font-size: 0.66rem;
 }
 
+.bboy-game-root .game-audio-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--game-space-3);
+}
+
+.bboy-game-root .game-audio-setting-row > div,
+.bboy-game-root .game-audio-capture {
+  display: grid;
+  gap: var(--game-space-2);
+}
+
+.bboy-game-root .game-audio-capture {
+  padding: var(--game-space-3);
+  border: 1px solid rgba(77, 67, 55, 0.24);
+  background: rgba(255, 252, 240, 0.52);
+}
+
 .bboy-game-root .game-input-map {
   display: grid;
   gap: var(--game-space-2);
@@ -2206,6 +2225,7 @@
   transform: scale(1.08);
 }
 
+
 .bboy-game-root .game-session-stats {
   position: absolute;
   z-index: 21;
@@ -2939,6 +2959,27 @@
   min-width: 3.5rem;
   min-height: 48px;
   border-radius: 0.55rem;
+}
+
+.bboy-game-root .touch-controls__shoulder--tap-tempo {
+  display: grid;
+  min-width: 7.25rem;
+  padding: 0.3rem 0.55rem;
+  border-color: rgba(255, 217, 92, 0.78);
+  color: var(--game-gold-hot);
+  line-height: 1.05;
+}
+
+.bboy-game-root .touch-controls__shoulder--tap-tempo span { font-size: 0.68rem; }
+.bboy-game-root .touch-controls__shoulder--tap-tempo small {
+  color: #fff2cf;
+  font-size: 0.55rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.bboy-game-root .touch-controls__shoulder--tap-tempo[aria-pressed="true"] {
+  background: rgba(95, 80, 28, 0.94);
+  box-shadow: 0 0 24px rgba(244, 190, 36, 0.42);
 }
 
 .bboy-game-root .touch-controls__system-button {

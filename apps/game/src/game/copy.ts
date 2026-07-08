@@ -55,6 +55,18 @@ export interface GameCopy {
   soundMix: string;
   soundMixDescription: string;
   fourChannels: string;
+  internalMusic: string;
+  internalMusicDescription: string;
+  trainingRhythmSource: string;
+  gameMusic: string;
+  gameMusicNote: string;
+  bringYourMusic: string;
+  bringYourMusicNote: string;
+  bringYourMusicInstructions: string;
+  tapBpm: string;
+  tapBpmHint: string;
+  manualBpm: string;
+  manualBpmNote: string;
   display: string;
   visualSetup: string;
   visualSetupDescription: string;

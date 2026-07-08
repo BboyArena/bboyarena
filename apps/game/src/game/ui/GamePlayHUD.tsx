@@ -17,6 +17,7 @@ import type { MoveQueueSnapshot } from '../move/MoveQueueController';
 import type { StickCuePoint } from '../move/moveDefinitionTypes';
 import type { MoveFamilyId } from '../move/moveDefinitionTypes';
 import TrainingCoachPanel from './TrainingCoachPanel';
+import { useTapTempo } from './useTapTempo';
 
 export type StickCueDiagnostic = {
   id: string;
@@ -75,6 +76,7 @@ const getMoveFamilyLabel = (intentId: PlayerMotionSnapshot['activeIntentId']) =>
 export default function GamePlayHUD({
   mode,
   gameState,
+  copy,
   motionState,
   animationStateLabel,
   animationContext,
@@ -100,6 +102,7 @@ export default function GamePlayHUD({
     && window.matchMedia('(max-width: 640px), (max-height: 520px)').matches
   ));
   const touchControlsVisible = useGameStore((state) => state.touchControlsVisible);
+  const trainingAudioMode = useGameStore((state) => state.trainingAudioMode);
   const activeInputSource = useGameStore((state) => state.activeInputSource);
   const selectedGamepadIndex = useGameStore((state) => state.selectedGamepadIndex);
   const connectedGamepads = useConnectedGamepads();
@@ -149,6 +152,8 @@ export default function GamePlayHUD({
   }, [mode]);
 
   const learningActive = mode === 'training' && compactTraining && learning;
+  const bringYourMusicActive = mode === 'training' && trainingAudioMode === 'bring-your-music';
+  const tapTempo = useTapTempo(bringYourMusicActive);
   const wholePlaySeconds = Math.max(0, Math.floor(playTimeSeconds));
   const playMinutes = Math.floor(wholePlaySeconds / 60);
   const playSeconds = wholePlaySeconds % 60;
@@ -287,6 +292,8 @@ export default function GamePlayHUD({
             <div>Game: <output>{gameState}</output></div>
             <div>Accepting intents: <output>{gameState === 'playing' ? 'yes' : 'no'}</output></div>
             <div>BPM: <output>{rhythmState.bpm.toFixed(2)}</output></div>
+            <div>Tempo source: <output>{trainingAudioMode}</output></div>
+            {trainingAudioMode === 'bring-your-music' ? <div>Tempo authority: <output>touch tap</output></div> : null}
             <div>Global tick: <output>{rhythmState.tick}</output></div>
             <div>Beat: <output>{rhythmState.beat.toFixed(3)}</output></div>
             <div>Beat phase: <output>{rhythmState.beatPhase.toFixed(3)}</output></div>
@@ -348,7 +355,13 @@ export default function GamePlayHUD({
         </aside>
       ) : null}
 
-      {touchControlsVisible && !learningActive ? <TouchControlsOverlay targets={touchStickTargets} feedbacks={stickFeedbacks} /> : null}
+      {touchControlsVisible && (!learningActive || bringYourMusicActive) ? (
+        <TouchControlsOverlay
+          targets={touchStickTargets}
+          feedbacks={stickFeedbacks}
+          tapTempo={bringYourMusicActive ? tapTempo : undefined}
+        />
+      ) : null}
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useGameStore, type GamePlayMode } from '../state/useGameStore';
+import { useGameStore, type GamePlayMode, type TrainingAudioMode } from '../state/useGameStore';
 import type { GameCopy } from '../copy';
 import GameButton from './GameButton';
 import GamePanel from './GamePanel';
@@ -19,9 +19,13 @@ export default function GameHUD({ copy }: GameHudProps) {
   const preferredInputMode = useGameStore((state) => state.preferredInputMode);
   const activeInputSource = useGameStore((state) => state.activeInputSource);
   const bpm = useGameStore((state) => state.bpm);
+  const internalMusicEnabled = useGameStore((state) => state.internalMusicEnabled);
+  const trainingAudioMode = useGameStore((state) => state.trainingAudioMode);
   const difficultyMode = useGameStore((state) => state.difficultyMode);
   const adaptiveSkillRating = useGameStore((state) => state.adaptiveSkillRating);
   const setBpm = useGameStore((state) => state.setBpm);
+  const setInternalMusicEnabled = useGameStore((state) => state.setInternalMusicEnabled);
+  const setTrainingAudioMode = useGameStore((state) => state.setTrainingAudioMode);
   const setDifficultyMode = useGameStore((state) => state.setDifficultyMode);
   const setPreferredInputMode = useGameStore((state) => state.setPreferredInputMode);
   const selectedGamepadIndex = useGameStore((state) => state.selectedGamepadIndex);
@@ -104,6 +108,11 @@ export default function GameHUD({ copy }: GameHudProps) {
     { id: 'assisted' as const, label: 'Assisted', note: 'Generous tracking windows' },
     { id: 'adaptive' as const, label: 'Adaptive', note: 'Grows with your consistency' },
     { id: 'expert' as const, label: 'Expert', note: 'Authored precision' }
+  ];
+  const trainingAudioModes: Array<{ id: TrainingAudioMode; label: string; note: string }> = [
+    { id: 'internal', label: copy.gameMusic, note: copy.gameMusicNote },
+    { id: 'bring-your-music', label: copy.bringYourMusic, note: copy.bringYourMusicNote },
+    { id: 'manual', label: copy.manualBpm, note: copy.manualBpmNote }
   ];
   const selectedSettingsCard = settingsCards.find((item) => item.id === selectedSettingsTab) ?? settingsCards[2];
   const inputActions: Array<{ id: GameInputButtonId; label: string }> = [
@@ -362,20 +371,60 @@ export default function GameHUD({ copy }: GameHudProps) {
                 </div>
               ) : selectedSettingsTab === 'audio' ? (
                 <div className="game-input-config">
-                  <label className="game-input-config__field">
-                    <span>Tempo: {bpm} BPM</span>
-                    <input
-                      type="range"
-                      min="60"
-                      max="180"
-                      step="1"
-                      value={bpm}
-                      onChange={(event) => setBpm(Number(event.target.value))}
-                    />
-                  </label>
-                  <p className="game-input-config__status">
-                    Changes apply immediately to the musical clock and future move timing.
-                  </p>
+                  <div className="game-audio-setting-row">
+                    <div>
+                      <p className="game-input-config__heading">{copy.internalMusic}</p>
+                      <p className="game-input-config__status">{copy.internalMusicDescription}</p>
+                    </div>
+                    <GameButton
+                      variant={internalMusicEnabled ? 'primary' : 'secondary'}
+                      active={internalMusicEnabled}
+                      onClick={() => setInternalMusicEnabled(!internalMusicEnabled)}
+                      aria-pressed={internalMusicEnabled}
+                    >
+                      {internalMusicEnabled ? copy.soundOn : copy.soundOff}
+                    </GameButton>
+                  </div>
+
+                  <p className="game-input-config__heading">{copy.trainingRhythmSource}</p>
+                  <div className="game-input-mode-card__grid" role="group" aria-label={copy.trainingRhythmSource}>
+                    {trainingAudioModes.map((mode) => (
+                      <GameButton
+                        key={mode.id}
+                        variant={trainingAudioMode === mode.id ? 'primary' : 'secondary'}
+                        active={trainingAudioMode === mode.id}
+                        className="game-input-mode-card__button"
+                        onClick={() => setTrainingAudioMode(mode.id)}
+                      >
+                        <span className="game-input-mode-card__button-label">{mode.label}</span>
+                        <span className="game-input-mode-card__button-note">{mode.note}</span>
+                      </GameButton>
+                    ))}
+                  </div>
+
+                  {trainingAudioMode === 'bring-your-music' ? (
+                    <div className="game-audio-capture">
+                      <p className="game-input-config__heading">{copy.tapBpm}</p>
+                      <p className="game-input-config__status">{copy.bringYourMusicInstructions}</p>
+                    </div>
+                  ) : (
+                    <>
+                      <label className="game-input-config__field">
+                        <span>Tempo: {bpm} BPM</span>
+                        <input
+                          type="range"
+                          min="60"
+                          max="180"
+                          step="1"
+                          value={bpm}
+                          onChange={(event) => setBpm(Number(event.target.value))}
+                        />
+                      </label>
+                      <p className="game-input-config__status">
+                        Changes apply immediately to the musical clock and future move timing.
+                      </p>
+                    </>
+                  )}
                 </div>
               ) : (
                 <div className="game-meter" aria-hidden="true">
