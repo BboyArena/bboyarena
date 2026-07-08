@@ -550,4 +550,23 @@ const pagePath = '/play-the-game';
       margin-inline: auto;
     }
   }
+
+  @media (orientation: landscape) and (max-height: 560px) {
+    .play-showroom {
+      gap: 0.75rem;
+    }
+
+    .play-showroom__screen {
+      width: min(100%, calc(100svh * 16 / 9));
+      margin-inline: auto;
+    }
+
+    .play-showroom__stage-header {
+      padding-block: 0.55rem;
+    }
+
+    .play-showroom__stage-header span {
+      display: none;
+    }
+  }
 </style>

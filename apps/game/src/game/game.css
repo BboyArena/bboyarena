@@ -3622,6 +3622,113 @@
   }
 }
 
+/* A phone in landscape is constrained by height, not width. Scaling the touch
+   deck from vh keeps both control banks inside the safe area on 6-inch screens. */
+@media (orientation: landscape) and (max-height: 560px) and (pointer: coarse) {
+  .bboy-game-root .touch-controls {
+    --touch-button-size: clamp(44px, 13vh, 56px);
+    --touch-control-gap: clamp(6px, 2vh, 10px);
+    --touch-stick-size: clamp(76px, 25vh, 104px);
+    --touch-edge-margin: clamp(6px, 2vh, 12px);
+    --touch-cluster-size: clamp(124px, 39vh, 156px);
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .bboy-game-root .touch-controls__side {
+    min-width: 0;
+    gap: var(--touch-control-gap);
+    padding-top: clamp(2.6rem, 14vh, 3.5rem);
+  }
+
+  .bboy-game-root .touch-controls__joystick-group {
+    min-width: 0;
+    gap: 0.15rem;
+  }
+
+  .bboy-game-root .touch-controls__joystick-label b {
+    font-size: 0.48rem;
+  }
+
+  .bboy-game-root .touch-controls__joystick-label small {
+    display: none;
+  }
+
+  .bboy-game-root .touch-controls__shoulders {
+    top: calc(clamp(2.5rem, 13vh, 3.2rem) + env(safe-area-inset-top, 0px));
+  }
+
+  .bboy-game-root .touch-controls__shoulders--left {
+    left: calc(var(--touch-edge-margin) + env(safe-area-inset-left, 0px));
+  }
+
+  .bboy-game-root .touch-controls__shoulders--right {
+    right: calc(var(--touch-edge-margin) + env(safe-area-inset-right, 0px));
+  }
+
+  .bboy-game-root .touch-controls__shoulder {
+    min-width: clamp(44px, 13vh, 56px);
+    min-height: clamp(40px, 11vh, 48px);
+    font-size: 0.75rem;
+  }
+
+  .bboy-game-root .touch-controls__system {
+    gap: 0.35rem;
+    padding-bottom: 0;
+  }
+
+  .bboy-game-root .touch-controls__system-button {
+    min-width: 3.75rem;
+    min-height: 40px;
+    padding-inline: 0.5rem;
+    font-size: 0.52rem;
+  }
+
+  .bboy-game-root .game-play-status-controls {
+    top: calc(0.35rem + env(safe-area-inset-top, 0px));
+    left: calc(0.35rem + env(safe-area-inset-left, 0px));
+  }
+
+  .bboy-game-root .game-active-move-hud {
+    top: calc(0.35rem + env(safe-area-inset-top, 0px));
+    width: min(13rem, 34vw);
+    min-width: 0;
+    padding: 0.3rem 0.5rem 0.35rem;
+  }
+
+  .bboy-game-root .game-active-move-hud strong {
+    font-size: 0.8rem;
+  }
+
+  .bboy-game-root .game-active-move-hud__queue {
+    display: none;
+  }
+
+  .bboy-game-root .game-beat-pad {
+    top: calc(0.35rem + env(safe-area-inset-top, 0px));
+    right: calc(0.35rem + env(safe-area-inset-right, 0px));
+  }
+
+  .bboy-game-root .game-session-stats {
+    top: calc(0.35rem + env(safe-area-inset-top, 0px));
+    right: calc(2.8rem + env(safe-area-inset-right, 0px));
+    gap: 0.4rem;
+    padding: 0.25rem 0.35rem;
+  }
+
+  .bboy-game-root .game-session-stats span {
+    font-size: 0.4rem;
+  }
+
+  .bboy-game-root .game-session-stats strong {
+    font-size: 0.66rem;
+  }
+
+  .bboy-game-root .game-fullscreen-toggle {
+    left: calc(0.35rem + env(safe-area-inset-left, 0px));
+    bottom: calc(0.35rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* Fullscreen belongs to the game runtime: use every available pixel instead of
    retaining the embedded showroom's presentation ratio. */
 #bboyarena-game-root:fullscreen {
