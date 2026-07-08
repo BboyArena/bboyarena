@@ -394,7 +394,8 @@ const pagePath = '/play-the-game';
 
   .play-showroom__screen {
     aspect-ratio: 16 / 9;
-    min-height: 20rem;
+    width: 100%;
+    overflow: hidden;
     background:
       radial-gradient(circle at center, rgba(244, 190, 36, 0.1), transparent 30%),
       #050505;
@@ -417,7 +418,7 @@ const pagePath = '/play-the-game';
 
   .play-showroom__pwa-gate {
     display: grid;
-    min-height: 20rem;
+    height: 100%;
     place-content: center;
     justify-items: center;
     gap: 1rem;
@@ -460,7 +461,7 @@ const pagePath = '/play-the-game';
 
   .play-showroom__missing {
     display: grid;
-    min-height: 20rem;
+    height: 100%;
     place-items: center;
     padding: 2rem;
     text-align: center;
@@ -540,18 +541,13 @@ const pagePath = '/play-the-game';
     .play-showroom__grid {
       grid-template-columns: 1fr;
     }
-
-    .play-showroom__screen {
-      aspect-ratio: auto;
-      height: min(72svh, 34rem);
-      min-height: 22rem;
-    }
   }
 
-  @media (max-width: 480px), (max-aspect-ratio: 9 / 16) {
+  @media (orientation: portrait) {
     .play-showroom__screen {
-      height: min(76svh, 30rem);
-      min-height: 20rem;
+      width: min(100%, calc(100svh * 9 / 16));
+      aspect-ratio: 9 / 16;
+      margin-inline: auto;
     }
   }
 </style>
