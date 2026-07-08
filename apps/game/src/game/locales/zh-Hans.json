@@ -98,5 +98,17 @@
   "topRock": "Toprock",
   "freeze": "Freeze",
   "swipe": "Swipe",
-  "footwork": "Footwork"
+  "footwork": "Footwork",
+  "tutorialTitle": "第一步",
+  "tutorialButton": "教程",
+  "tutorialWelcome": "不用背动作。先跟着感觉动起来。",
+  "tutorialLeftStick": "推动左摇杆，让上半身找到律动。",
+  "tutorialRightStick": "推动右摇杆，让髋部和双腿加入。",
+  "tutorialPressA": "按 A 做一个 Toprock 动作。",
+  "tutorialPressX": "按 X 定格一个 Freeze。",
+  "tutorialFreePractice": "就是这样——组合控制，跳出你的风格。",
+  "tutorialStart": "开始跳舞",
+  "tutorialFinish": "自由练习",
+  "tutorialTryIt": "现在试试",
+  "tutorialSkip": "跳过教程"
 }

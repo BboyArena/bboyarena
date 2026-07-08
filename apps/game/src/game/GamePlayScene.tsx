@@ -24,6 +24,8 @@ import { getMoveQueueFamilyForButton, MoveQueueController } from './move/MoveQue
 import type { GameInputButtonId, GameInputSnapshot } from './input/gameInputTypes';
 import { scoreToStaminaReward } from './move/moveScoring';
 import type { TouchStickFeedback } from './ui/TouchControlsOverlay';
+import { useTrainingTutorial } from './training/useTrainingTutorial';
+import TrainingTutorialOverlay from './ui/TrainingTutorialOverlay';
 
 const MAXIMUM_STAMINA = 100;
 const MINIMUM_TRAINING_STAMINA = 5;
@@ -129,7 +131,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const [moveHistory, setMoveHistory] = useState(() => moveHistoryRef.current.getSnapshot());
   const moveQueueRef = useRef(new MoveQueueController());
   const [moveQueue, setMoveQueue] = useState(() => moveQueueRef.current.getSnapshot());
-  const [diagnosticsVisible, setDiagnosticsVisible] = useState(import.meta.env.DEV);
+  const [diagnosticsVisible, setDiagnosticsVisible] = useState(false);
   const staminaRef = useRef(MAXIMUM_STAMINA);
   const lastStaminaBeatRef = useRef(rhythmSnapshot.beat);
   const [stamina, setStamina] = useState(MAXIMUM_STAMINA);
@@ -145,6 +147,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const stickFeedbackSequenceRef = useRef(0);
   const [stickFeedbacks, setStickFeedbacks] = useState<TouchStickFeedback[]>([]);
   const [renderingDiagnostics, setRenderingDiagnostics] = useState<RenderingDiagnostics | null>(null);
+  const tutorial = useTrainingTutorial(mode === 'training', rhythmSnapshot, snapshot);
 
   useEffect(() => {
     if (mode === 'training' && gameState === 'idle') {
@@ -456,6 +459,11 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
             Debug HUD {diagnosticsVisible ? 'On' : 'Off'}
           </button>
         ) : null}
+        {mode === 'training' ? (
+          <button type="button" className="game-training-input-hud__toggle" onClick={tutorial.start}>
+            {copy.tutorialButton}
+          </button>
+        ) : null}
       </div>
       <GameCanvasErrorBoundary>
         <CanvasScene
@@ -487,7 +495,18 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
         playTimeSeconds={playTimeSeconds}
         staminaRewardFeedback={staminaRewardFeedback}
         stickFeedbacks={stickFeedbacks}
+        tutorialStep={tutorial.state.isActive ? tutorial.state.currentStep : null}
+        leftStickTutorial={tutorial.leftStickChallenge}
       />
+      {mode === 'training' ? (
+        <TrainingTutorialOverlay
+          tutorial={tutorial.state}
+          copy={copy}
+          onAdvance={tutorial.advance}
+          onSkip={tutorial.skip}
+          leftStickChallenge={tutorial.leftStickChallenge}
+        />
+      ) : null}
     </>
   );
 }

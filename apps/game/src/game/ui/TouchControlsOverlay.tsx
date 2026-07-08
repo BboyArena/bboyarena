@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { memo, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useGameInputController } from '../input/GameInputProvider';
 import TouchInputAdapter from '../input/TouchInputAdapter';
 import { useGameStore } from '../state/useGameStore';
 import { normalizeInputVector, type GameInputButtonId } from '../input/gameInputTypes';
+import type { TrainingTutorialStepId } from '../training/useTrainingTutorial';
 
 const labels: Record<GameInputButtonId, string> = {
   toprock: 'A', footwork: 'B', freeze: 'X', powermove: 'Y',
@@ -21,12 +22,14 @@ function TouchButton({
   buttonId,
   className,
   onPress,
-  children
+  children,
+  tutorialControl
 }: {
   buttonId: GameInputButtonId;
   className: string;
   onPress?: () => void;
   children?: React.ReactNode;
+  tutorialControl?: TrainingTutorialStepId;
 }) {
   const controller = useGameInputController();
   const [pressed, setPressed] = useState(false);
@@ -36,7 +39,7 @@ function TouchButton({
   };
 
   return (
-    <button type="button" className={className} aria-label={`${labels[buttonId]}: ${buttonId}`} aria-pressed={pressed}
+    <button type="button" className={className} aria-label={`${labels[buttonId]}: ${buttonId}`} aria-pressed={pressed} data-tutorial-control={tutorialControl}
       onPointerDown={(event) => {
         event.preventDefault();
         if (typeof event.currentTarget.setPointerCapture === 'function') {
@@ -118,14 +121,16 @@ function DirectionPad() {
   </div>;
 }
 
-export default function TouchControlsOverlay({
+function TouchControlsOverlay({
   targets = {},
   feedbacks = [],
-  tapTempo
+  tapTempo,
+  tutorialStep
 }: {
   targets?: Partial<Record<'left' | 'right', TouchStickTarget>>;
   feedbacks?: TouchStickFeedback[];
   tapTempo?: { bpm: number; isArmed: boolean; isTooFast: boolean; tap: () => void };
+  tutorialStep?: TrainingTutorialStepId | null;
 }) {
   const controller = useGameInputController();
   const [resetVersion, setResetVersion] = useState(0);
@@ -161,7 +166,7 @@ export default function TouchControlsOverlay({
   }, [controller]);
   if (!touchControlsVisible) return null;
 
-  return <div key={resetVersion} className="touch-controls" data-input-source={activeInputSource}>
+  return <div key={resetVersion} className="touch-controls" data-input-source={activeInputSource} data-tutorial-step={tutorialStep ?? undefined}>
     <div className="touch-controls__shoulders touch-controls__shoulders--left">
       <TouchButton buttonId="l1" className="touch-controls__shoulder" />
       <TouchButton buttonId="l2" className="touch-controls__shoulder" />
@@ -182,7 +187,7 @@ export default function TouchControlsOverlay({
 
     <div className="touch-controls__side touch-controls__side--left">
       <DirectionPad />
-      <div className="touch-controls__joystick-group">
+      <div className="touch-controls__joystick-group" data-tutorial-control="leftStick">
         <span className="touch-controls__joystick-label"><b>L · Upper body</b><small>Torso + shoulders</small></span>
         <div className="touch-controls__joystick-zone" ref={leftStickRef} data-feedback={leftFeedback?.grade} aria-label="Left analog stick: upper body, torso and shoulders">
           <JoystickTarget target={targets.left} />
@@ -201,11 +206,11 @@ export default function TouchControlsOverlay({
     <div className="touch-controls__side touch-controls__side--right">
       <div className="touch-controls__face" aria-label="Move family buttons">
         <TouchButton buttonId="powermove" className="touch-controls__face-button touch-controls__face-button--y" />
-        <TouchButton buttonId="freeze" className="touch-controls__face-button touch-controls__face-button--x" />
+        <TouchButton buttonId="freeze" className="touch-controls__face-button touch-controls__face-button--x" tutorialControl="pressX" />
         <TouchButton buttonId="footwork" className="touch-controls__face-button touch-controls__face-button--b" />
-        <TouchButton buttonId="toprock" className="touch-controls__face-button touch-controls__face-button--a" />
+        <TouchButton buttonId="toprock" className="touch-controls__face-button touch-controls__face-button--a" tutorialControl="pressA" />
       </div>
-      <div className="touch-controls__joystick-group">
+      <div className="touch-controls__joystick-group" data-tutorial-control="rightStick">
         <span className="touch-controls__joystick-label"><b>R · Lower body</b><small>Hips + legs</small></span>
         <div className="touch-controls__joystick-zone" ref={rightStickRef} data-feedback={rightFeedback?.grade} aria-label="Right analog stick: lower body, hips and legs">
           <JoystickTarget target={targets.right} />
@@ -217,3 +222,5 @@ export default function TouchControlsOverlay({
     </div>
   </div>;
 }
+
+export default memo(TouchControlsOverlay);

@@ -2623,6 +2623,7 @@
     padding: 0.25rem;
   }
 }
+}
 
 .bboy-game-root .game-training-input-hud__header {
   display: flex;
@@ -3772,4 +3773,163 @@
 #bboyarena-game-root:fullscreen .game-stage {
   aspect-ratio: auto;
 }
+
+.bboy-game-root .training-tutorial {
+  position: absolute;
+  z-index: 40;
+  left: 50%;
+  bottom: clamp(1rem, 5.5vw, 4rem);
+  width: min(34rem, calc(100% - 2rem));
+  transform: translateX(-50%);
+  padding: clamp(0.85rem, 2vw, 1.25rem);
+  border: 2px solid var(--game-gold);
+  background: rgba(8, 8, 9, 0.94);
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.55), 0 12px 35px rgba(0, 0, 0, 0.48);
+  text-align: center;
+}
+
+.bboy-game-root .training-tutorial__eyebrow {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--game-gold);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.bboy-game-root .training-tutorial > strong {
+  display: block;
+  font-size: clamp(0.95rem, 2.3vw, 1.35rem);
+}
+
+.bboy-game-root .training-tutorial__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.8rem;
+}
+
+.bboy-game-root .training-tutorial button {
+  min-height: 2.35rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--game-gold);
+  background: var(--game-gold);
+  color: #090909;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.bboy-game-root .training-tutorial .training-tutorial__skip {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.bboy-game-root .training-tutorial small {
+  color: var(--game-gold);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.bboy-game-root .training-tutorial__stick-challenge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.65rem;
+}
+
+.bboy-game-root .training-tutorial__stick-challenge > span:last-child {
+  display: grid;
+  justify-items: start;
+  gap: 0.1rem;
+}
+
+.bboy-game-root .training-tutorial__stick-challenge b {
+  color: white;
+  font-size: 1rem;
+}
+
+.bboy-game-root .training-tutorial__stick-map {
+  position: relative;
+  display: block;
+  width: 4rem;
+  height: 4rem;
+  flex: 0 0 4rem;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background:
+    linear-gradient(90deg, transparent 49%, rgba(255, 255, 255, 0.18) 50%, transparent 51%),
+    linear-gradient(0deg, transparent 49%, rgba(255, 255, 255, 0.18) 50%, transparent 51%);
+}
+
+.bboy-game-root .training-tutorial__stick-map i {
+  position: absolute;
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 2px solid #111;
+  border-radius: 50%;
+  background: var(--game-gold);
+  transform: translate(-50%, -50%);
+  animation: training-tutorial-target-pulse 600ms ease-in-out infinite alternate;
+}
+
+@keyframes training-tutorial-target-pulse {
+  to { transform: translate(-50%, -50%) scale(1.25); }
+}
+
+.bboy-game-root .touch-controls[data-tutorial-step] :where(
+  .touch-controls__shoulders,
+  .touch-controls__dpad,
+  .touch-controls__system,
+  .touch-controls__face-button,
+  .touch-controls__joystick-group
+) {
+  opacity: 0.2;
+  transition: opacity 160ms ease;
+}
+
+.bboy-game-root .touch-controls[data-tutorial-step="leftStick"] [data-tutorial-control="leftStick"],
+.bboy-game-root .touch-controls[data-tutorial-step="rightStick"] [data-tutorial-control="rightStick"],
+.bboy-game-root .touch-controls[data-tutorial-step="pressA"] [data-tutorial-control="pressA"],
+.bboy-game-root .touch-controls[data-tutorial-step="pressX"] [data-tutorial-control="pressX"],
+.bboy-game-root .touch-controls[data-tutorial-step="freePractice"] > *,
+.bboy-game-root .touch-controls[data-tutorial-step="freePractice"] :where(
+  .touch-controls__shoulders,
+  .touch-controls__dpad,
+  .touch-controls__system,
+  .touch-controls__face-button,
+  .touch-controls__joystick-group,
+  [data-tutorial-control]
+) {
+  opacity: 1;
+}
+
+.bboy-game-root .touch-controls[data-tutorial-step] [data-tutorial-control] {
+  pointer-events: auto;
+}
+
+.bboy-game-root .touch-controls[data-tutorial-step="leftStick"] [data-tutorial-control="leftStick"],
+.bboy-game-root .touch-controls[data-tutorial-step="rightStick"] [data-tutorial-control="rightStick"],
+.bboy-game-root .touch-controls[data-tutorial-step="pressA"] [data-tutorial-control="pressA"],
+.bboy-game-root .touch-controls[data-tutorial-step="pressX"] [data-tutorial-control="pressX"] {
+  outline: 2px solid var(--game-gold);
+  outline-offset: 4px;
+}
+
+@media (max-width: 640px), (max-height: 520px) {
+  .bboy-game-root .training-tutorial {
+    bottom: 0.45rem;
+    width: min(28rem, calc(100% - 1rem));
+    padding: 0.55rem 0.7rem;
+  }
+
+  .bboy-game-root .training-tutorial__actions {
+    margin-top: 0.4rem;
+  }
 }

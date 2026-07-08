@@ -98,5 +98,17 @@
   "topRock": "Toprock",
   "freeze": "Freeze",
   "swipe": "Swipe",
-  "footwork": "Footwork"
+  "footwork": "Footwork",
+  "tutorialTitle": "Primi passi",
+  "tutorialButton": "Tutorial",
+  "tutorialWelcome": "Niente coreografie da memorizzare. Iniziamo a muoverci.",
+  "tutorialLeftStick": "Muovi lo stick sinistro. Lascia che la parte alta trovi il groove.",
+  "tutorialRightStick": "Muovi lo stick destro. Porta dentro anche e gambe.",
+  "tutorialPressA": "Premi A per un movimento Toprock.",
+  "tutorialPressX": "Premi X e chiudi con un Freeze.",
+  "tutorialFreePractice": "Ci sei: combina i controlli e rendili tuoi.",
+  "tutorialStart": "Balliamo",
+  "tutorialFinish": "Pratica libera",
+  "tutorialTryIt": "Prova ora",
+  "tutorialSkip": "Salta tutorial"
 }

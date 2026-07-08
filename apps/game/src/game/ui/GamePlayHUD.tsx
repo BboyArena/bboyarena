@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useGameStore } from '../state/useGameStore';
 import { useGameInputSnapshot } from '../input/GameInputProvider';
 import { useConnectedGamepads } from '../input/useConnectedGamepads';
@@ -19,6 +19,7 @@ import type { MoveFamilyId } from '../move/moveDefinitionTypes';
 import TrainingCoachPanel from './TrainingCoachPanel';
 import { useTapTempo } from './useTapTempo';
 import type { RenderingDiagnostics } from '../CanvasScene';
+import type { LeftStickTutorialChallenge, TrainingTutorialStepId } from '../training/useTrainingTutorial';
 
 export type StickCueDiagnostic = {
   id: string;
@@ -58,6 +59,8 @@ interface GamePlayHudProps {
   playTimeSeconds: number;
   staminaRewardFeedback: { amount: number; score: number; sequence: number } | null;
   stickFeedbacks: TouchStickFeedback[];
+  tutorialStep: TrainingTutorialStepId | null;
+  leftStickTutorial: LeftStickTutorialChallenge | null;
 }
 
 const intentButtons: Array<{ id: GameInputButtonId; label: string }> = [
@@ -94,7 +97,9 @@ export default function GamePlayHUD({
   totalPoints,
   playTimeSeconds,
   staminaRewardFeedback,
-  stickFeedbacks
+  stickFeedbacks,
+  tutorialStep,
+  leftStickTutorial
 }: GamePlayHudProps) {
   const [compactTraining, setCompactTraining] = useState(() => (
     typeof window !== 'undefined' && window.matchMedia('(max-width: 640px), (max-height: 520px)').matches
@@ -131,17 +136,29 @@ export default function GamePlayHUD({
         return Math.hypot(input.x - cue.sample.x, input.y - cue.sample.y) <= cue.sample.tolerance;
       }) ? 'Step locked — keep the rhythm.' : 'Hit the gold checkpoint now.')
     : (stickCueDiagnostics.length > 0 ? 'Get ready for the next checkpoint.' : undefined);
-  const touchStickTargets = Object.fromEntries(stickCueDiagnostics.map((cue) => {
-    const input = cue.targetInput === 'look' ? snapshot.look : snapshot.move;
-    return [cue.stick, {
-      x: cue.sample.x,
-      y: cue.sample.y,
-      tolerance: cue.sample.tolerance,
-      onTarget: cue.sample.active && Math.hypot(input.x - cue.sample.x, input.y - cue.sample.y) <= cue.sample.tolerance,
-      active: cue.sample.active,
-      step: `${cue.sample.pointIndex + 1}/${cue.points.length}`
-    }];
-  })) as Partial<Record<'left' | 'right', TouchStickTarget>>;
+  const touchStickTargets = useMemo(() => {
+    const targets = Object.fromEntries(stickCueDiagnostics.map((cue) => {
+      const input = cue.targetInput === 'look' ? snapshot.look : snapshot.move;
+      return [cue.stick, {
+        x: cue.sample.x,
+        y: cue.sample.y,
+        tolerance: cue.sample.tolerance,
+        onTarget: cue.sample.active && Math.hypot(input.x - cue.sample.x, input.y - cue.sample.y) <= cue.sample.tolerance,
+        active: cue.sample.active,
+        step: `${cue.sample.pointIndex + 1}/${cue.points.length}`
+      }];
+    })) as Partial<Record<'left' | 'right', TouchStickTarget>>;
+    if (tutorialStep === 'leftStick' && leftStickTutorial) {
+      targets.left = {
+        ...leftStickTutorial.target,
+        tolerance: 0.3,
+        onTarget: leftStickTutorial.score >= 85,
+        active: true,
+        step: `${leftStickTutorial.position}/${leftStickTutorial.totalPositions}`
+      };
+    }
+    return targets;
+  }, [leftStickTutorial, snapshot.look, snapshot.move, stickCueDiagnostics, tutorialStep]);
 
   useEffect(() => {
     const compactViewport = window.matchMedia('(max-width: 640px), (max-height: 520px)');
@@ -370,6 +387,7 @@ export default function GamePlayHUD({
           targets={touchStickTargets}
           feedbacks={stickFeedbacks}
           tapTempo={bringYourMusicActive ? tapTempo : undefined}
+          tutorialStep={tutorialStep}
         />
       ) : null}
     </>

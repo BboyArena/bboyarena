@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
@@ -86,7 +86,7 @@ function WebGLContextGuard({ onContextLost }: { onContextLost: () => void }) {
   return null;
 }
 
-export default function CanvasScene({ gameState, playerMotionState, animationDefinition, onPerformanceUpdate }: CanvasSceneProps) {
+function CanvasScene({ gameState, playerMotionState, animationDefinition, onPerformanceUpdate }: CanvasSceneProps) {
   const [hasWebGLContext, setHasWebGLContext] = useState(true);
   const inputController = useGameInputController();
   const threeFingerGestureActive = useRef(false);
@@ -121,7 +121,7 @@ export default function CanvasScene({ gameState, playerMotionState, animationDef
       <Canvas
         className="game-canvas__surface"
         shadows
-        dpr={[1, 1.5]}
+        dpr={[1, 1.25]}
         camera={{ position: [0, 3.4, 8.5], fov: 42 }}
         gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
       >
@@ -141,12 +141,7 @@ export default function CanvasScene({ gameState, playerMotionState, animationDef
           position={[6, 10, 5]}
           intensity={0.3}
           color="#ffe1bb"
-          castShadow
-          shadow-mapSize-width={512}
-          shadow-mapSize-height={512}
         />
-        <pointLight position={[-5, 2.6, -3]} intensity={0.08} color="#3d2a16" />
-        <pointLight position={[4, 1.8, 4]} intensity={0.22} color="#9b6a32" />
         <pointLight position={[0, 4, 3]} intensity={0.34} color="#c48d52" />
         <spotLight
           position={[0, 10, 0]}
@@ -157,8 +152,8 @@ export default function CanvasScene({ gameState, playerMotionState, animationDef
           decay={1}
           color="#fff1d6"
           castShadow
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
+          shadow-mapSize-width={512}
+          shadow-mapSize-height={512}
           shadow-bias={-0.00008}
         />
 
@@ -185,3 +180,18 @@ export default function CanvasScene({ gameState, playerMotionState, animationDef
     </div>
   );
 }
+
+function canvasScenePropsEqual(previous: CanvasSceneProps, next: CanvasSceneProps) {
+  const previousMotion = previous.playerMotionState;
+  const nextMotion = next.playerMotionState;
+  return previous.gameState === next.gameState
+    && previous.animationDefinition === next.animationDefinition
+    && previous.onPerformanceUpdate === next.onPerformanceUpdate
+    && previousMotion.activeIntentId === nextMotion.activeIntentId
+    && previousMotion.balance === nextMotion.balance
+    && previousMotion.rotationAxis.x === nextMotion.rotationAxis.x
+    && previousMotion.rotationAxis.y === nextMotion.rotationAxis.y
+    && previousMotion.rotationAxis.z === nextMotion.rotationAxis.z;
+}
+
+export default memo(CanvasScene, canvasScenePropsEqual);

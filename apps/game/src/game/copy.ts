@@ -106,6 +106,18 @@ export interface GameCopy {
   freeze: string;
   swipe: string;
   footwork: string;
+  tutorialTitle: string;
+  tutorialButton: string;
+  tutorialWelcome: string;
+  tutorialLeftStick: string;
+  tutorialRightStick: string;
+  tutorialPressA: string;
+  tutorialPressX: string;
+  tutorialFreePractice: string;
+  tutorialStart: string;
+  tutorialFinish: string;
+  tutorialTryIt: string;
+  tutorialSkip: string;
 }
 
 interface LoadedGameCopy {
