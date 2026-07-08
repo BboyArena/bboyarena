@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMachine } from '@xstate/react';
 import { gameMachine } from './state/gameMachine';
 import { useGameStore, type GamePlayMode } from './state/useGameStore';
-import CanvasScene from './CanvasScene';
+import CanvasScene, { type RenderingDiagnostics } from './CanvasScene';
 import GamePlayHUD from './ui/GamePlayHUD';
 import GameCanvasErrorBoundary from './ui/GameCanvasErrorBoundary';
 import type { GameCopy } from './copy';
@@ -144,6 +144,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const awardedStickStepsRef = useRef(new Set<string>());
   const stickFeedbackSequenceRef = useRef(0);
   const [stickFeedbacks, setStickFeedbacks] = useState<TouchStickFeedback[]>([]);
+  const [renderingDiagnostics, setRenderingDiagnostics] = useState<RenderingDiagnostics | null>(null);
 
   useEffect(() => {
     if (mode === 'training' && gameState === 'idle') {
@@ -257,6 +258,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
       lastStaminaBeatRef.current = rhythmSnapshot.beat;
       const transition = moveQueueRef.current.advance(rhythmSnapshot.beat);
       if (transition) {
+        awardedStickStepsRef.current.clear();
         const accumulator = scoreAccumulatorRef.current;
         const completedScore = mode === 'training'
           ? (accumulator?.moveId === transition.completed.id
@@ -460,6 +462,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
           gameState={gameState}
           playerMotionState={motionSnapshot}
           animationDefinition={animationDefinition}
+          onPerformanceUpdate={diagnosticsVisible ? setRenderingDiagnostics : undefined}
         />
       </GameCanvasErrorBoundary>
       <GamePlayHUD
@@ -474,6 +477,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
         moveHistory={moveHistory}
         rhythmState={rhythmSnapshot}
         diagnosticsVisible={diagnosticsVisible}
+        renderingDiagnostics={renderingDiagnostics}
         stickCueDiagnostics={stickCueDiagnostics}
         moveQueue={moveQueue}
         stamina={stamina}

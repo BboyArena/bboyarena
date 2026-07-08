@@ -18,6 +18,7 @@ import type { StickCuePoint } from '../move/moveDefinitionTypes';
 import type { MoveFamilyId } from '../move/moveDefinitionTypes';
 import TrainingCoachPanel from './TrainingCoachPanel';
 import { useTapTempo } from './useTapTempo';
+import type { RenderingDiagnostics } from '../CanvasScene';
 
 export type StickCueDiagnostic = {
   id: string;
@@ -47,6 +48,7 @@ interface GamePlayHudProps {
   moveHistory: PlayerMoveHistoryEntry[];
   rhythmState: RhythmClockSnapshot;
   diagnosticsVisible: boolean;
+  renderingDiagnostics: RenderingDiagnostics | null;
   stickCueDiagnostics: StickCueDiagnostic[];
   moveQueue: MoveQueueSnapshot;
   stamina: number;
@@ -83,6 +85,7 @@ export default function GamePlayHUD({
   moveHistory,
   rhythmState,
   diagnosticsVisible,
+  renderingDiagnostics,
   stickCueDiagnostics,
   moveQueue,
   stamina,
@@ -291,6 +294,11 @@ export default function GamePlayHUD({
 
           <section aria-label="Motion diagnostics">
             <strong>Motion diagnostics</strong>
+            <div>FPS: <output>{renderingDiagnostics?.fps.toFixed(1) ?? 'measuring'}</output></div>
+            <div>Frame time: <output>{renderingDiagnostics ? `${renderingDiagnostics.frameTimeMs.toFixed(1)} ms` : 'measuring'}</output></div>
+            <div>Draw calls: <output>{renderingDiagnostics?.drawCalls ?? 'measuring'}</output></div>
+            <div>Triangles: <output>{renderingDiagnostics?.triangles.toLocaleString() ?? 'measuring'}</output></div>
+            <div>GPU resources: <output>{renderingDiagnostics ? `${renderingDiagnostics.geometries} geo / ${renderingDiagnostics.textures} tex` : 'measuring'}</output></div>
             <div>Game: <output>{gameState}</output></div>
             <div>Accepting intents: <output>{gameState === 'playing' ? 'yes' : 'no'}</output></div>
             <div>BPM: <output>{rhythmState.bpm.toFixed(2)}</output></div>

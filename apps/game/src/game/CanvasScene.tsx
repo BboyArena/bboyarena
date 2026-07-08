@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import Player from './Player';
@@ -11,6 +11,45 @@ interface CanvasSceneProps {
   gameState: string;
   playerMotionState: PlayerMotionSnapshot;
   animationDefinition: AnimationDefinition | null;
+  onPerformanceUpdate?: (diagnostics: RenderingDiagnostics) => void;
+}
+
+export type RenderingDiagnostics = {
+  fps: number;
+  frameTimeMs: number;
+  drawCalls: number;
+  triangles: number;
+  geometries: number;
+  textures: number;
+};
+
+function PerformanceMonitor({ onUpdate }: { onUpdate?: (diagnostics: RenderingDiagnostics) => void }) {
+  const gl = useThree((state) => state.gl);
+  const sampleRef = useRef({ startedAt: performance.now(), frames: 0 });
+
+  useFrame(() => {
+    if (!onUpdate) return;
+
+    const sample = sampleRef.current;
+    sample.frames += 1;
+    const now = performance.now();
+    const elapsedMs = now - sample.startedAt;
+    if (elapsedMs < 500) return;
+
+    const fps = sample.frames * 1000 / elapsedMs;
+    onUpdate({
+      fps,
+      frameTimeMs: fps > 0 ? 1000 / fps : 0,
+      drawCalls: gl.info.render.calls,
+      triangles: gl.info.render.triangles,
+      geometries: gl.info.memory.geometries,
+      textures: gl.info.memory.textures
+    });
+    sample.startedAt = now;
+    sample.frames = 0;
+  });
+
+  return null;
 }
 
 function ParquetFloor() {
@@ -47,7 +86,7 @@ function WebGLContextGuard({ onContextLost }: { onContextLost: () => void }) {
   return null;
 }
 
-export default function CanvasScene({ gameState, playerMotionState, animationDefinition }: CanvasSceneProps) {
+export default function CanvasScene({ gameState, playerMotionState, animationDefinition, onPerformanceUpdate }: CanvasSceneProps) {
   const [hasWebGLContext, setHasWebGLContext] = useState(true);
   const inputController = useGameInputController();
   const threeFingerGestureActive = useRef(false);
@@ -87,6 +126,7 @@ export default function CanvasScene({ gameState, playerMotionState, animationDef
         gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
       >
         <WebGLContextGuard onContextLost={() => setHasWebGLContext(false)} />
+        <PerformanceMonitor onUpdate={onPerformanceUpdate} />
         <color attach="background" args={['#070503']} />
         <fog attach="fog" args={['#070503', 6, 22]} />
 
