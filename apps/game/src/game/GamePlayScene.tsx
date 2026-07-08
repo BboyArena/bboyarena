@@ -6,7 +6,7 @@ import CanvasScene, { type RenderingDiagnostics } from './CanvasScene';
 import GamePlayHUD from './ui/GamePlayHUD';
 import GameCanvasErrorBoundary from './ui/GameCanvasErrorBoundary';
 import type { GameCopy } from './copy';
-import { GameInputProvider, useGameInputSnapshot } from './input/GameInputProvider';
+import { GameInputProvider, useGameInputController, useGameInputSnapshot } from './input/GameInputProvider';
 import GamepadInputAdapter from './input/GamepadInputAdapter';
 import KeyboardMouseInputAdapter from './input/KeyboardMouseInputAdapter';
 import { useResolveActiveInputSource } from './input/useResolveActiveInputSource';
@@ -103,6 +103,8 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const [state, send] = useMachine(gameMachine);
   const openMainMenu = useGameStore((store) => store.openMainMenu);
   const snapshot = useGameInputSnapshot();
+  const inputController = useGameInputController();
+  const threeFingerGestureActiveRef = useRef(false);
   const rhythmClock = useRhythmClock();
   const rhythmSnapshot = useRhythmClockSnapshot();
   const difficultyMode = useGameStore((store) => store.difficultyMode);
@@ -437,7 +439,20 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   ]);
 
   return (
-    <>
+    <div
+      className="game-play-runtime"
+      onTouchStartCapture={(event) => {
+        if (event.touches.length !== 3 || threeFingerGestureActiveRef.current) return;
+        threeFingerGestureActiveRef.current = true;
+        inputController.triggerSystemAction('touch', 'system.quickMenu');
+      }}
+      onTouchEndCapture={(event) => {
+        if (event.touches.length < 3) threeFingerGestureActiveRef.current = false;
+      }}
+      onTouchCancelCapture={() => {
+        threeFingerGestureActiveRef.current = false;
+      }}
+    >
       <GameInputSceneBindings gameState={gameState} send={send} />
       <div className="game-play-status-controls">
         <button
@@ -506,7 +521,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
           leftStickChallenge={tutorial.leftStickChallenge}
         />
       ) : null}
-    </>
+    </div>
   );
 }
 
