@@ -35,10 +35,10 @@ export default function TrainingCoachPanel({
   loopPoints,
   totalPoints
 }: TrainingCoachPanelProps) {
-  const [expanded, setExpanded] = useState(() => !compact);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    setExpanded(!compact);
+    setExpanded(false);
   }, [compact]);
 
   const progressPercent = Math.round(Math.min(1, Math.max(0, progress)) * 100);
@@ -94,7 +94,7 @@ export default function TrainingCoachPanel({
         <div>
           <span>Current move</span>
           <strong>{displayName}</strong>
-          <small>{move ? `Loop score ${score ?? 0}% · ${loopPoints} pts · Run ${totalPoints} pts` : `A / B / X / Y · Run ${totalPoints} pts`}</small>
+          <small>{move && family ? `${mainButton} · ${family}` : 'A / B / X / Y · Choose a move'}</small>
         </div>
         <button
           type="button"

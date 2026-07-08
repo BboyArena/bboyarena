@@ -2195,22 +2195,51 @@
   text-align: center;
 }
 
-.bboy-game-root .game-beat-pad {
+.bboy-game-root .game-rhythm-status {
   position: absolute;
   z-index: 22;
   top: 0.8rem;
   right: clamp(0.75rem, 2vw, 1.5rem);
-  display: grid;
-  justify-items: center;
-  gap: 0.2rem;
-  color: rgba(255, 237, 172, 0.66);
-  font-size: 0.48rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.38rem 0.55rem;
+  border: 1px solid rgba(255, 217, 92, 0.32);
+  border-radius: 0.45rem;
+  background: rgba(8, 8, 10, 0.78);
+  color: var(--game-text);
   pointer-events: none;
 }
 
-.bboy-game-root .game-beat-pad i {
+.bboy-game-root .game-rhythm-status > div {
+  display: grid;
+  gap: 0.08rem;
+}
+
+.bboy-game-root .game-rhythm-status span {
+  color: rgba(247, 241, 230, 0.56);
+  font-size: 0.42rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.bboy-game-root .game-rhythm-status strong {
+  color: #fff2cf;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+}
+
+.bboy-game-root .game-rhythm-status .game-rhythm-status__beat {
+  grid-template-columns: 1.4rem auto;
+  align-items: center;
+  gap: 0.4rem;
+  padding-right: 0.65rem;
+  border-right: 1px solid rgba(255, 217, 92, 0.22);
+}
+
+.bboy-game-root .game-rhythm-status__beat i {
   width: 1.4rem;
   height: 1.4rem;
   border: 1px solid rgba(255, 217, 92, 0.55);
@@ -2219,43 +2248,10 @@
   transition: background 60ms linear, box-shadow 60ms linear, transform 60ms linear;
 }
 
-.bboy-game-root .game-beat-pad[data-active="true"] i {
+.bboy-game-root .game-rhythm-status[data-active="true"] i {
   background: var(--game-gold-hot);
   box-shadow: 0 0 14px rgba(255, 217, 92, 0.82), inset 0 0 0 2px rgba(255, 255, 255, 0.22);
   transform: scale(1.08);
-}
-
-
-.bboy-game-root .game-session-stats {
-  position: absolute;
-  z-index: 21;
-  top: 3.15rem;
-  right: clamp(0.75rem, 2vw, 1.5rem);
-  display: flex;
-  gap: 0.75rem;
-  padding: 0.38rem 0.55rem;
-  border: 1px solid rgba(255, 217, 92, 0.25);
-  border-radius: 0.45rem;
-  background: rgba(8, 8, 10, 0.72);
-  color: var(--game-text);
-  pointer-events: none;
-}
-
-.bboy-game-root .game-session-stats div { display: grid; gap: 0.08rem; }
-
-.bboy-game-root .game-session-stats span {
-  color: rgba(247, 241, 230, 0.56);
-  font-size: 0.46rem;
-  font-weight: 850;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-
-.bboy-game-root .game-session-stats strong {
-  color: #fff2cf;
-  font-size: 0.78rem;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.06em;
 }
 
 .bboy-game-root .game-active-move-hud span,
@@ -2521,13 +2517,6 @@
 }
 
 @media (max-width: 640px), (max-height: 520px) {
-  .bboy-game-root .game-session-stats {
-    top: calc(3rem + env(safe-area-inset-top, 0px));
-    right: 0.5rem;
-    gap: 0.45rem;
-    padding: 0.3rem 0.4rem;
-  }
-
   .bboy-game-root .game-training-coach {
     top: calc(0.45rem + env(safe-area-inset-top, 0px));
     left: 50%;
@@ -2553,9 +2542,11 @@
     display: none;
   }
 
-  .bboy-game-root .game-beat-pad {
-    top: 0.5rem;
-    right: 0.5rem;
+  .bboy-game-root .game-rhythm-status {
+    top: calc(0.35rem + env(safe-area-inset-top, 0px));
+    right: calc(0.35rem + env(safe-area-inset-right, 0px));
+    gap: 0.4rem;
+    padding: 0.25rem 0.35rem;
   }
 
   .bboy-game-root .game-active-move-hud {
@@ -3744,23 +3735,11 @@
     display: none;
   }
 
-  .bboy-game-root .game-beat-pad {
-    top: calc(0.35rem + env(safe-area-inset-top, 0px));
-    right: calc(0.35rem + env(safe-area-inset-right, 0px));
-  }
-
-  .bboy-game-root .game-session-stats {
-    top: calc(0.35rem + env(safe-area-inset-top, 0px));
-    right: calc(2.8rem + env(safe-area-inset-right, 0px));
-    gap: 0.4rem;
-    padding: 0.25rem 0.35rem;
-  }
-
-  .bboy-game-root .game-session-stats span {
+  .bboy-game-root .game-rhythm-status span {
     font-size: 0.4rem;
   }
 
-  .bboy-game-root .game-session-stats strong {
+  .bboy-game-root .game-rhythm-status strong {
     font-size: 0.66rem;
   }
 

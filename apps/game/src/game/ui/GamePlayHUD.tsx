@@ -161,10 +161,21 @@ export default function GamePlayHUD({
 
   return (
     <>
-      <aside className="game-session-stats" aria-label={`Total score ${totalPoints}, play time ${formattedPlayTime}`}>
-        <div><span>Total score</span><strong>{totalPoints}</strong></div>
-        <div><span>Play time</span><strong>{formattedPlayTime}</strong></div>
-      </aside>
+      {!learningActive ? (
+        <aside
+          className="game-rhythm-status"
+          data-active={rhythmState.beatPhase < 0.18}
+          aria-label={`Beat ${(rhythmState.beatIndex % 4) + 1} of 4, ${rhythmState.bpm.toFixed(0)} BPM, total score ${totalPoints}, play time ${formattedPlayTime}`}
+        >
+          <div className="game-rhythm-status__beat" aria-hidden="true">
+            <i />
+            <strong>{(rhythmState.beatIndex % 4) + 1}/4</strong>
+          </div>
+          <div><span>BPM</span><strong>{rhythmState.bpm.toFixed(0)}</strong></div>
+          <div><span>Score</span><strong>{totalPoints}</strong></div>
+          <div><span>Time</span><strong>{formattedPlayTime}</strong></div>
+        </aside>
+      ) : null}
 
       {staminaRewardFeedback && !learningActive ? (
         <div
@@ -177,15 +188,6 @@ export default function GamePlayHUD({
           <strong>+{staminaRewardFeedback.amount.toFixed(1)} stamina</strong>
         </div>
       ) : null}
-
-      {!learningActive ? <div
-        className="game-beat-pad"
-        data-active={rhythmState.beatPhase < 0.18}
-        aria-label={`Beat ${(rhythmState.beatIndex % 4) + 1} of 4`}
-      >
-        <i />
-        <span>{(rhythmState.beatIndex % 4) + 1}/4</span>
-      </div> : null}
 
       {!learningActive ? <aside className="game-active-move-hud" data-training={mode === 'training'} aria-live="polite" aria-label="Active move">
         <span>Move</span>
