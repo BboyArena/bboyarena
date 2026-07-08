@@ -4,7 +4,7 @@ import { useGameInputSnapshot } from '../input/GameInputProvider';
 import { useConnectedGamepads } from '../input/useConnectedGamepads';
 import type { GameInputButtonId } from '../input/gameInputTypes';
 import type { GamePlayMode } from '../state/useGameStore';
-import TouchControlsOverlay, { type TouchStickTarget } from './TouchControlsOverlay';
+import TouchControlsOverlay, { type TouchStickFeedback, type TouchStickTarget } from './TouchControlsOverlay';
 import type { GameCopy } from '../copy';
 import type { PlayerMotionSnapshot } from '../motion/playerMotionTypes';
 import type { AnimationPlaybackMachineContext } from '../animation/animationPlaybackMachine';
@@ -51,6 +51,7 @@ interface GamePlayHudProps {
   stamina: number;
   moveScore: number | null;
   staminaRewardFeedback: { amount: number; sequence: number } | null;
+  stickFeedbacks: TouchStickFeedback[];
 }
 
 const intentButtons: Array<{ id: GameInputButtonId; label: string }> = [
@@ -81,7 +82,8 @@ export default function GamePlayHUD({
   moveQueue,
   stamina,
   moveScore,
-  staminaRewardFeedback
+  staminaRewardFeedback,
+  stickFeedbacks
 }: GamePlayHudProps) {
   const [compactTraining, setCompactTraining] = useState(() => (
     typeof window !== 'undefined' && window.matchMedia('(max-width: 640px), (max-height: 520px)').matches
@@ -329,7 +331,7 @@ export default function GamePlayHUD({
         </aside>
       ) : null}
 
-      {touchControlsVisible && !learningActive ? <TouchControlsOverlay targets={touchStickTargets} /> : null}
+      {touchControlsVisible && !learningActive ? <TouchControlsOverlay targets={touchStickTargets} feedbacks={stickFeedbacks} /> : null}
     </>
   );
 }

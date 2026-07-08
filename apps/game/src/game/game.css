@@ -2696,6 +2696,37 @@
   pointer-events: none;
 }
 
+.bboy-game-root .touch-controls__joystick-zone[data-feedback] {
+  --joystick-success-color: #65ed8e;
+}
+
+.bboy-game-root .touch-controls__joystick-zone[data-feedback="perfect"] { --joystick-success-color: #f8ffb0; }
+.bboy-game-root .touch-controls__joystick-zone[data-feedback="good"] { --joystick-success-color: #65ed8e; }
+
+.bboy-game-root .touch-controls__joystick-feedback {
+  position: absolute;
+  z-index: 6;
+  inset: -0.45rem;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--joystick-success-color, #65ed8e);
+  border-radius: 50%;
+  color: var(--joystick-success-color, #65ed8e);
+  font-size: 0.68rem;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 4px #000;
+  pointer-events: none;
+  animation: game-joystick-success-ring 520ms ease-out both;
+}
+
+@keyframes game-joystick-success-ring {
+  0% { opacity: 0; scale: 0.72; box-shadow: inset 0 0 0 var(--joystick-success-color), 0 0 0 var(--joystick-success-color); }
+  22% { opacity: 1; box-shadow: inset 0 0 1.8rem var(--joystick-success-color), 0 0 1.6rem var(--joystick-success-color); }
+  100% { opacity: 0; scale: 1.42; box-shadow: inset 0 0 0 var(--joystick-success-color), 0 0 0 var(--joystick-success-color); }
+}
+
 .bboy-game-root .touch-controls__joystick-target {
   position: absolute;
   z-index: 2;

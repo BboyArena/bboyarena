@@ -53,6 +53,12 @@ export type TouchStickTarget = {
   step: string;
 };
 
+export type TouchStickFeedback = {
+  stick: 'left' | 'right';
+  grade: 'good' | 'perfect';
+  sequence: number;
+};
+
 const touchDeadzone = 0.18;
 const touchResponseExponent = 1.35;
 
@@ -101,13 +107,26 @@ function DirectionPad() {
   </div>;
 }
 
-export default function TouchControlsOverlay({ targets = {} }: { targets?: Partial<Record<'left' | 'right', TouchStickTarget>> }) {
+export default function TouchControlsOverlay({
+  targets = {},
+  feedbacks = []
+}: {
+  targets?: Partial<Record<'left' | 'right', TouchStickTarget>>;
+  feedbacks?: TouchStickFeedback[];
+}) {
   const controller = useGameInputController();
   const [resetVersion, setResetVersion] = useState(0);
   const touchControlsVisible = useGameStore((state) => state.touchControlsVisible);
   const activeInputSource = useGameStore((state) => state.activeInputSource);
   const leftStickRef = useRef<HTMLDivElement | null>(null);
   const rightStickRef = useRef<HTMLDivElement | null>(null);
+  const leftFeedback = feedbacks.find((feedback) => feedback.stick === 'left');
+  const rightFeedback = feedbacks.find((feedback) => feedback.stick === 'right');
+
+  useEffect(() => {
+    if (feedbacks.length === 0 || typeof navigator.vibrate !== 'function') return;
+    navigator.vibrate(feedbacks.some((feedback) => feedback.grade === 'perfect') ? 45 : 30);
+  }, [feedbacks]);
 
   useEffect(() => {
     const resetTouch = () => {
@@ -143,9 +162,10 @@ export default function TouchControlsOverlay({ targets = {} }: { targets?: Parti
       <DirectionPad />
       <div className="touch-controls__joystick-group">
         <span className="touch-controls__joystick-label"><b>L · Upper body</b><small>Torso + shoulders</small></span>
-        <div className="touch-controls__joystick-zone" ref={leftStickRef} aria-label="Left analog stick: upper body, torso and shoulders">
+        <div className="touch-controls__joystick-zone" ref={leftStickRef} data-feedback={leftFeedback?.grade} aria-label="Left analog stick: upper body, torso and shoulders">
           <JoystickTarget target={targets.left} />
           <span className="touch-controls__joystick-visual" aria-hidden="true" />
+          {leftFeedback ? <span key={leftFeedback.sequence} className="touch-controls__joystick-feedback" role="status">{leftFeedback.grade}</span> : null}
           <TouchInputAdapter joystickZoneRef={leftStickRef} channel="move" />
         </div>
       </div>
@@ -165,9 +185,10 @@ export default function TouchControlsOverlay({ targets = {} }: { targets?: Parti
       </div>
       <div className="touch-controls__joystick-group">
         <span className="touch-controls__joystick-label"><b>R · Lower body</b><small>Hips + legs</small></span>
-        <div className="touch-controls__joystick-zone" ref={rightStickRef} aria-label="Right analog stick: lower body, hips and legs">
+        <div className="touch-controls__joystick-zone" ref={rightStickRef} data-feedback={rightFeedback?.grade} aria-label="Right analog stick: lower body, hips and legs">
           <JoystickTarget target={targets.right} />
           <span className="touch-controls__joystick-visual" aria-hidden="true" />
+          {rightFeedback ? <span key={rightFeedback.sequence} className="touch-controls__joystick-feedback" role="status">{rightFeedback.grade}</span> : null}
           <TouchInputAdapter joystickZoneRef={rightStickRef} channel="look" />
         </div>
       </div>

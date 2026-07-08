@@ -27,6 +27,7 @@ import {
   sampleMoveInputAccuracy,
   scoreToStaminaReward
 } from './move/moveScoring';
+import type { TouchStickFeedback } from './ui/TouchControlsOverlay';
 
 const MAXIMUM_STAMINA = 100;
 const MINIMUM_TRAINING_STAMINA = 5;
@@ -137,6 +138,9 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const staminaRewardSequenceRef = useRef(0);
   const [staminaRewardFeedback, setStaminaRewardFeedback] = useState<{ amount: number; sequence: number } | null>(null);
   const scoreAccumulatorRef = useRef<{ moveId: number; total: number; samples: number } | null>(null);
+  const awardedStickStepsRef = useRef(new Set<string>());
+  const stickFeedbackSequenceRef = useRef(0);
+  const [stickFeedbacks, setStickFeedbacks] = useState<TouchStickFeedback[]>([]);
 
   useEffect(() => {
     if (mode === 'training' && gameState === 'idle') {
@@ -166,6 +170,8 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
       setMoveScore(null);
       setStaminaRewardFeedback(null);
       scoreAccumulatorRef.current = null;
+      awardedStickStepsRef.current.clear();
+      setStickFeedbacks([]);
       lastAnimationIntentRef.current = null;
       if (moveHistoryRef.current.reset(currentTick)) {
         setMoveHistory(moveHistoryRef.current.getSnapshot());
@@ -333,21 +339,52 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
       ? (rhythmSnapshot.beat - activeMove.startedAtBeat) / activeMove.durationBeats
       : 0;
 
-    return move.stickCueTracks.map((track) => ({
-      id: track.id,
-      label: track.label,
-      stick: track.stick,
-      controllerRole: track.controllerRole,
-      targetInput: track.targetInput ?? 'movement',
-      points: track.points,
-      progress: track.loop ? ((progress % 1) + 1) % 1 : Math.min(1, Math.max(0, progress)),
-      sample: sampleStickCueStep(track, progress, activeMove.durationBeats, timingWindowBeats)
-    }));
+    return move.stickCueTracks.map((track) => {
+      const sample = sampleStickCueStep(track, progress, activeMove.durationBeats, timingWindowBeats);
+      return {
+        id: track.id,
+        label: track.label,
+        stick: track.stick,
+        controllerRole: track.controllerRole,
+        targetInput: track.targetInput ?? 'movement',
+        points: track.points,
+        progress: track.loop ? ((progress % 1) + 1) % 1 : Math.min(1, Math.max(0, progress)),
+        sample: { ...sample, tolerance: sample.tolerance * toleranceMultiplier }
+      };
+    });
   }, [
     moveQueue.active,
     rhythmSnapshot.beat,
-    timingWindowBeats
+    timingWindowBeats,
+    toleranceMultiplier
   ]);
+
+  useEffect(() => {
+    const activeMove = moveQueue.active;
+    if (!activeMove || mode !== 'training' || gameState !== 'playing') return;
+    const nextFeedbacks: TouchStickFeedback[] = [];
+
+    for (const cue of stickCueDiagnostics) {
+      if (!cue.sample.active) continue;
+      const input = cue.targetInput === 'look' ? snapshot.look : snapshot.move;
+      const distance = Math.hypot(input.x - cue.sample.x, input.y - cue.sample.y);
+      if (distance > cue.sample.tolerance) continue;
+
+      const stepKey = `${activeMove.id}:${cue.id}:${cue.sample.pointIndex}`;
+      if (awardedStickStepsRef.current.has(stepKey)) continue;
+      awardedStickStepsRef.current.add(stepKey);
+
+      const distanceRatio = distance / Math.max(Number.EPSILON, cue.sample.tolerance);
+      const timingRatio = Math.abs(cue.sample.beatsUntilStep) / Math.max(Number.EPSILON, timingWindowBeats);
+      stickFeedbackSequenceRef.current += 1;
+      nextFeedbacks.push({
+        stick: cue.stick,
+        grade: distanceRatio <= 0.45 && timingRatio <= 0.35 ? 'perfect' : 'good',
+        sequence: stickFeedbackSequenceRef.current
+      });
+    }
+    if (nextFeedbacks.length > 0) setStickFeedbacks(nextFeedbacks);
+  }, [gameState, mode, moveQueue.active, snapshot.look, snapshot.move, stickCueDiagnostics, timingWindowBeats]);
 
   useEffect(() => {
     if (
@@ -412,6 +449,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
         stamina={stamina}
         moveScore={moveScore}
         staminaRewardFeedback={staminaRewardFeedback}
+        stickFeedbacks={stickFeedbacks}
       />
     </>
   );
