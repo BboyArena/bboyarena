@@ -13,7 +13,7 @@ export type MoveScoringConfig = {
 };
 
 export const scoreToStaminaReward = (score: number) => (
-  Math.max(0, Math.min(1, (score - MINIMUM_MOVE_SCORE) / (MAXIMUM_MOVE_SCORE - MINIMUM_MOVE_SCORE)))
+  Math.max(0, Math.min(1, score / MAXIMUM_MOVE_SCORE))
   * MAXIMUM_STAMINA_REWARD
 );
 

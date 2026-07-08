@@ -22,16 +22,14 @@ import { moveCatalog } from './move/moveCatalog';
 import { sampleStickCueStep } from './move/stickCueTracks';
 import { getMoveQueueFamilyForButton, MoveQueueController } from './move/MoveQueueController';
 import type { GameInputButtonId, GameInputSnapshot } from './input/gameInputTypes';
-import {
-  accuracyToMoveScore,
-  sampleMoveInputAccuracy,
-  scoreToStaminaReward
-} from './move/moveScoring';
+import { scoreToStaminaReward } from './move/moveScoring';
 import type { TouchStickFeedback } from './ui/TouchControlsOverlay';
 
 const MAXIMUM_STAMINA = 100;
 const MINIMUM_TRAINING_STAMINA = 5;
 const MOVE_STAMINA_COST = 3;
+const GOOD_STEP_POINTS = 50;
+const PERFECT_STEP_POINTS = 100;
 
 function resolveToleranceMultiplier(mode: 'assisted' | 'adaptive' | 'expert', skillRating: number) {
   if (mode === 'assisted') return 1.75;
@@ -133,11 +131,14 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const [moveQueue, setMoveQueue] = useState(() => moveQueueRef.current.getSnapshot());
   const [diagnosticsVisible, setDiagnosticsVisible] = useState(import.meta.env.DEV);
   const staminaRef = useRef(MAXIMUM_STAMINA);
+  const lastStaminaBeatRef = useRef(rhythmSnapshot.beat);
   const [stamina, setStamina] = useState(MAXIMUM_STAMINA);
   const [moveScore, setMoveScore] = useState<number | null>(null);
+  const [loopPoints, setLoopPoints] = useState(0);
+  const [totalPoints, setTotalPoints] = useState(0);
   const staminaRewardSequenceRef = useRef(0);
   const [staminaRewardFeedback, setStaminaRewardFeedback] = useState<{ amount: number; sequence: number } | null>(null);
-  const scoreAccumulatorRef = useRef<{ moveId: number; total: number; samples: number } | null>(null);
+  const scoreAccumulatorRef = useRef<{ moveId: number; earned: number; possible: number } | null>(null);
   const awardedStickStepsRef = useRef(new Set<string>());
   const stickFeedbackSequenceRef = useRef(0);
   const [stickFeedbacks, setStickFeedbacks] = useState<TouchStickFeedback[]>([]);
@@ -150,7 +151,8 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
 
   useEffect(() => {
     const previousGameState = previousGameStateRef.current;
-    const currentTick = rhythmClock.getSnapshot().tick;
+    const currentRhythm = rhythmClock.getSnapshot();
+    const currentTick = currentRhythm.tick;
 
     if (gameState === 'playing') {
       motionSend({ type: previousGameState === 'paused' ? 'RESUME' : 'ENABLE' });
@@ -166,8 +168,11 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
       moveQueueRef.current.reset();
       setMoveQueue(moveQueueRef.current.getSnapshot());
       staminaRef.current = MAXIMUM_STAMINA;
+      lastStaminaBeatRef.current = currentRhythm.beat;
       setStamina(MAXIMUM_STAMINA);
       setMoveScore(null);
+      setLoopPoints(0);
+      setTotalPoints(0);
       setStaminaRewardFeedback(null);
       scoreAccumulatorRef.current = null;
       awardedStickStepsRef.current.clear();
@@ -186,27 +191,24 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
       motionSend({ type: 'TICK', tick: rhythmSnapshot.tick });
       const activeBeforeAdvance = moveQueueRef.current.getSnapshot().active;
       if (mode === 'training' && activeBeforeAdvance) {
-        const accuracy = sampleMoveInputAccuracy(
-          activeBeforeAdvance,
-          rhythmSnapshot.beat,
-          liveInputRef.current,
-          { toleranceMultiplier, timingWindowBeats }
+        const elapsedBeats = Math.max(0, rhythmSnapshot.beat - lastStaminaBeatRef.current);
+        const staminaDrain = elapsedBeats * (
+          MOVE_STAMINA_COST / Math.max(Number.EPSILON, activeBeforeAdvance.durationBeats)
         );
-        if (accuracy !== null) {
-          const accumulator = scoreAccumulatorRef.current?.moveId === activeBeforeAdvance.id
-            ? scoreAccumulatorRef.current
-            : { moveId: activeBeforeAdvance.id, total: 0, samples: 0 };
-          accumulator.total += accuracy;
-          accumulator.samples += 1;
-          scoreAccumulatorRef.current = accumulator;
-          setMoveScore(accuracyToMoveScore(accumulator.total / accumulator.samples));
+        if (staminaDrain > 0) {
+          const nextStamina = Math.max(MINIMUM_TRAINING_STAMINA, staminaRef.current - staminaDrain);
+          staminaRef.current = nextStamina;
+          setStamina(nextStamina);
         }
       }
+      lastStaminaBeatRef.current = rhythmSnapshot.beat;
       const transition = moveQueueRef.current.advance(rhythmSnapshot.beat);
       if (transition) {
         const accumulator = scoreAccumulatorRef.current;
-        const completedScore = mode === 'training' && accumulator?.moveId === transition.completed.id
-          ? accuracyToMoveScore(accumulator.total / Math.max(1, accumulator.samples))
+        const completedScore = mode === 'training'
+          ? (accumulator?.moveId === transition.completed.id
+              ? Math.round((accumulator.earned / Math.max(1, accumulator.possible)) * 100)
+              : 0)
           : undefined;
         scoreAccumulatorRef.current = null;
         if (mode === 'training' && completedScore !== undefined && difficultyMode === 'adaptive') {
@@ -218,14 +220,14 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
         }
         let started = transition.started;
         if (mode === 'training') {
-          const staminaReward = scoreToStaminaReward(completedScore ?? 20);
+          const staminaReward = scoreToStaminaReward(completedScore ?? 0);
           const nextStamina = Math.max(
             MINIMUM_TRAINING_STAMINA,
-            Math.min(MAXIMUM_STAMINA, staminaRef.current - MOVE_STAMINA_COST + staminaReward)
+            Math.min(MAXIMUM_STAMINA, staminaRef.current + staminaReward)
           );
           staminaRef.current = nextStamina;
           setStamina(nextStamina);
-          setMoveScore(completedScore ?? 20);
+          setLoopPoints(0);
           if (staminaReward > 0.01) {
             staminaRewardSequenceRef.current += 1;
             setStaminaRewardFeedback({
@@ -244,6 +246,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
               transition.completed.startedAtBeat + transition.completed.durationBeats
             );
           }
+          setMoveScore(started ? 0 : (completedScore ?? 0));
         }
         animationSend({ type: 'animation.complete', completedAtTick: rhythmSnapshot.tick });
         motionSend({
@@ -376,10 +379,23 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
 
       const distanceRatio = distance / Math.max(Number.EPSILON, cue.sample.tolerance);
       const timingRatio = Math.abs(cue.sample.beatsUntilStep) / Math.max(Number.EPSILON, timingWindowBeats);
+      const grade = distanceRatio <= 0.45 && timingRatio <= 0.35 ? 'perfect' : 'good';
+      const definition = moveCatalog.moves.find((move) => move.intentId === activeMove.intentId);
+      const possible = (definition?.stickCueTracks.reduce((sum, track) => sum + track.points.length, 0) ?? 1)
+        * PERFECT_STEP_POINTS;
+      const accumulator = scoreAccumulatorRef.current?.moveId === activeMove.id
+        ? scoreAccumulatorRef.current
+        : { moveId: activeMove.id, earned: 0, possible };
+      const awardedPoints = grade === 'perfect' ? PERFECT_STEP_POINTS : GOOD_STEP_POINTS;
+      accumulator.earned += awardedPoints;
+      scoreAccumulatorRef.current = accumulator;
+      setLoopPoints(accumulator.earned);
+      setTotalPoints((points) => points + awardedPoints);
+      setMoveScore(Math.round((accumulator.earned / Math.max(1, accumulator.possible)) * 100));
       stickFeedbackSequenceRef.current += 1;
       nextFeedbacks.push({
         stick: cue.stick,
-        grade: distanceRatio <= 0.45 && timingRatio <= 0.35 ? 'perfect' : 'good',
+        grade,
         sequence: stickFeedbackSequenceRef.current
       });
     }
@@ -448,6 +464,8 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
         moveQueue={moveQueue}
         stamina={stamina}
         moveScore={moveScore}
+        loopPoints={loopPoints}
+        totalPoints={totalPoints}
         staminaRewardFeedback={staminaRewardFeedback}
         stickFeedbacks={stickFeedbacks}
       />

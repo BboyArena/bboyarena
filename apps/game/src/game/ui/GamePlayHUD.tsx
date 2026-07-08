@@ -50,6 +50,8 @@ interface GamePlayHudProps {
   moveQueue: MoveQueueSnapshot;
   stamina: number;
   moveScore: number | null;
+  loopPoints: number;
+  totalPoints: number;
   staminaRewardFeedback: { amount: number; sequence: number } | null;
   stickFeedbacks: TouchStickFeedback[];
 }
@@ -82,6 +84,8 @@ export default function GamePlayHUD({
   moveQueue,
   stamina,
   moveScore,
+  loopPoints,
+  totalPoints,
   staminaRewardFeedback,
   stickFeedbacks
 }: GamePlayHudProps) {
@@ -171,7 +175,7 @@ export default function GamePlayHUD({
         <span>Move</span>
         <strong>{moveFamilyLabel}</strong>
         <small>Style: {moveStyleLabel}</small>
-        <div className="game-active-move-hud__progress" aria-label={`${Math.round(activeProgress * 100)}% complete`}>
+        <div className="game-active-move-hud__progress" aria-label={`Loop ${Math.round(activeProgress * 100)}% complete`}>
           <i style={{ width: `${activeProgress * 100}%` }} />
         </div>
         <ol className="game-active-move-hud__queue" aria-label="Queued moves">
@@ -196,6 +200,8 @@ export default function GamePlayHUD({
           onLearningChange={setLearning}
           stamina={stamina}
           score={moveScore}
+          loopPoints={loopPoints}
+          totalPoints={totalPoints}
         />
       ) : null}
 

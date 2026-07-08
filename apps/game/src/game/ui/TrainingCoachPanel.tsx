@@ -18,6 +18,8 @@ interface TrainingCoachPanelProps {
   onLearningChange: (learning: boolean) => void;
   stamina: number;
   score: number | null;
+  loopPoints: number;
+  totalPoints: number;
 }
 
 export default function TrainingCoachPanel({
@@ -29,7 +31,9 @@ export default function TrainingCoachPanel({
   learning,
   onLearningChange,
   stamina,
-  score
+  score,
+  loopPoints,
+  totalPoints
 }: TrainingCoachPanelProps) {
   const [expanded, setExpanded] = useState(() => !compact);
 
@@ -48,7 +52,7 @@ export default function TrainingCoachPanel({
           <span className="game-training-learn__eyebrow">Prototype move catalog</span>
           <h2>{displayName}</h2>
           <div className="game-training-learn__performance">
-            <div><small>Accuracy</small><strong>{score ?? 20}%</strong></div>
+            <div><small>Loop score</small><strong>{score ?? 0}%</strong></div>
             <div><small>Stamina</small><strong>{Math.round(stamina)}%</strong></div>
           </div>
           {move && family ? (
@@ -90,7 +94,7 @@ export default function TrainingCoachPanel({
         <div>
           <span>Current move</span>
           <strong>{displayName}</strong>
-          <small>{move ? `${progressPercent}% · score ${score ?? 20}% · stamina ${Math.round(stamina)}%` : `A / B / X / Y · stamina ${Math.round(stamina)}%`}</small>
+          <small>{move ? `Loop score ${score ?? 0}% · ${loopPoints} pts · Run ${totalPoints} pts` : `A / B / X / Y · Run ${totalPoints} pts`}</small>
         </div>
         <button
           type="button"
@@ -105,8 +109,15 @@ export default function TrainingCoachPanel({
           <b>Coach</b>
         </button>
       </div>
-      <div className="game-training-coach__progress" aria-hidden="true">
+      <div className="game-training-coach__stamina" aria-label={`Stamina ${Math.round(stamina)}%`}>
+        <span>Stamina</span><strong>{Math.round(stamina)}%</strong>
+        <div><i style={{ width: `${stamina}%` }} /></div>
+      </div>
+      <div className="game-training-coach__progress" aria-label={`Loop ${progressPercent}% complete`}>
+        <span>Loop {progressPercent}%</span>
+        <div>
         <i style={{ width: `${progressPercent}%` }} />
+        </div>
       </div>
       {expanded ? (
         <div className="game-training-coach__details" id="game-training-coach-details">
@@ -115,7 +126,8 @@ export default function TrainingCoachPanel({
               <div><dt>Button</dt><dd>{mainButton} · {family}</dd></div>
               <div><dt>Skills</dt><dd>{move.skills.join(', ')}</dd></div>
               <div><dt>Steps</dt><dd>Hit both gold checkpoints when they become active</dd></div>
-              <div><dt>Energy</dt><dd>Score {score ?? 20}% · Stamina {Math.round(stamina)}%</dd></div>
+              <div><dt>Score</dt><dd>Loop {score ?? 0}% · {loopPoints} pts · Run {totalPoints} pts</dd></div>
+              <div><dt>Energy</dt><dd>Stamina {Math.round(stamina)}% · drains during movement, recovers after the loop</dd></div>
               {feedback ? <div><dt>Feedback</dt><dd>{feedback}</dd></div> : null}
             </dl>
           ) : <p>Choose A Toprock, B Footwork, X Freeze, or Y Powermove.</p>}
