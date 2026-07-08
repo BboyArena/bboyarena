@@ -153,6 +153,32 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const tutorial = useTrainingTutorial(mode === 'training', rhythmSnapshot, snapshot);
 
   useEffect(() => {
+    const gameRoot = document.getElementById('bboyarena-game-root');
+    if (!gameRoot) return undefined;
+
+    const handleTouchStart = (event: TouchEvent) => {
+      if (event.touches.length !== 3 || threeFingerGestureActiveRef.current) return;
+      threeFingerGestureActiveRef.current = true;
+      inputController.triggerSystemAction('touch', 'system.quickMenu');
+    };
+    const handleTouchEnd = (event: TouchEvent) => {
+      if (event.touches.length < 3) threeFingerGestureActiveRef.current = false;
+    };
+    const handleTouchCancel = () => {
+      threeFingerGestureActiveRef.current = false;
+    };
+
+    gameRoot.addEventListener('touchstart', handleTouchStart, { capture: true, passive: true });
+    gameRoot.addEventListener('touchend', handleTouchEnd, { capture: true, passive: true });
+    gameRoot.addEventListener('touchcancel', handleTouchCancel, { capture: true, passive: true });
+    return () => {
+      gameRoot.removeEventListener('touchstart', handleTouchStart, { capture: true });
+      gameRoot.removeEventListener('touchend', handleTouchEnd, { capture: true });
+      gameRoot.removeEventListener('touchcancel', handleTouchCancel, { capture: true });
+    };
+  }, [inputController]);
+
+  useEffect(() => {
     if (mode === 'training' && gameState === 'idle') {
       send({ type: 'START' });
     }
@@ -439,20 +465,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   ]);
 
   return (
-    <div
-      className="game-play-runtime"
-      onTouchStartCapture={(event) => {
-        if (event.touches.length !== 3 || threeFingerGestureActiveRef.current) return;
-        threeFingerGestureActiveRef.current = true;
-        inputController.triggerSystemAction('touch', 'system.quickMenu');
-      }}
-      onTouchEndCapture={(event) => {
-        if (event.touches.length < 3) threeFingerGestureActiveRef.current = false;
-      }}
-      onTouchCancelCapture={() => {
-        threeFingerGestureActiveRef.current = false;
-      }}
-    >
+    <>
       <GameInputSceneBindings gameState={gameState} send={send} />
       <div className="game-play-status-controls">
         <button
@@ -521,7 +534,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
           leftStickChallenge={tutorial.leftStickChallenge}
         />
       ) : null}
-    </div>
+    </>
   );
 }
 

@@ -199,11 +199,6 @@
   touch-action: none;
 }
 
-.bboy-game-root .game-play-runtime {
-  position: absolute;
-  inset: 0;
-}
-
 .bboy-game-root .game-canvas__surface {
   position: absolute !important;
   inset: 0 !important;
