@@ -32,6 +32,7 @@ const MINIMUM_TRAINING_STAMINA = 5;
 const MOVE_STAMINA_COST = 3;
 const GOOD_STEP_POINTS = 50;
 const PERFECT_STEP_POINTS = 100;
+const movesByIntentId = new Map(moveCatalog.moves.map((move) => [move.intentId, move]));
 
 function resolveToleranceMultiplier(mode: 'assisted' | 'adaptive' | 'expert', skillRating: number) {
   if (mode === 'assisted') return 1.75;
@@ -205,7 +206,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
       motionSend({ type: 'TICK', tick: rhythmSnapshot.tick });
       const activeBeforeAdvance = moveQueueRef.current.getSnapshot().active;
       if (mode === 'training' && activeBeforeAdvance) {
-        const definition = moveCatalog.moves.find((move) => move.intentId === activeBeforeAdvance.intentId);
+        const definition = movesByIntentId.get(activeBeforeAdvance.intentId);
         const progress = activeBeforeAdvance.durationBeats > 0
           ? (rhythmSnapshot.beat - activeBeforeAdvance.startedAtBeat) / activeBeforeAdvance.durationBeats
           : 0;
@@ -392,9 +393,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
     const activeMove = moveQueue.active;
     if (activeMove === null) return [];
 
-    const move = moveCatalog.moves.find(
-      (definition) => definition.intentId === activeMove.intentId
-    );
+    const move = movesByIntentId.get(activeMove.intentId);
     if (!move?.stickCueTracks?.length) return [];
 
     const progress = activeMove.durationBeats > 0

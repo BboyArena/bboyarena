@@ -62,7 +62,6 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
     };
   }, [locale]);
 
-  console.log('GameApp: rendering screen', screen, 'with mode', selectedMode, 'and locale', resolvedLocale);
   return (
     <RhythmClockProvider>
        <div

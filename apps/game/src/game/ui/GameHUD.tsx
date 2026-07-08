@@ -483,7 +483,6 @@ export default function GameHUD({ copy }: GameHudProps) {
       </div>
     );
   }
-  console.log('GameHUD: unhandled screen', screen);
   return (
     <div className="game-hud game-hud--splash">
       <div className="game-splash-layout">

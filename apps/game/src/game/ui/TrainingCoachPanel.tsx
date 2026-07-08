@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import type { MoveDefinition, MoveFamilyId } from '../move/moveDefinitionTypes';
 
 const familyButtons: Record<MoveFamilyId, string> = {
@@ -22,7 +22,7 @@ interface TrainingCoachPanelProps {
   totalPoints: number;
 }
 
-export default function TrainingCoachPanel({
+function TrainingCoachPanel({
   move,
   family,
   progress,
@@ -111,12 +111,12 @@ export default function TrainingCoachPanel({
       </div>
       <div className="game-training-coach__stamina" aria-label={`Stamina ${Math.round(stamina)}%`}>
         <span>Stamina</span><strong>{Math.round(stamina)}%</strong>
-        <div><i style={{ width: `${stamina}%` }} /></div>
+        <div><i style={{ transform: `scaleX(${Math.min(1, Math.max(0, stamina / 100))})` }} /></div>
       </div>
       <div className="game-training-coach__progress" aria-label={`Loop ${progressPercent}% complete`}>
         <span>Loop {progressPercent}%</span>
         <div>
-        <i style={{ width: `${progressPercent}%` }} />
+        <i style={{ transform: `scaleX(${progressPercent / 100})` }} />
         </div>
       </div>
       {expanded ? (
@@ -136,3 +136,5 @@ export default function TrainingCoachPanel({
     </aside>
   );
 }
+
+export default memo(TrainingCoachPanel);

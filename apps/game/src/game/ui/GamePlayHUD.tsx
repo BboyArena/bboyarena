@@ -70,6 +70,8 @@ const intentButtons: Array<{ id: GameInputButtonId; label: string }> = [
   { id: 'powermove', label: 'Powermove' }
 ];
 
+const movesByIntentId = new Map(moveCatalog.moves.map((move) => [move.intentId, move]));
+
 const getMoveFamilyLabel = (intentId: PlayerMotionSnapshot['activeIntentId']) => {
   if (intentId?.includes('.toprock')) return 'Toprock';
   if (intentId?.includes('.footwork')) return 'Footwork';
@@ -118,9 +120,9 @@ export default function GamePlayHUD({
   const pressedIntentButtons = intentButtons.filter(({ id }) => snapshot.buttons[id].pressed);
   const selectedGamepad = connectedGamepads.find((gamepad) => gamepad.index === selectedGamepadIndex)
     ?? (selectedGamepadIndex === null ? connectedGamepads[0] : undefined);
-  const activeMove = moveCatalog.moves.find((move) => move.intentId === moveQueue.active?.intentId);
+  const activeMove = moveQueue.active ? movesByIntentId.get(moveQueue.active.intentId) : undefined;
   const documentedMove = activeMove
-    ?? moveCatalog.moves.find((move) => move.intentId === motionState.activeIntentId)
+    ?? (motionState.activeIntentId ? movesByIntentId.get(motionState.activeIntentId) : undefined)
     ?? null;
   const moveFamilyLabel = moveQueue.active?.family ?? getMoveFamilyLabel(motionState.activeIntentId);
   const moveStyleLabel = moveQueue.active?.label ?? activeMove?.label
@@ -214,7 +216,7 @@ export default function GamePlayHUD({
         <strong>{moveFamilyLabel}</strong>
         <small>Style: {moveStyleLabel}</small>
         <div className="game-active-move-hud__progress" aria-label={`Loop ${Math.round(activeProgress * 100)}% complete`}>
-          <i style={{ width: `${activeProgress * 100}%` }} />
+          <i style={{ transform: `scaleX(${activeProgress})` }} />
         </div>
         <ol className="game-active-move-hud__queue" aria-label="Queued moves">
           {moveQueue.queued.length === 0 ? (

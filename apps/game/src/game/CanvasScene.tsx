@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
@@ -90,6 +90,7 @@ function CanvasScene({ gameState, playerMotionState, animationDefinition, onPerf
   const [hasWebGLContext, setHasWebGLContext] = useState(true);
   const inputController = useGameInputController();
   const threeFingerGestureActive = useRef(false);
+  const handleContextLost = useCallback(() => setHasWebGLContext(false), []);
 
   const handleTouchStart = (touchCount: number) => {
     if (touchCount !== 3 || threeFingerGestureActive.current) return;
@@ -125,7 +126,7 @@ function CanvasScene({ gameState, playerMotionState, animationDefinition, onPerf
         camera={{ position: [0, 3.4, 8.5], fov: 42 }}
         gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
       >
-        <WebGLContextGuard onContextLost={() => setHasWebGLContext(false)} />
+        <WebGLContextGuard onContextLost={handleContextLost} />
         <PerformanceMonitor onUpdate={onPerformanceUpdate} />
         <color attach="background" args={['#070503']} />
         <fog attach="fog" args={['#070503', 6, 22]} />

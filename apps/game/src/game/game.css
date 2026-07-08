@@ -1946,11 +1946,13 @@
 
 .bboy-game-root .game-training-coach__stamina i {
   display: block;
+  width: 100%;
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, #e0684b, #f4be24 48%, #65ed8e);
   box-shadow: 0 0 0.65rem rgba(101, 237, 142, 0.35);
-  transition: width 120ms linear;
+  transform-origin: left center;
+  transition: transform 120ms linear;
 }
 
 .bboy-game-root .game-training-coach__progress {
@@ -1972,9 +1974,11 @@
 
 .bboy-game-root .game-training-coach__progress i {
   display: block;
+  width: 100%;
   height: 100%;
   background: rgba(255, 217, 92, 0.72);
-  transition: width 80ms linear;
+  transform-origin: left center;
+  transition: transform 80ms linear;
 }
 
 .bboy-game-root .game-training-coach__details {
@@ -2284,9 +2288,11 @@
 
 .bboy-game-root .game-active-move-hud__progress i {
   display: block;
+  width: 100%;
   height: 100%;
   background: rgba(255, 217, 92, 0.65);
-  transition: width 80ms linear;
+  transform-origin: left center;
+  transition: transform 80ms linear;
 }
 
 .bboy-game-root .game-active-move-hud__queue {
@@ -2449,7 +2455,8 @@
 
 .bboy-game-root .game-stick-cue-hud__target {
   fill: var(--game-gold-hot);
-  filter: drop-shadow(0 0 4px rgba(244, 190, 36, 0.8));
+  stroke: rgba(255, 255, 255, 0.72);
+  stroke-width: 1;
 }
 
 .bboy-game-root .game-stick-cue-hud__input {
@@ -2807,15 +2814,14 @@
   font-weight: 950;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  text-shadow: 0 1px 4px #000;
   pointer-events: none;
   animation: game-joystick-success-ring 520ms ease-out both;
 }
 
 @keyframes game-joystick-success-ring {
-  0% { opacity: 0; scale: 0.72; box-shadow: inset 0 0 0 var(--joystick-success-color), 0 0 0 var(--joystick-success-color); }
-  22% { opacity: 1; box-shadow: inset 0 0 1.8rem var(--joystick-success-color), 0 0 1.6rem var(--joystick-success-color); }
-  100% { opacity: 0; scale: 1.42; box-shadow: inset 0 0 0 var(--joystick-success-color), 0 0 0 var(--joystick-success-color); }
+  0% { opacity: 0; transform: scale(0.72); }
+  22% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.42); }
 }
 
 .bboy-game-root .touch-controls__joystick-target {
@@ -3013,7 +3019,6 @@
   width: 0;
   height: 0;
   border-style: solid;
-  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.72));
 }
 
 .bboy-game-root .touch-controls__dpad-icon--up,
