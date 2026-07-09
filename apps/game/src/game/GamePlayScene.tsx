@@ -109,6 +109,8 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const rhythmSnapshot = useRhythmClockSnapshot();
   const difficultyMode = useGameStore((store) => store.difficultyMode);
   const adaptiveSkillRating = useGameStore((store) => store.adaptiveSkillRating);
+  const cameraFeel = useGameStore((store) => store.cameraFeel);
+  const bpm = useGameStore((store) => store.bpm);
   const recordAdaptivePerformance = useGameStore((store) => store.recordAdaptivePerformance);
   const toleranceMultiplier = resolveToleranceMultiplier(difficultyMode, adaptiveSkillRating);
   const timingWindowBeats = resolveTimingWindowBeats(difficultyMode, adaptiveSkillRating);
@@ -497,6 +499,8 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
           gameState={gameState}
           playerMotionState={motionSnapshot}
           animationDefinition={animationDefinition}
+          cameraFeel={cameraFeel}
+          bpm={bpm}
           onPerformanceUpdate={diagnosticsVisible ? setRenderingDiagnostics : undefined}
         />
       </GameCanvasErrorBoundary>

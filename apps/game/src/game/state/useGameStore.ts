@@ -7,6 +7,7 @@ import type {
   PreferredInputMode
 } from '../input/gameInputTypes';
 import { defaultGamepadInputMap, defaultKeyboardInputMap } from '../input/gameInputTypes';
+import type { CameraFeel } from '../camera/cameraFeel';
 
 export type GameMenuScreen = 'splashscreen' | 'mainMenu' | 'settings' | 'credits';
 export type GamePlayMode = 'career' | 'training';
@@ -24,6 +25,7 @@ interface GameState {
   adaptiveSkillRating: number;
   internalMusicEnabled: boolean;
   trainingAudioMode: TrainingAudioMode;
+  cameraFeel: CameraFeel;
   preferredInputMode: PreferredInputMode;
   activeInputSource: ActiveInputSource;
   touchControlsVisible: boolean;
@@ -50,6 +52,7 @@ interface GameState {
   recordAdaptivePerformance: (score: number) => void;
   setInternalMusicEnabled: (enabled: boolean) => void;
   setTrainingAudioMode: (mode: TrainingAudioMode) => void;
+  setCameraFeel: (feel: CameraFeel) => void;
   resetGame: () => void;
 }
 
@@ -63,6 +66,7 @@ export const useGameStore = create<GameState>((set) => ({
   adaptiveSkillRating: 0,
   internalMusicEnabled: true,
   trainingAudioMode: 'internal',
+  cameraFeel: 'dynamic',
   preferredInputMode: 'auto',
   activeInputSource: 'keyboardMouse',
   touchControlsVisible: false,
@@ -99,5 +103,6 @@ export const useGameStore = create<GameState>((set) => ({
   }),
   setInternalMusicEnabled: (internalMusicEnabled) => set({ internalMusicEnabled }),
   setTrainingAudioMode: (trainingAudioMode) => set({ trainingAudioMode }),
+  setCameraFeel: (cameraFeel) => set({ cameraFeel }),
   resetGame: () => set({ score: 0 }),
 }));

@@ -5,11 +5,15 @@ import * as THREE from 'three';
 import Player from './Player';
 import type { PlayerMotionSnapshot } from './motion/playerMotionTypes';
 import type { AnimationDefinition } from './animation/animationCatalogTypes';
+import CypherCameraRig from './camera/useCypherCamera';
+import type { CameraFeel } from './camera/cameraFeel';
 
 interface CanvasSceneProps {
   gameState: string;
   playerMotionState: PlayerMotionSnapshot;
   animationDefinition: AnimationDefinition | null;
+  cameraFeel: CameraFeel;
+  bpm: number;
   onPerformanceUpdate?: (diagnostics: RenderingDiagnostics) => void;
 }
 
@@ -85,7 +89,7 @@ function WebGLContextGuard({ onContextLost }: { onContextLost: () => void }) {
   return null;
 }
 
-function CanvasScene({ gameState, playerMotionState, animationDefinition, onPerformanceUpdate }: CanvasSceneProps) {
+function CanvasScene({ gameState, playerMotionState, animationDefinition, cameraFeel, bpm, onPerformanceUpdate }: CanvasSceneProps) {
   const [hasWebGLContext, setHasWebGLContext] = useState(true);
   const handleContextLost = useCallback(() => setHasWebGLContext(false), []);
 
@@ -109,6 +113,13 @@ function CanvasScene({ gameState, playerMotionState, animationDefinition, onPerf
       >
         <WebGLContextGuard onContextLost={handleContextLost} />
         <PerformanceMonitor onUpdate={onPerformanceUpdate} />
+        {cameraFeel === 'dynamic' ? (
+          <CypherCameraRig
+            bpm={bpm}
+            gameState={gameState}
+            playerMotionState={playerMotionState}
+          />
+        ) : null}
         <color attach="background" args={['#070503']} />
         <fog attach="fog" args={['#070503', 6, 22]} />
 
@@ -149,15 +160,17 @@ function CanvasScene({ gameState, playerMotionState, animationDefinition, onPerf
           />
         </group>
 
-        <OrbitControls
-          enablePan={false}
-          enableDamping
-          dampingFactor={0.08}
-          minDistance={5}
-          maxDistance={14}
-          maxPolarAngle={Math.PI / 2.15}
-          target={[0, 1.05, 0]}
-        />
+        {cameraFeel === 'fixed' ? (
+          <OrbitControls
+            enablePan={false}
+            enableDamping
+            dampingFactor={0.08}
+            minDistance={5}
+            maxDistance={14}
+            maxPolarAngle={Math.PI / 2.15}
+            target={[0, 1.05, 0]}
+          />
+        ) : null}
       </Canvas>
     </div>
   );
@@ -168,8 +181,12 @@ function canvasScenePropsEqual(previous: CanvasSceneProps, next: CanvasSceneProp
   const nextMotion = next.playerMotionState;
   return previous.gameState === next.gameState
     && previous.animationDefinition === next.animationDefinition
+    && previous.cameraFeel === next.cameraFeel
+    && previous.bpm === next.bpm
     && previous.onPerformanceUpdate === next.onPerformanceUpdate
     && previousMotion.activeIntentId === nextMotion.activeIntentId
+    && previousMotion.phase === nextMotion.phase
+    && previousMotion.angularVelocity === nextMotion.angularVelocity
     && previousMotion.balance === nextMotion.balance
     && previousMotion.rotationAxis.x === nextMotion.rotationAxis.x
     && previousMotion.rotationAxis.y === nextMotion.rotationAxis.y

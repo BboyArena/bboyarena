@@ -33,14 +33,13 @@ export default function Player({ gameState, playerMotionState, animationDefiniti
       meshRef.current.scale.set(1, 1, 1);
     } else if (gameState === 'playing') {
       // Dance moves: Spin, bounce and tilt matching the BPM
-      const movePulse = activeIntentId === 'move.powermove.default' ? 1.12 : 1;
       const spinDirection = rotationAxis.y === 0 ? 1 : Math.sign(rotationAxis.y);
       meshRef.current.position.y = 1 + Math.abs(rhythm) * 0.8 * balance;
       meshRef.current.rotation.y = time * spinSpeed * spinDirection;
       meshRef.current.rotation.x = Math.sin(time * 2) * 0.3;
       meshRef.current.rotation.z = Math.cos(time * 2.5) * 0.3;
 
-      const pulse = (1 + Math.abs(rhythm) * 0.12) * movePulse;
+      const pulse = 1 + Math.abs(rhythm) * 0.12;
       meshRef.current.scale.set(pulse, pulse, pulse);
     } else if (gameState === 'paused') {
       // Freeze state

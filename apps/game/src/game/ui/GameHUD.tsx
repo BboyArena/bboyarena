@@ -6,6 +6,7 @@ import GamePanel from './GamePanel';
 import GameScrollArea from './GameScrollArea';
 import { useConnectedGamepads } from '../input/useConnectedGamepads';
 import type { GameInputButtonId } from '../input/gameInputTypes';
+import { CAMERA_FEELS, type CameraFeel } from '../camera/cameraFeel';
 
 interface GameHudProps {
   copy: GameCopy;
@@ -21,11 +22,13 @@ export default function GameHUD({ copy }: GameHudProps) {
   const bpm = useGameStore((state) => state.bpm);
   const internalMusicEnabled = useGameStore((state) => state.internalMusicEnabled);
   const trainingAudioMode = useGameStore((state) => state.trainingAudioMode);
+  const cameraFeel = useGameStore((state) => state.cameraFeel);
   const difficultyMode = useGameStore((state) => state.difficultyMode);
   const adaptiveSkillRating = useGameStore((state) => state.adaptiveSkillRating);
   const setBpm = useGameStore((state) => state.setBpm);
   const setInternalMusicEnabled = useGameStore((state) => state.setInternalMusicEnabled);
   const setTrainingAudioMode = useGameStore((state) => state.setTrainingAudioMode);
+  const setCameraFeel = useGameStore((state) => state.setCameraFeel);
   const setDifficultyMode = useGameStore((state) => state.setDifficultyMode);
   const setPreferredInputMode = useGameStore((state) => state.setPreferredInputMode);
   const selectedGamepadIndex = useGameStore((state) => state.selectedGamepadIndex);
@@ -114,6 +117,10 @@ export default function GameHUD({ copy }: GameHudProps) {
     { id: 'bring-your-music', label: copy.bringYourMusic, note: copy.bringYourMusicNote },
     { id: 'manual', label: copy.manualBpm, note: copy.manualBpmNote }
   ];
+  const cameraFeels: Array<{ id: CameraFeel; label: string; note: string }> = CAMERA_FEELS.map((feel) => {
+    if (feel === 'fixed') return { id: feel, label: 'Fixed Orbit', note: 'Static turntable view' };
+    return { id: feel, label: 'Dynamic', note: 'Cypher / footwork / hype by move' };
+  });
   const selectedSettingsCard = settingsCards.find((item) => item.id === selectedSettingsTab) ?? settingsCards[2];
   const inputActions: Array<{ id: GameInputButtonId; label: string }> = [
     { id: 'toprock', label: 'Toprock' },
@@ -427,8 +434,25 @@ export default function GameHUD({ copy }: GameHudProps) {
                   )}
                 </div>
               ) : (
-                <div className="game-meter" aria-hidden="true">
-                  <span style={{ width: selectedSettingsCard.meter }} />
+                <div className="game-input-mode-card">
+                  <p className="game-input-config__heading">Camera Feel</p>
+                  <div className="game-input-mode-card__grid" role="group" aria-label="Camera Feel">
+                    {cameraFeels.map((feel) => (
+                      <GameButton
+                        key={feel.id}
+                        variant={cameraFeel === feel.id ? 'primary' : 'secondary'}
+                        active={cameraFeel === feel.id}
+                        className="game-input-mode-card__button"
+                        onClick={() => setCameraFeel(feel.id)}
+                      >
+                        <span className="game-input-mode-card__button-label">{feel.label}</span>
+                        <span className="game-input-mode-card__button-note">{feel.note}</span>
+                      </GameButton>
+                    ))}
+                  </div>
+                  <p className="game-input-config__status">
+                    Camera Feel only changes runtime framing in play scenes. It does not affect input, timing, scoring, or physics.
+                  </p>
                 </div>
               )}
             </GamePanel>
