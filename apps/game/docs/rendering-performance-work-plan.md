@@ -26,6 +26,45 @@ Il rendering deve restare un consumer dello stato gameplay, non il proprietario 
 6. Non modificare gameplay, scoring, timing, state machine, input mapping o comportamento dei controlli.
 7. Le ottimizzazioni devono essere osservabilmente equivalenti per il giocatore.
 
+## Aggiornamento 2026-07-09
+
+Stato corrente: dopo le prime ottimizzazioni il runtime mobile è tornato a 60 FPS stabili per almeno 4 minuti nella prova manuale riportata. Questo indica che uno o più colli di bottiglia nel percorso rendering/UI sono stati rimossi o ridotti sotto soglia.
+
+Le modifiche già applicate sono volutamente conservative:
+
+- nessuna modifica alle regole di gameplay;
+- nessuna modifica a scoring, timing o state machine;
+- nessuna modifica al mapping dei controlli;
+- ottimizzazioni concentrate su rendering 3D, CSS/overlay, memoizzazione React, allocazioni evitate e pulizia del percorso caldo.
+
+### Colli di bottiglia mitigati
+
+- Costo GPU del canvas ridotto con DPR massimo più basso e shadow map più leggera.
+- Numero di luci dinamiche ridotto nella scena gameplay.
+- Canvas memoizzato per evitare render React non necessari.
+- Barre HUD/training migrate da animazioni di `width` ad animazioni di `transform: scaleX()`.
+- Filtri, drop-shadow e glow animati rimossi o sostituiti nel percorso gameplay.
+- Lookup ripetuti su cataloghi move/animation sostituiti con `Map` stabili.
+- Tutorial training reso meno rumoroso lato React, pubblicando il progresso stick a step visivi invece che a ogni micro-variazione.
+- Overlay touch e pannelli training memoizzati.
+- Log runtime non necessari rimossi.
+- Handler WebGL stabilizzati.
+- Gesture a 3 dita spostata su listener nativo root-level passivo/capture, per non dipendere dall'area canvas e per non bloccare il touch mobile.
+
+### Verifiche effettuate
+
+- `git diff --check`: nessun whitespace/error di patch.
+- Build mirata con `esbuild` su `GamePlayScene.tsx` e `CanvasScene.tsx`: riuscita.
+- `npm run game:build`: nessun errore di compilazione prima del cutoff dello strumento a 30 secondi; il comando arriva a `rendering chunks...`.
+- Test manuale utente: mobile stabile a 60 FPS per almeno 4 minuti.
+
+### Verifiche ancora da chiudere
+
+- Endurance completa 10 minuti.
+- Prova specifica tutorial training con gesture 3 dita e controlli touch attivi.
+- Prova pausa/resume ripetuta.
+- Misura con DevTools/Profiler di FPS medio, 1% low, p95 frame time, draw call, heap e commit React.
+
 ## Scenari di benchmark
 
 Usare sempre questi scenari:
@@ -163,13 +202,14 @@ Aggiornare ogni elemento UI soltanto quando la sua informazione cambia visibilme
 
 ### Attività
 
-- [ ] Separare rhythm, score, move, coach, cue e diagnostica in componenti memoizzati.
+- [x] Memoizzare overlay touch e pannello training.
+- [ ] Separare ulteriormente rhythm, score, move, coach, cue e diagnostica in componenti memoizzati.
 - [ ] Aggiornare tempo mostrato una volta al secondo.
-- [ ] Quantizzare stamina e progress alle variazioni visivamente utili.
-- [ ] Portare le barre da `width` a `transform: scaleX()`.
+- [x] Quantizzare il progresso visivo del tutorial stick sinistro senza alterare la soglia reale di completamento.
+- [x] Portare le barre principali da `width` a `transform: scaleX()`.
 - [ ] Evitare la ricostruzione completa degli SVG cue a ogni tick.
-- [ ] Indicizzare move e animation catalog con `Map`.
-- [ ] Tenere il debug HUD fuori dall'albero production.
+- [x] Indicizzare move e animation catalog con `Map`.
+- [x] Disattivare la diagnostica gameplay di default.
 - [ ] Verificare annunci ARIA senza aggiornamenti continui inutili.
 
 ### File candidati
@@ -220,11 +260,11 @@ Ridurre rasterizzazione e compositing degli overlay sopra WebGL.
 ### Attività
 
 - [ ] Classificare i 57 `box-shadow` tra menu e gameplay.
-- [ ] Rimuovere `filter: drop-shadow()` dagli elementi animati durante il gioco.
+- [x] Rimuovere `filter: drop-shadow()` dagli elementi animati durante il gioco già toccati dal percorso HUD/tutorial.
 - [ ] Eliminare `backdrop-filter` dagli overlay gameplay.
-- [ ] Sostituire glow animati con outline, border o opacity.
+- [x] Sostituire glow animati del tutorial/touch path con outline, border o opacity.
 - [ ] Limitare le animazioni infinite e rispettare `prefers-reduced-motion`.
-- [ ] Evitare animazioni di `width`, shadow e filter.
+- [x] Evitare animazioni di `width`, shadow e filter sulle barre e sui cue già ottimizzati.
 - [ ] Verificare layer/compositing su viewport mobile.
 
 ### File candidati
@@ -247,11 +287,11 @@ Definire un budget grafico mobile sostenibile prima di aggiungere personaggi e a
 ### Attività
 
 - [ ] Misurare costo separato di luci, ombre, texture e antialiasing.
-- [ ] Provare una sola luce direzionale più hemisphere.
+- [x] Ridurre il set di luci dinamiche nella scena gameplay.
 - [ ] Valutare Lambert o materiali baked per ambiente e props.
-- [ ] Conservare al massimo una shadow-casting light.
-- [ ] Attivare ombre soltanto per oggetti che ne beneficiano.
-- [ ] Definire DPR per tier dispositivo.
+- [x] Conservare al massimo una shadow-casting light nel setup attuale.
+- [x] Ridurre shadow map a 512² nel setup attuale.
+- [x] Definire DPR provvisorio più conservativo: massimo 1,25.
 - [ ] Rimuovere OrbitControls dalla build gameplay se non necessario.
 - [ ] Stabilire budget massimo per draw call, triangoli, materiali e texture.
 
@@ -303,11 +343,12 @@ Rimuovere lavoro piccolo ma frequente dopo le correzioni strutturali.
 
 ### Attività
 
-- [ ] Rimuovere o proteggere i `console.log` di runtime.
+- [x] Rimuovere o proteggere i `console.log` di runtime individuati nel percorso gameplay/HUD.
 - [ ] Eliminare array e oggetti temporanei nei loop RAF/useFrame.
-- [ ] Stabilizzare callback e dipendenze degli effect.
+- [x] Stabilizzare callback WebGL e dipendenze principali già toccate.
 - [ ] Rimuovere sistemi input legacy non utilizzati.
-- [ ] Verificare listener e interval duplicati.
+- [x] Spostare la gesture a 3 dita su listener nativi passivi/capture root-level per coprire anche l'area tutorial senza bloccare il touch.
+- [ ] Verificare listener e interval duplicati con sessione mobile lunga.
 
 ### Definition of done
 
@@ -339,19 +380,20 @@ Tutti i target misurabili sono soddisfatti oppure ogni eccezione è documentata 
 | Data | Commit/worktree | Dispositivo | Scenario | FPS medio | 1% low | p95 frame | Commit React/s | Draw call | Heap | Note |
 |---|---|---|---|---:|---:|---:|---:|---:|---:|---|
 | Da compilare | locale | Da compilare | Baseline | — | — | — | — | — | — | — |
+| 2026-07-09 | locale non pushato | Mobile, device da confermare | Gameplay mobile endurance parziale | 60 | — | — | — | — | — | Prova manuale utente: 60 FPS stabili per circa 4 minuti dopo le ottimizzazioni |
 
 ## Stato avanzamento
 
 | Step | Stato | Risultato |
 |---|---|---|
-| 0 — Baseline | Non iniziato | — |
+| 0 — Baseline | Parzialmente coperto | Manca baseline numerica completa; disponibile osservazione manuale post-fix a 60 FPS per circa 4 minuti |
 | 1 — Simulazione/React | Non iniziato | — |
 | 2 — XState | Non iniziato | — |
 | 3 — Gamepad | Non iniziato | — |
-| 4 — HUD | Parzialmente avviato | Barre migrate da width a transform; lookup catalogo indicizzati |
+| 4 — HUD | Parzialmente completato | Barre migrate da width a transform; lookup catalogo indicizzati; overlay touch e training panel memoizzati; tutorial stick quantizzato lato UI |
 | 5 — Audio | Non iniziato | — |
-| 6 — CSS | Parzialmente avviato | Rimossi filtri e shadow animate dal percorso gameplay |
-| 7 — Rendering 3D | Parzialmente avviato | DPR e shadow map ridotti, canvas memoizzato |
+| 6 — CSS | Parzialmente completato | Rimossi filtri/drop-shadow e shadow animate dal percorso gameplay già coinvolto; glow sostituiti con outline/opacity dove rilevante |
+| 7 — Rendering 3D | Parzialmente completato | DPR massimo ridotto a 1,25, shadow map 512², luci dinamiche ridotte, canvas memoizzato |
 | 8 — Asset GPU | Non iniziato | — |
-| 9 — Percorso caldo | Parzialmente avviato | Rimossi log runtime e stabilizzata callback WebGL |
-| 10 — Verifica finale | Non iniziato | — |
+| 9 — Percorso caldo | Parzialmente completato | Rimossi log runtime, stabilizzata callback WebGL, gesture 3 dita resa root-level/passiva per area tutorial/mobile |
+| 10 — Verifica finale | Parzialmente avviato | Verifica manuale mobile positiva a 60 FPS per circa 4 minuti; build completa ancora da chiudere senza cutoff |
