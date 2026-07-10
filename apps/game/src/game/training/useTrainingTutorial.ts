@@ -152,20 +152,6 @@ export function useTrainingTutorial(
   useEffect(() => {
     if (!leftStickChallenge || state.currentStep !== 'leftStick' || !state.isActive) return;
 
-    if (leftStickChallenge.waitingForBeat) {
-      if (acceptedAtBeatRef.current !== null && rhythm.beatIndex > acceptedAtBeatRef.current) {
-        setLeftStickChallenge((current) => current ? {
-          ...current,
-          target: createRandomTarget(current.target),
-          position: current.position + 1,
-          score: 0,
-          waitingForBeat: false
-        } : current);
-        acceptedAtBeatRef.current = null;
-      }
-      return;
-    }
-
     const score = scoreStickPosition(snapshot.move, leftStickChallenge.target);
     const displayScore = score >= LEFT_STICK_PASS_SCORE
       ? score
@@ -180,9 +166,15 @@ export function useTrainingTutorial(
       return;
     }
 
-    acceptedAtBeatRef.current = rhythm.beatIndex;
-    setLeftStickChallenge((current) => current ? { ...current, score, waitingForBeat: true } : current);
-  }, [advance, leftStickChallenge, rhythm.beatIndex, snapshot.move, state.currentStep, state.isActive]);
+    acceptedAtBeatRef.current = null;
+    setLeftStickChallenge((current) => current ? {
+      ...current,
+      target: createRandomTarget(current.target),
+      position: current.position + 1,
+      score: 0,
+      waitingForBeat: false
+    } : current);
+  }, [advance, leftStickChallenge, rhythm.tick, snapshot.move, state.currentStep, state.isActive]);
 
   useEffect(() => {
     const previous = previousSnapshotRef.current;
