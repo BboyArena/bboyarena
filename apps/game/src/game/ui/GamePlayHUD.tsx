@@ -174,9 +174,15 @@ export default function GamePlayHUD({
     return () => compactViewport.removeEventListener('change', handleChange);
   }, [mode]);
 
-  const learningActive = mode === 'training' && compactTraining && learning;
+  const tutorialActive = tutorialStep !== null && tutorialStep !== 'completed';
+  const tutorialNeedsPracticeControls = tutorialActive && tutorialStep !== 'welcome';
+  const learningActive = mode === 'training' && compactTraining && learning && !tutorialNeedsPracticeControls;
   const bringYourMusicActive = mode === 'training' && trainingAudioMode === 'bring-your-music';
   const tapTempo = useTapTempo(bringYourMusicActive);
+
+  useEffect(() => {
+    if (tutorialNeedsPracticeControls) setLearning(false);
+  }, [tutorialNeedsPracticeControls]);
 
   useEffect(() => {
     const r1Pressed = snapshot.buttons.r1.pressed;
@@ -239,7 +245,7 @@ export default function GamePlayHUD({
         </ol>
       </aside> : null}
 
-      {mode === 'training' ? (
+      {mode === 'training' && !tutorialActive ? (
         <TrainingCoachPanel
           move={documentedMove}
           family={(moveQueue.active?.family ?? (documentedMove?.intentId.split('.')[1] ?? null)) as MoveFamilyId | null}
@@ -394,8 +400,9 @@ export default function GamePlayHUD({
         </aside>
       ) : null}
 
-      {touchControlsVisible && (!learningActive || bringYourMusicActive) ? (
+      {touchControlsVisible && (!learningActive || bringYourMusicActive || tutorialNeedsPracticeControls) ? (
         <TouchControlsOverlay
+          key={tutorialStep ?? 'gameplay'}
           targets={touchStickTargets}
           feedbacks={stickFeedbacks}
           tapTempo={bringYourMusicActive ? tapTempo : undefined}

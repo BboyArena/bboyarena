@@ -153,6 +153,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const [stickFeedbacks, setStickFeedbacks] = useState<TouchStickFeedback[]>([]);
   const [renderingDiagnostics, setRenderingDiagnostics] = useState<RenderingDiagnostics | null>(null);
   const tutorial = useTrainingTutorial(mode === 'training', rhythmSnapshot, snapshot);
+  const previousTutorialActiveRef = useRef(tutorial.state.isActive);
 
   useEffect(() => {
     const gameRoot = document.getElementById('bboyarena-game-root');
@@ -185,6 +186,15 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
       send({ type: 'START' });
     }
   }, [gameState, mode, send]);
+
+  useEffect(() => {
+    const wasTutorialActive = previousTutorialActiveRef.current;
+    previousTutorialActiveRef.current = tutorial.state.isActive;
+    if (!wasTutorialActive || tutorial.state.isActive) return;
+
+    threeFingerGestureActiveRef.current = false;
+    inputController.resetSource('touch');
+  }, [inputController, tutorial.state.isActive]);
 
   useEffect(() => {
     const previousGameState = previousGameStateRef.current;

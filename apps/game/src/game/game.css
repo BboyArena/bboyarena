@@ -3938,3 +3938,69 @@
     margin-top: 0.4rem;
   }
 }
+
+@media (max-width: 640px) and (pointer: coarse), (max-height: 520px) and (pointer: coarse) {
+  .bboy-game-root .game-training-learn {
+    background: #08080a;
+    contain: layout paint style;
+  }
+
+  .bboy-game-root .game-training-learn__card,
+  .bboy-game-root .training-tutorial {
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.42);
+  }
+
+  .bboy-game-root .training-tutorial:is(
+    [data-step="leftStick"],
+    [data-step="rightStick"],
+    [data-step="pressA"],
+    [data-step="pressX"],
+    [data-step="freePractice"]
+  ) {
+    top: calc(0.55rem + env(safe-area-inset-top, 0px));
+    bottom: auto;
+    width: min(24rem, calc(100% - 1rem));
+  }
+
+  .bboy-game-root .training-tutorial {
+    contain: layout paint style;
+  }
+
+  .bboy-game-root .training-tutorial__stick-map i,
+  .bboy-game-root .touch-controls__joystick-target {
+    animation: none;
+  }
+
+  .bboy-game-root .touch-controls__joystick-target {
+    box-shadow: 0 0 0 0.16rem rgba(244, 190, 36, 0.12);
+  }
+
+  .bboy-game-root .touch-controls[data-tutorial-step] :where(
+    .touch-controls__shoulders,
+    .touch-controls__dpad,
+    .touch-controls__system,
+    .touch-controls__face-button,
+    .touch-controls__joystick-group
+  ) {
+    visibility: hidden;
+    opacity: 0;
+    transition: none;
+  }
+
+  .bboy-game-root .touch-controls[data-tutorial-step="leftStick"] [data-tutorial-control="leftStick"],
+  .bboy-game-root .touch-controls[data-tutorial-step="rightStick"] [data-tutorial-control="rightStick"],
+  .bboy-game-root .touch-controls[data-tutorial-step="pressA"] [data-tutorial-control="pressA"],
+  .bboy-game-root .touch-controls[data-tutorial-step="pressX"] [data-tutorial-control="pressX"],
+  .bboy-game-root .touch-controls[data-tutorial-step="freePractice"] > *,
+  .bboy-game-root .touch-controls[data-tutorial-step="freePractice"] :where(
+    .touch-controls__shoulders,
+    .touch-controls__dpad,
+    .touch-controls__system,
+    .touch-controls__face-button,
+    .touch-controls__joystick-group,
+    [data-tutorial-control]
+  ) {
+    visibility: visible;
+    opacity: 1;
+  }
+}

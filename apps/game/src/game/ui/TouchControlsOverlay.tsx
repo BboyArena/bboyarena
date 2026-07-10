@@ -140,6 +140,18 @@ function TouchControlsOverlay({
   const rightStickRef = useRef<HTMLDivElement | null>(null);
   const leftFeedback = feedbacks.find((feedback) => feedback.stick === 'left');
   const rightFeedback = feedbacks.find((feedback) => feedback.stick === 'right');
+  const tutorialFocus = tutorialStep && tutorialStep !== 'completed' ? tutorialStep : null;
+  const showAllControls = tutorialFocus === null || tutorialFocus === 'welcome' || tutorialFocus === 'freePractice';
+  const showLeftStick = showAllControls || tutorialFocus === 'leftStick';
+  const showRightStick = showAllControls || tutorialFocus === 'rightStick';
+  const showFaceButtons = showAllControls || tutorialFocus === 'pressA' || tutorialFocus === 'pressX';
+  const showPressA = showAllControls || tutorialFocus === 'pressA';
+  const showPressB = showAllControls;
+  const showPressX = showAllControls || tutorialFocus === 'pressX';
+  const showPressY = showAllControls;
+  const showDpad = showAllControls;
+  const showShoulders = showAllControls;
+  const showSystem = showAllControls;
 
   useEffect(() => {
     if (feedbacks.length === 0 || typeof navigator.vibrate !== 'function') return;
@@ -167,57 +179,69 @@ function TouchControlsOverlay({
   if (!touchControlsVisible) return null;
 
   return <div key={resetVersion} className="touch-controls" data-input-source={activeInputSource} data-tutorial-step={tutorialStep ?? undefined}>
-    <div className="touch-controls__shoulders touch-controls__shoulders--left">
-      <TouchButton buttonId="l1" className="touch-controls__shoulder" />
-      <TouchButton buttonId="l2" className="touch-controls__shoulder" />
-    </div>
-    <div className="touch-controls__shoulders touch-controls__shoulders--right">
-      <TouchButton buttonId="r2" className="touch-controls__shoulder" />
-      <TouchButton
-        buttonId="r1"
-        className={`touch-controls__shoulder${tapTempo ? ' touch-controls__shoulder--tap-tempo' : ''}`}
-      >
-        {tapTempo ? <>
-          <span>R1 · {tapTempo.isTooFast ? 'TAP AGAIN' : tapTempo.isArmed ? 'TAP 2/2' : 'TAP BPM'}</span>
-          <small>{tapTempo.isTooFast ? 'TOO FAST' : `${tapTempo.bpm} BPM${tapTempo.isArmed ? ' · 1/2' : ''}`}</small>
-        </> : null}
-      </TouchButton>
-    </div>
+    {showShoulders ? (
+      <>
+        <div className="touch-controls__shoulders touch-controls__shoulders--left">
+          <TouchButton buttonId="l1" className="touch-controls__shoulder" />
+          <TouchButton buttonId="l2" className="touch-controls__shoulder" />
+        </div>
+        <div className="touch-controls__shoulders touch-controls__shoulders--right">
+          <TouchButton buttonId="r2" className="touch-controls__shoulder" />
+          <TouchButton
+            buttonId="r1"
+            className={`touch-controls__shoulder${tapTempo ? ' touch-controls__shoulder--tap-tempo' : ''}`}
+          >
+            {tapTempo ? <>
+              <span>R1 · {tapTempo.isTooFast ? 'TAP AGAIN' : tapTempo.isArmed ? 'TAP 2/2' : 'TAP BPM'}</span>
+              <small>{tapTempo.isTooFast ? 'TOO FAST' : `${tapTempo.bpm} BPM${tapTempo.isArmed ? ' · 1/2' : ''}`}</small>
+            </> : null}
+          </TouchButton>
+        </div>
+      </>
+    ) : null}
 
     <div className="touch-controls__side touch-controls__side--left">
-      <DirectionPad />
-      <div className="touch-controls__joystick-group" data-tutorial-control="leftStick">
-        <span className="touch-controls__joystick-label"><b>L · Upper body</b><small>Torso + shoulders</small></span>
-        <div className="touch-controls__joystick-zone" ref={leftStickRef} data-feedback={leftFeedback?.grade} aria-label="Left analog stick: upper body, torso and shoulders">
-          <JoystickTarget target={targets.left} />
-          <span className="touch-controls__joystick-visual" aria-hidden="true" />
-          {leftFeedback ? <span key={leftFeedback.sequence} className="touch-controls__joystick-feedback" role="status">{leftFeedback.grade}</span> : null}
-          <TouchInputAdapter joystickZoneRef={leftStickRef} channel="move" />
+      {showDpad ? <DirectionPad /> : null}
+      {showLeftStick ? (
+        <div className="touch-controls__joystick-group" data-tutorial-control="leftStick">
+          <span className="touch-controls__joystick-label"><b>L · Upper body</b><small>Torso + shoulders</small></span>
+          <div className="touch-controls__joystick-zone" ref={leftStickRef} data-feedback={leftFeedback?.grade} aria-label="Left analog stick: upper body, torso and shoulders">
+            <JoystickTarget target={targets.left} />
+            <span className="touch-controls__joystick-visual" aria-hidden="true" />
+            {leftFeedback ? <span key={leftFeedback.sequence} className="touch-controls__joystick-feedback" role="status">{leftFeedback.grade}</span> : null}
+            <TouchInputAdapter joystickZoneRef={leftStickRef} channel="move" />
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
 
-    <div className="touch-controls__system">
-      <TouchButton buttonId="pause" className="touch-controls__system-button" />
-      <TouchButton buttonId="start" className="touch-controls__system-button" />
-    </div>
+    {showSystem ? (
+      <div className="touch-controls__system">
+        <TouchButton buttonId="pause" className="touch-controls__system-button" />
+        <TouchButton buttonId="start" className="touch-controls__system-button" />
+      </div>
+    ) : null}
 
     <div className="touch-controls__side touch-controls__side--right">
-      <div className="touch-controls__face" aria-label="Move family buttons">
-        <TouchButton buttonId="powermove" className="touch-controls__face-button touch-controls__face-button--y" />
-        <TouchButton buttonId="freeze" className="touch-controls__face-button touch-controls__face-button--x" tutorialControl="pressX" />
-        <TouchButton buttonId="footwork" className="touch-controls__face-button touch-controls__face-button--b" />
-        <TouchButton buttonId="toprock" className="touch-controls__face-button touch-controls__face-button--a" tutorialControl="pressA" />
-      </div>
-      <div className="touch-controls__joystick-group" data-tutorial-control="rightStick">
-        <span className="touch-controls__joystick-label"><b>R · Lower body</b><small>Hips + legs</small></span>
-        <div className="touch-controls__joystick-zone" ref={rightStickRef} data-feedback={rightFeedback?.grade} aria-label="Right analog stick: lower body, hips and legs">
-          <JoystickTarget target={targets.right} />
-          <span className="touch-controls__joystick-visual" aria-hidden="true" />
-          {rightFeedback ? <span key={rightFeedback.sequence} className="touch-controls__joystick-feedback" role="status">{rightFeedback.grade}</span> : null}
-          <TouchInputAdapter joystickZoneRef={rightStickRef} channel="look" />
+      {showFaceButtons ? (
+        <div className="touch-controls__face" aria-label="Move family buttons">
+          {showPressY ? <TouchButton buttonId="powermove" className="touch-controls__face-button touch-controls__face-button--y" /> : null}
+          {showPressX ? <TouchButton buttonId="freeze" className="touch-controls__face-button touch-controls__face-button--x" tutorialControl="pressX" /> : null}
+          {showPressB ? <TouchButton buttonId="footwork" className="touch-controls__face-button touch-controls__face-button--b" /> : null}
+          {showPressA ? <TouchButton buttonId="toprock" className="touch-controls__face-button touch-controls__face-button--a" tutorialControl="pressA" /> : null}
         </div>
-      </div>
+      ) : null}
+      {showRightStick ? (
+        <div className="touch-controls__joystick-group" data-tutorial-control="rightStick">
+          <span className="touch-controls__joystick-label"><b>R · Lower body</b><small>Hips + legs</small></span>
+          <div className="touch-controls__joystick-zone" ref={rightStickRef} data-feedback={rightFeedback?.grade} aria-label="Right analog stick: lower body, hips and legs">
+            <JoystickTarget target={targets.right} />
+            <span className="touch-controls__joystick-visual" aria-hidden="true" />
+            {rightFeedback ? <span key={rightFeedback.sequence} className="touch-controls__joystick-feedback" role="status">{rightFeedback.grade}</span> : null}
+            <TouchInputAdapter joystickZoneRef={rightStickRef} channel="look" />
+          </div>
+        </div>
+      ) : null}
     </div>
   </div>;
 }

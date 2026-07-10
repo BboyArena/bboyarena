@@ -123,6 +123,17 @@ export function useTrainingTutorial(
   }, []);
 
   useEffect(() => {
+    if (enabled) return;
+
+    acceptedAtBeatRef.current = null;
+    setLeftStickChallenge(null);
+    setState((current) => current.isActive
+      ? { isActive: false, isCompleted: current.isCompleted, currentStep: 'completed' }
+      : current
+    );
+  }, [enabled]);
+
+  useEffect(() => {
     if (!state.isActive || state.currentStep !== 'leftStick') {
       setLeftStickChallenge(null);
       acceptedAtBeatRef.current = null;
