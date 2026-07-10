@@ -49,6 +49,7 @@ For development on a device that does not naturally expose touch controls, open 
 An input snapshot contains:
 
 - normalized movement and look vectors;
+- active flags for movement and look channels, so a held neutral stick can differ from released input. Touch sticks use pointer contact; gamepad sticks use per-stick evidence from axis movement, stick-click, or a short return-to-center grace window;
 - canonical button states for move families, shoulders, and system controls;
 - the most recently active input source;
 - a timestamp.

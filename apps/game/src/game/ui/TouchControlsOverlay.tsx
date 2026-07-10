@@ -176,7 +176,6 @@ function TouchControlsOverlay({
       <TouchButton
         buttonId="r1"
         className={`touch-controls__shoulder${tapTempo ? ' touch-controls__shoulder--tap-tempo' : ''}`}
-        onPress={tapTempo?.tap}
       >
         {tapTempo ? <>
           <span>R1 · {tapTempo.isTooFast ? 'TAP AGAIN' : tapTempo.isArmed ? 'TAP 2/2' : 'TAP BPM'}</span>

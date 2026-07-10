@@ -41,10 +41,10 @@ export default function TouchInputAdapter({ joystickZoneRef, channel }: TouchInp
     if (!zone) return undefined;
     let activePointerId: number | null = null;
 
-    const updateController = (x: number, y: number) => {
+    const updateController = (x: number, y: number, active: boolean) => {
       const vector = softenTouchVector(x, y);
-      if (channel === 'move') controller.updateMove('touch', vector);
-      else controller.updateLook('touch', vector);
+      if (channel === 'move') controller.updateMove('touch', vector, active);
+      else controller.updateLook('touch', vector, active);
     };
 
     const render = (x: number, y: number, strength: number) => {
@@ -67,7 +67,7 @@ export default function TouchInputAdapter({ joystickZoneRef, channel }: TouchInp
       zone.style.setProperty('--joystick-color', 'rgb(155, 119, 66)');
       zone.style.setProperty('--joystick-offset-x', '0px');
       zone.style.setProperty('--joystick-offset-y', '0px');
-      updateController(0, 0);
+      updateController(0, 0, false);
     };
 
     const updateFromPointer = (event: PointerEvent) => {
@@ -80,7 +80,7 @@ export default function TouchInputAdapter({ joystickZoneRef, channel }: TouchInp
       const directionX = distance > 0 ? dx / distance : 0;
       const directionY = distance > 0 ? -dy / distance : 0;
       render(directionX, directionY, strength);
-      updateController(directionX * strength, directionY * strength);
+      updateController(directionX * strength, directionY * strength, activePointerId !== null);
     };
 
     const handlePointerDown = (event: PointerEvent) => {

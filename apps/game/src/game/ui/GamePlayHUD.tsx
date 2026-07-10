@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '../state/useGameStore';
 import { useGameInputSnapshot } from '../input/GameInputProvider';
 import { useConnectedGamepads } from '../input/useConnectedGamepads';
@@ -117,6 +117,7 @@ export default function GamePlayHUD({
   const selectedGamepadIndex = useGameStore((state) => state.selectedGamepadIndex);
   const connectedGamepads = useConnectedGamepads();
   const snapshot = useGameInputSnapshot();
+  const previousR1PressedRef = useRef(snapshot.buttons.r1.pressed);
   const pressedIntentButtons = intentButtons.filter(({ id }) => snapshot.buttons[id].pressed);
   const selectedGamepad = connectedGamepads.find((gamepad) => gamepad.index === selectedGamepadIndex)
     ?? (selectedGamepadIndex === null ? connectedGamepads[0] : undefined);
@@ -176,6 +177,15 @@ export default function GamePlayHUD({
   const learningActive = mode === 'training' && compactTraining && learning;
   const bringYourMusicActive = mode === 'training' && trainingAudioMode === 'bring-your-music';
   const tapTempo = useTapTempo(bringYourMusicActive);
+
+  useEffect(() => {
+    const r1Pressed = snapshot.buttons.r1.pressed;
+    if (bringYourMusicActive && r1Pressed && !previousR1PressedRef.current) {
+      tapTempo.tap();
+    }
+    previousR1PressedRef.current = r1Pressed;
+  }, [bringYourMusicActive, snapshot.buttons.r1.pressed, tapTempo]);
+
   const wholePlaySeconds = Math.max(0, Math.floor(playTimeSeconds));
   const playMinutes = Math.floor(wholePlaySeconds / 60);
   const playSeconds = wholePlaySeconds % 60;

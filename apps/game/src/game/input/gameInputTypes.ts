@@ -80,6 +80,10 @@ export type GameInputSnapshot = {
   source: ActiveInputSource;
   move: GameInputVector;
   look: GameInputVector;
+  active: {
+    move: boolean;
+    look: boolean;
+  };
   buttons: Record<GameInputButtonId, GameInputButtonState>;
   lastSystemEvent: GameInputSystemEvent | null;
   updatedAt: number;
@@ -117,6 +121,10 @@ export function createDefaultGameInputSnapshot(
     source,
     move: { x: 0, y: 0 },
     look: { x: 0, y: 0 },
+    active: {
+      move: false,
+      look: false
+    },
     buttons: Object.fromEntries(
       buttonIds.map((button) => [button, { pressed: false, value: 0 }])
     ) as Record<GameInputButtonId, GameInputButtonState>,

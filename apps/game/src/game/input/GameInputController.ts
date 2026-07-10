@@ -27,6 +27,7 @@ function areSnapshotsEqual(a: GameInputSnapshot, b: GameInputSnapshot) {
   if (a.source !== b.source) return false;
   if (!areVectorsEqual(a.move, b.move)) return false;
   if (!areVectorsEqual(a.look, b.look)) return false;
+  if (a.active.move !== b.active.move || a.active.look !== b.active.look) return false;
   if (a.lastSystemEvent?.sequence !== b.lastSystemEvent?.sequence) return false;
 
   return (
@@ -60,28 +61,38 @@ export class GameInputController {
     return this.snapshot;
   }
 
-  updateMove(source: ActiveInputSource, vector: GameInputVector): void {
+  updateMove(source: ActiveInputSource, vector: GameInputVector, active?: boolean): void {
     const normalizedVector = normalizeInputVector(vector);
-    if (!this.activateSource(source, normalizedVector.x !== 0 || normalizedVector.y !== 0)) return;
+    const hasActiveInput = active ?? (normalizedVector.x !== 0 || normalizedVector.y !== 0);
+    if (!this.activateSource(source, hasActiveInput)) return;
 
     const nextSnapshot: GameInputSnapshot = {
       ...this.snapshot,
       source,
       move: normalizedVector,
+      active: {
+        ...this.snapshot.active,
+        move: hasActiveInput
+      },
       updatedAt: this.getTimestamp()
     };
 
     this.commitSnapshot(nextSnapshot);
   }
 
-  updateLook(source: ActiveInputSource, vector: GameInputVector): void {
+  updateLook(source: ActiveInputSource, vector: GameInputVector, active?: boolean): void {
     const normalizedVector = normalizeInputVector(vector);
-    if (!this.activateSource(source, normalizedVector.x !== 0 || normalizedVector.y !== 0)) return;
+    const hasActiveInput = active ?? (normalizedVector.x !== 0 || normalizedVector.y !== 0);
+    if (!this.activateSource(source, hasActiveInput)) return;
 
     this.commitSnapshot({
       ...this.snapshot,
       source,
       look: normalizedVector,
+      active: {
+        ...this.snapshot.active,
+        look: hasActiveInput
+      },
       updatedAt: this.getTimestamp()
     });
   }

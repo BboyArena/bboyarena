@@ -247,9 +247,14 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
         for (const track of definition?.stickCueTracks ?? []) {
           const cue = sampleStickCueStep(track, progress, activeBeforeAdvance.durationBeats, timingWindowBeats);
           if (!cue.active) continue;
-          const input = (track.targetInput ?? 'movement') === 'look'
+          const targetInput = track.targetInput ?? 'movement';
+          const input = targetInput === 'look'
             ? liveInputRef.current.look
             : liveInputRef.current.move;
+          const inputActive = targetInput === 'look'
+            ? liveInputRef.current.active.look
+            : liveInputRef.current.active.move;
+          if (!inputActive) continue;
           const tolerance = cue.tolerance * toleranceMultiplier;
           const distance = Math.hypot(input.x - cue.x, input.y - cue.y);
           if (distance > tolerance) continue;

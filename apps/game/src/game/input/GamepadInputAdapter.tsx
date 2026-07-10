@@ -4,6 +4,9 @@ import { useGameStore } from '../state/useGameStore';
 import { clampInputValue, normalizeInputVector, type GameInputVector } from './gameInputTypes';
 
 const deadzone = 0.15;
+const centerHoldGraceMs = 350;
+const leftStickButtonIndex = 10;
+const rightStickButtonIndex = 11;
 
 function applyDeadzone(value: number) {
   const magnitude = Math.abs(value);
@@ -31,8 +34,13 @@ export default function GamepadInputAdapter() {
     if (typeof window === 'undefined' || typeof navigator === 'undefined') return undefined;
 
     let frame = 0;
+    let lastMoveActivityAt = Number.NEGATIVE_INFINITY;
+    let lastLookActivityAt = Number.NEGATIVE_INFINITY;
 
     const poll = () => {
+      const now = typeof performance !== 'undefined' && typeof performance.now === 'function'
+        ? performance.now()
+        : Date.now();
       const gamepads = typeof navigator.getGamepads === 'function' ? navigator.getGamepads() : [];
       const gamepad = selectedGamepadIndex === null
         ? Array.from(gamepads).find(Boolean)
@@ -48,12 +56,24 @@ export default function GamepadInputAdapter() {
         x: gamepad.axes[0] ?? 0,
         y: -(gamepad.axes[1] ?? 0)
       });
-
-      controller.updateMove('gamepad', move);
-      controller.updateLook('gamepad', normalizeGamepadVector({
+      const look = normalizeGamepadVector({
         x: gamepad.axes[2] ?? 0,
         y: -(gamepad.axes[3] ?? 0)
-      }));
+      });
+      const hasMoveInput = Math.hypot(move.x, move.y) > 0;
+      const hasLookInput = Math.hypot(look.x, look.y) > 0;
+      if (hasMoveInput) lastMoveActivityAt = now;
+      if (hasLookInput) lastLookActivityAt = now;
+
+      const moveActive = hasMoveInput
+        || Boolean(gamepad.buttons[leftStickButtonIndex]?.pressed)
+        || now - lastMoveActivityAt <= centerHoldGraceMs;
+      const lookActive = hasLookInput
+        || Boolean(gamepad.buttons[rightStickButtonIndex]?.pressed)
+        || now - lastLookActivityAt <= centerHoldGraceMs;
+
+      controller.updateMove('gamepad', move, moveActive);
+      controller.updateLook('gamepad', look, lookActive);
 
       Object.entries(gamepadInputMap).forEach(([buttonId, index]) => {
         const buttonState = gamepad.buttons[index];
