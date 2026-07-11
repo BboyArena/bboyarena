@@ -1,6 +1,7 @@
 import {
   createContext,
   useContext,
+  useCallback,
   useEffect,
   useRef,
   useSyncExternalStore,
@@ -71,4 +72,22 @@ export function useRhythmClock(): RhythmClock {
 export function useRhythmClockSnapshot(): RhythmClockSnapshot {
   const clock = useRhythmClock();
   return useSyncExternalStore(clock.subscribe, clock.getSnapshot, clock.getSnapshot);
+}
+
+export function useRhythmClockSnapshotAtFps(fps: number): RhythmClockSnapshot {
+  const clock = useRhythmClock();
+  const minimumFrameMs = 1000 / Math.max(1, fps);
+  const lastNotifiedAtRef = useRef(0);
+
+  const subscribe = useCallback((listener: () => void) => clock.subscribe(() => {
+    const now = typeof performance !== 'undefined' && typeof performance.now === 'function'
+      ? performance.now()
+      : Date.now();
+    if (now - lastNotifiedAtRef.current < minimumFrameMs) return;
+
+    lastNotifiedAtRef.current = now;
+    listener();
+  }), [clock, minimumFrameMs]);
+
+  return useSyncExternalStore(subscribe, clock.getSnapshot, clock.getSnapshot);
 }

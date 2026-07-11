@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMachine } from '@xstate/react';
 import { gameMachine } from './state/gameMachine';
 import { useGameStore, type GamePlayMode } from './state/useGameStore';
@@ -6,7 +6,7 @@ import CanvasScene, { type RenderingDiagnostics } from './CanvasScene';
 import GamePlayHUD from './ui/GamePlayHUD';
 import GameCanvasErrorBoundary from './ui/GameCanvasErrorBoundary';
 import type { GameCopy } from './copy';
-import { GameInputProvider, useGameInputController, useGameInputSnapshot } from './input/GameInputProvider';
+import { GameInputProvider, useGameInputController, useGameInputSnapshot, useGameInputSnapshotAtFps } from './input/GameInputProvider';
 import GamepadInputAdapter from './input/GamepadInputAdapter';
 import KeyboardMouseInputAdapter from './input/KeyboardMouseInputAdapter';
 import { useResolveActiveInputSource } from './input/useResolveActiveInputSource';
@@ -17,7 +17,7 @@ import {
 import { createAnimationCatalogSources } from './animation/animationCatalogLoader';
 import { animationPlaybackMachine } from './animation/animationPlaybackMachine';
 import { PlayerMoveHistory } from './motion/playerMoveHistory';
-import { useRhythmClock, useRhythmClockSnapshot } from './rhythm/RhythmClockProvider';
+import { useRhythmClock, useRhythmClockSnapshotAtFps } from './rhythm/RhythmClockProvider';
 import { moveCatalog } from './move/moveCatalog';
 import { sampleStickCueStep } from './move/stickCueTracks';
 import { getMoveQueueFamilyForButton, MoveQueueController } from './move/MoveQueueController';
@@ -26,12 +26,15 @@ import { scoreToStaminaReward } from './move/moveScoring';
 import type { TouchStickFeedback } from './ui/TouchControlsOverlay';
 import { useTrainingTutorial } from './training/useTrainingTutorial';
 import TrainingTutorialOverlay from './ui/TrainingTutorialOverlay';
+import TrainingContextMenuOverlay from './ui/TrainingContextMenuOverlay';
 
 const MAXIMUM_STAMINA = 100;
 const MINIMUM_TRAINING_STAMINA = 5;
 const MOVE_STAMINA_COST = 3;
 const GOOD_STEP_POINTS = 50;
 const PERFECT_STEP_POINTS = 100;
+const UI_RHYTHM_SAMPLE_RATE = 20;
+const UI_INPUT_SAMPLE_RATE = 30;
 const movesByIntentId = new Map(moveCatalog.moves.map((move) => [move.intentId, move]));
 
 function resolveToleranceMultiplier(mode: 'assisted' | 'adaptive' | 'expert', skillRating: number) {
@@ -60,7 +63,19 @@ interface GamePlaySceneProps {
   copy: GameCopy;
 }
 
-function GameInputSceneBindings({ gameState, send }: { gameState: string; send: (event: { type: string }) => void }) {
+function GameInputSceneBindings({
+  gameState,
+  mode,
+  onOptions,
+  onExit,
+  send
+}: {
+  gameState: string;
+  mode: GamePlayMode;
+  onOptions: () => void;
+  onExit: () => void;
+  send: (event: { type: string }) => void;
+}) {
   const resolvedInputSource = useResolveActiveInputSource();
   const preferredInputMode = useGameStore((store) => store.preferredInputMode);
   const setActiveInputSource = useGameStore((store) => store.setActiveInputSource);
@@ -76,8 +91,20 @@ function GameInputSceneBindings({ gameState, send }: { gameState: string; send: 
     const startPressed = snapshot.buttons.start.pressed;
     const pausePressed = snapshot.buttons.pause.pressed;
 
+    if (startPressed && !previousSnapshot.buttons.start.pressed && mode === 'training') {
+      onOptions();
+      previousSnapshotRef.current = snapshot;
+      return;
+    }
+
     if (startPressed && !previousSnapshot.buttons.start.pressed && (gameState === 'idle' || gameState === 'gameOver')) {
       send({ type: 'START' });
+    }
+
+    if (pausePressed && !previousSnapshot.buttons.pause.pressed && mode === 'training') {
+      onExit();
+      previousSnapshotRef.current = snapshot;
+      return;
     }
 
     if (pausePressed && !previousSnapshot.buttons.pause.pressed && gameState === 'playing') {
@@ -89,7 +116,7 @@ function GameInputSceneBindings({ gameState, send }: { gameState: string; send: 
     }
 
     previousSnapshotRef.current = snapshot;
-  }, [gameState, send, snapshot]);
+  }, [gameState, mode, onExit, onOptions, send, snapshot]);
 
   return (
     <>
@@ -102,11 +129,11 @@ function GameInputSceneBindings({ gameState, send }: { gameState: string; send: 
 function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const [state, send] = useMachine(gameMachine);
   const openMainMenu = useGameStore((store) => store.openMainMenu);
-  const snapshot = useGameInputSnapshot();
   const inputController = useGameInputController();
+  const snapshot = useGameInputSnapshotAtFps(UI_INPUT_SAMPLE_RATE);
   const threeFingerGestureActiveRef = useRef(false);
   const rhythmClock = useRhythmClock();
-  const rhythmSnapshot = useRhythmClockSnapshot();
+  const rhythmSnapshot = useRhythmClockSnapshotAtFps(UI_RHYTHM_SAMPLE_RATE);
   const difficultyMode = useGameStore((store) => store.difficultyMode);
   const adaptiveSkillRating = useGameStore((store) => store.adaptiveSkillRating);
   const cameraFeel = useGameStore((store) => store.cameraFeel);
@@ -152,8 +179,23 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
   const stickFeedbackSequenceRef = useRef(0);
   const [stickFeedbacks, setStickFeedbacks] = useState<TouchStickFeedback[]>([]);
   const [renderingDiagnostics, setRenderingDiagnostics] = useState<RenderingDiagnostics | null>(null);
+  const [contextMenuOpen, setContextMenuOpen] = useState(false);
+  const previousQuickMenuSequenceRef = useRef(snapshot.lastSystemEvent?.sequence ?? 0);
   const tutorial = useTrainingTutorial(mode === 'training', rhythmSnapshot, snapshot);
   const previousTutorialActiveRef = useRef(tutorial.state.isActive);
+  const toggleContextMenu = useCallback(() => {
+    setContextMenuOpen((isOpen) => !isOpen);
+  }, []);
+  const closeContextMenu = useCallback(() => {
+    setContextMenuOpen(false);
+  }, []);
+  const startTutorialFromContextMenu = useCallback(() => {
+    tutorial.start();
+    setContextMenuOpen(false);
+  }, [tutorial.start]);
+  const toggleDiagnostics = useCallback(() => {
+    setDiagnosticsVisible((visible) => !visible);
+  }, []);
 
   useEffect(() => {
     const gameRoot = document.getElementById('bboyarena-game-root');
@@ -186,6 +228,19 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
       send({ type: 'START' });
     }
   }, [gameState, mode, send]);
+
+  useEffect(() => {
+    const lastSystemEvent = snapshot.lastSystemEvent;
+    if (
+      mode === 'training'
+      && lastSystemEvent?.action === 'system.quickMenu'
+      && lastSystemEvent.sequence !== previousQuickMenuSequenceRef.current
+    ) {
+      setContextMenuOpen((isOpen) => !isOpen);
+    }
+
+    previousQuickMenuSequenceRef.current = lastSystemEvent?.sequence ?? previousQuickMenuSequenceRef.current;
+  }, [mode, snapshot.lastSystemEvent]);
 
   useEffect(() => {
     const wasTutorialActive = previousTutorialActiveRef.current;
@@ -243,6 +298,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
     lastPlayTimeTickRef.current = rhythmSnapshot.tick;
 
     if (gameState === 'playing') {
+      liveInputRef.current = inputController.getSnapshot();
       motionSend({ type: 'TICK', tick: rhythmSnapshot.tick });
       const activeBeforeAdvance = moveQueueRef.current.getSnapshot().active;
       if (mode === 'training' && activeBeforeAdvance) {
@@ -370,7 +426,7 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
         setMoveQueue(moveQueueRef.current.getSnapshot());
       }
     }
-  }, [animationSend, difficultyMode, gameState, mode, motionSend, recordAdaptivePerformance, rhythmSnapshot.beat, rhythmSnapshot.tick, timingWindowBeats, toleranceMultiplier]);
+  }, [animationSend, difficultyMode, gameState, inputController, mode, motionSend, recordAdaptivePerformance, rhythmSnapshot.beat, rhythmSnapshot.tick, timingWindowBeats, toleranceMultiplier]);
 
   useEffect(() => {
     const previousSnapshot = previousMotionInputRef.current;
@@ -483,32 +539,13 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
 
   return (
     <>
-      <GameInputSceneBindings gameState={gameState} send={send} />
-      <div className="game-play-status-controls">
-        <button
-          type="button"
-          className="game-status-pill game-status-pill--interactive"
-          onClick={openMainMenu}
-          aria-label={copy.backToMenu}
-        >
-          {copy.playStatus} / {mode} / {gameState}
-        </button>
-        {import.meta.env.DEV && mode === 'training' ? (
-          <button
-            type="button"
-            className="game-training-input-hud__toggle"
-            aria-pressed={diagnosticsVisible}
-            onClick={() => setDiagnosticsVisible((visible) => !visible)}
-          >
-            Debug HUD {diagnosticsVisible ? 'On' : 'Off'}
-          </button>
-        ) : null}
-        {mode === 'training' ? (
-          <button type="button" className="game-training-input-hud__toggle" onClick={tutorial.start}>
-            {copy.tutorialButton}
-          </button>
-        ) : null}
-      </div>
+      <GameInputSceneBindings
+        gameState={gameState}
+        mode={mode}
+        onExit={openMainMenu}
+        onOptions={toggleContextMenu}
+        send={send}
+      />
       <GameCanvasErrorBoundary>
         <CanvasScene
           gameState={gameState}
@@ -519,31 +556,43 @@ function GamePlaySceneContent({ mode, copy }: GamePlaySceneProps) {
           onPerformanceUpdate={diagnosticsVisible ? setRenderingDiagnostics : undefined}
         />
       </GameCanvasErrorBoundary>
-      <GamePlayHUD
-        mode={mode}
-        gameState={gameState}
-        send={send}
-        onExit={openMainMenu}
-        copy={copy}
-        motionState={motionSnapshot}
-        animationStateLabel={animationStateLabel}
-        animationContext={animationActorState.context}
-        moveHistory={moveHistory}
-        rhythmState={rhythmSnapshot}
-        diagnosticsVisible={diagnosticsVisible}
-        renderingDiagnostics={renderingDiagnostics}
-        stickCueDiagnostics={stickCueDiagnostics}
-        moveQueue={moveQueue}
-        stamina={stamina}
-        moveScore={moveScore}
-        loopPoints={loopPoints}
-        totalPoints={totalPoints}
-        playTimeSeconds={playTimeSeconds}
-        staminaRewardFeedback={staminaRewardFeedback}
-        stickFeedbacks={stickFeedbacks}
-        tutorialStep={tutorial.state.isActive ? tutorial.state.currentStep : null}
-        leftStickTutorial={tutorial.leftStickChallenge}
-      />
+      {!contextMenuOpen ? (
+        <GamePlayHUD
+          mode={mode}
+          gameState={gameState}
+          copy={copy}
+          motionState={motionSnapshot}
+          animationStateLabel={animationStateLabel}
+          animationContext={animationActorState.context}
+          moveHistory={moveHistory}
+          rhythmState={rhythmSnapshot}
+          diagnosticsVisible={diagnosticsVisible}
+          renderingDiagnostics={renderingDiagnostics}
+          snapshot={snapshot}
+          stickCueDiagnostics={stickCueDiagnostics}
+          moveQueue={moveQueue}
+          stamina={stamina}
+          moveScore={moveScore}
+          loopPoints={loopPoints}
+          totalPoints={totalPoints}
+          playTimeSeconds={playTimeSeconds}
+          staminaRewardFeedback={staminaRewardFeedback}
+          stickFeedbacks={stickFeedbacks}
+          tutorialStep={tutorial.state.isActive ? tutorial.state.currentStep : null}
+          leftStickTutorial={tutorial.leftStickChallenge}
+        />
+      ) : null}
+      {mode === 'training' && contextMenuOpen ? (
+        <TrainingContextMenuOverlay
+          copy={copy}
+          diagnosticsVisible={diagnosticsVisible}
+          isOpen
+          showDiagnosticsAction={import.meta.env.DEV}
+          onClose={closeContextMenu}
+          onStartTutorial={startTutorialFromContextMenu}
+          onToggleDiagnostics={toggleDiagnostics}
+        />
+      ) : null}
       {mode === 'training' ? (
         <TrainingTutorialOverlay
           tutorial={tutorial.state}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useGameStore, type GameMenuScreen } from './state/useGameStore';
+import { useGameStore } from './state/useGameStore';
 import GameFullscreenToggle from './ui/GameFullscreenToggle';
 import GameFullscreenReticle from './ui/GameFullscreenReticle';
 import GameHUD from './ui/GameHUD';
@@ -23,16 +23,7 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
   const screen = useGameStore((state) => state.screen);
   const selectedMode = useGameStore((state) => state.selectedMode);
   const trainingAudioMode = useGameStore((state) => state.trainingAudioMode);
-  const setScreen = useGameStore((state) => state.setScreen);
-  const isDev = import.meta.env.DEV;
   const isPlayableScreen = screen === 'career' || screen === 'training';
-
-  const cycleScreen = () => {
-    const menuScreens: GameMenuScreen[] = ['splashscreen', 'mainMenu', 'settings', 'credits'];
-    const currentIndex = menuScreens.indexOf(screen as GameMenuScreen);
-    const nextScreen = menuScreens[(currentIndex + 1) % menuScreens.length];
-    setScreen(nextScreen);
-  };
 
   useEffect(() => {
     const root = rootRef.current;
@@ -79,19 +70,7 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
                 <GamePlayScene mode={selectedMode} copy={copy} />
               </>
             ) : (
-              <>
-                {isDev ? (
-                  <button
-                    type="button"
-                    className="game-status-pill game-status-pill--interactive"
-                    onClick={cycleScreen}
-                    aria-label={copy.sceneSelector}
-                  >
-                    {copy.sceneSelector} / {screen}
-                  </button>
-                ) : null}
-                <GameHUD copy={copy} />
-              </>
+              <GameHUD copy={copy} />
             )}
             <GameFullscreenToggle targetRef={rootRef} />
             <GameFullscreenReticle targetRef={rootRef} />

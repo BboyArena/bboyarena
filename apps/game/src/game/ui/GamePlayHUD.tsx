@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '../state/useGameStore';
-import { useGameInputSnapshot } from '../input/GameInputProvider';
 import { useConnectedGamepads } from '../input/useConnectedGamepads';
-import type { GameInputButtonId } from '../input/gameInputTypes';
+import type { GameInputButtonId, GameInputSnapshot } from '../input/gameInputTypes';
 import type { GamePlayMode } from '../state/useGameStore';
 import TouchControlsOverlay, { type TouchStickFeedback, type TouchStickTarget } from './TouchControlsOverlay';
 import type { GameCopy } from '../copy';
@@ -40,8 +39,6 @@ const stickGrammar = {
 interface GamePlayHudProps {
   mode: GamePlayMode;
   gameState: string;
-  send: (event: { type: string }) => void;
-  onExit: () => void;
   copy: GameCopy;
   motionState: PlayerMotionSnapshot;
   animationStateLabel: string;
@@ -50,6 +47,7 @@ interface GamePlayHudProps {
   rhythmState: RhythmClockSnapshot;
   diagnosticsVisible: boolean;
   renderingDiagnostics: RenderingDiagnostics | null;
+  snapshot: GameInputSnapshot;
   stickCueDiagnostics: StickCueDiagnostic[];
   moveQueue: MoveQueueSnapshot;
   stamina: number;
@@ -80,6 +78,157 @@ const getMoveFamilyLabel = (intentId: PlayerMotionSnapshot['activeIntentId']) =>
   return 'Ready';
 };
 
+type TrainingDiagnosticsHudProps = {
+  activeInputSource: ReturnType<typeof useGameStore.getState>['activeInputSource'];
+  animationContext: AnimationPlaybackMachineContext;
+  animationStateLabel: string;
+  gameState: string;
+  moveHistory: PlayerMoveHistoryEntry[];
+  moveQueue: MoveQueueSnapshot;
+  motionState: PlayerMotionSnapshot;
+  pressedIntentButtons: Array<{ id: GameInputButtonId; label: string }>;
+  renderingDiagnostics: RenderingDiagnostics | null;
+  rhythmState: RhythmClockSnapshot;
+  selectedGamepad?: ReturnType<typeof useConnectedGamepads>[number];
+  snapshot: GameInputSnapshot;
+  stickCueDiagnostics: StickCueDiagnostic[];
+  trainingAudioMode: ReturnType<typeof useGameStore.getState>['trainingAudioMode'];
+};
+
+function TrainingDiagnosticsHud({
+  activeInputSource,
+  animationContext,
+  animationStateLabel,
+  gameState,
+  moveHistory,
+  moveQueue,
+  motionState,
+  pressedIntentButtons,
+  renderingDiagnostics,
+  rhythmState,
+  selectedGamepad,
+  snapshot,
+  stickCueDiagnostics,
+  trainingAudioMode
+}: TrainingDiagnosticsHudProps) {
+  return (
+    <aside className="game-training-input-hud" aria-label="Live input and motion monitor">
+      <div className="game-training-input-hud__header">
+        <div>
+          <span>Live input</span>
+          <strong>{activeInputSource === 'keyboardMouse' ? 'Keyboard + Mouse' : activeInputSource}</strong>
+        </div>
+        <i data-connected={activeInputSource !== 'gamepad' || Boolean(selectedGamepad)} />
+      </div>
+
+      {activeInputSource === 'gamepad' ? (
+        <p className="game-training-input-hud__device">
+          {selectedGamepad?.id ?? 'Waiting for selected controller'}
+        </p>
+      ) : null}
+
+      <div className="game-training-input-hud__buttons">
+        {pressedIntentButtons.length === 0 ? (
+          <span className="game-training-input-hud__empty">No move input</span>
+        ) : pressedIntentButtons.map((button) => (
+          <div key={button.id} data-pressed="true">
+            <span>{button.label}</span>
+            <b>ON</b>
+          </div>
+        ))}
+      </div>
+
+      <section aria-label="Motion diagnostics">
+        <strong>Motion diagnostics</strong>
+        <div>FPS: <output>{renderingDiagnostics?.fps.toFixed(1) ?? 'measuring'}</output></div>
+        <div>Frame time: <output>{renderingDiagnostics ? `${renderingDiagnostics.frameTimeMs.toFixed(1)} ms` : 'measuring'}</output></div>
+        <div>Draw calls: <output>{renderingDiagnostics?.drawCalls ?? 'measuring'}</output></div>
+        <div>Triangles: <output>{renderingDiagnostics?.triangles.toLocaleString() ?? 'measuring'}</output></div>
+        <div>GPU resources: <output>{renderingDiagnostics ? `${renderingDiagnostics.geometries} geo / ${renderingDiagnostics.textures} tex` : 'measuring'}</output></div>
+        <div>Game: <output>{gameState}</output></div>
+        <div>Accepting intents: <output>{gameState === 'playing' ? 'yes' : 'no'}</output></div>
+        <div>BPM: <output>{rhythmState.bpm.toFixed(2)}</output></div>
+        <div>Tempo source: <output>{trainingAudioMode}</output></div>
+        {trainingAudioMode === 'bring-your-music' ? <div>Tempo authority: <output>touch tap</output></div> : null}
+        <div>Global tick: <output>{rhythmState.tick}</output></div>
+        <div>Beat: <output>{rhythmState.beat.toFixed(3)}</output></div>
+        <div>Beat phase: <output>{rhythmState.beatPhase.toFixed(3)}</output></div>
+        <div>Subdivision: <output>{rhythmState.subdivision + 1}/{rhythmState.subdivisionsPerBeat}</output></div>
+        <div>Motion: <output>{motionState.phase}</output></div>
+        <div>Intent: <output>{motionState.activeIntentId ?? 'none'}</output></div>
+        <div>Queue: <output>{moveQueue.queued.length} move(s)</output></div>
+        <div>Tick: <output>{motionState.tick}</output></div>
+        <div>Animation state: <output>{animationStateLabel}</output></div>
+        <div>Animation: <output>{animationContext.current?.definition.id ?? 'none'}</output></div>
+        <div>Catalog: <output>{animationContext.sourceId ?? 'loading'}</output></div>
+        <div>Fallback: <output>{animationContext.usedFallback ? 'yes' : 'no'}</output></div>
+        <div>Outcome: <output>{animationContext.lastEvent?.type ?? 'none'}</output></div>
+        <div>
+          Special event:{' '}
+          <output>
+            {snapshot.lastSystemEvent?.action === 'system.quickMenu'
+              ? `Quick Menu #${snapshot.lastSystemEvent.sequence}`
+              : 'none'}
+          </output>
+        </div>
+      </section>
+
+      <section aria-label="Stick cue diagnostics">
+        <strong>Stick cue targets (diagnostic only)</strong>
+        {stickCueDiagnostics.length === 0 ? (
+          <div>No cue tracks for the active move.</div>
+        ) : stickCueDiagnostics.map((cue) => (
+          <div key={cue.id}>
+            {cue.label} [{cue.controllerRole}]:{' '}
+            <output>
+              ({cue.sample.x.toFixed(2)}, {cue.sample.y.toFixed(2)}) +/-{cue.sample.tolerance.toFixed(2)}
+              {' - '}{(cue.progress * 100).toFixed(0)}%
+              {' - step #'}{cue.sample.pointIndex + 1}
+              {' - '}{cue.sample.active ? 'ACTIVE' : `in ${Math.max(0, cue.sample.beatsUntilStep).toFixed(2)} beats`}
+            </output>
+          </div>
+        ))}
+      </section>
+
+      <section aria-label="Accepted move history">
+        <strong>Accepted move history</strong>
+        {moveHistory.length === 0 ? (
+          <div>No accepted synthetic moves yet.</div>
+        ) : (
+          <ol>
+            {moveHistory.slice(-8).reverse().map((entry) => (
+              <li key={entry.id}>
+                <b>#{entry.sequence} {PLAYER_MOTION_INTENT_LABELS[entry.intentId]}</b>
+                {' - '}{entry.outcome}
+                {' - '}{entry.animationId ?? 'animation pending'}
+                {' - ticks '}{entry.startedAtTick}-{entry.endedAtTick ?? 'active'}
+                {' - score '}{entry.scoring.status === 'evaluated' ? `${entry.scoring.score}%` : entry.scoring.status}
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
+    </aside>
+  );
+}
+
+const MemoizedTrainingDiagnosticsHud = memo(TrainingDiagnosticsHud, (previous, next) => (
+  previous.activeInputSource === next.activeInputSource
+  && previous.animationContext === next.animationContext
+  && previous.animationStateLabel === next.animationStateLabel
+  && previous.gameState === next.gameState
+  && previous.moveHistory === next.moveHistory
+  && previous.moveQueue === next.moveQueue
+  && previous.motionState.phase === next.motionState.phase
+  && previous.motionState.activeIntentId === next.motionState.activeIntentId
+  && previous.pressedIntentButtons.length === next.pressedIntentButtons.length
+  && previous.renderingDiagnostics === next.renderingDiagnostics
+  && previous.selectedGamepad?.id === next.selectedGamepad?.id
+  && previous.snapshot.lastSystemEvent?.sequence === next.snapshot.lastSystemEvent?.sequence
+  && previous.stickCueDiagnostics === next.stickCueDiagnostics
+  && previous.trainingAudioMode === next.trainingAudioMode
+));
+
 export default function GamePlayHUD({
   mode,
   gameState,
@@ -91,6 +240,7 @@ export default function GamePlayHUD({
   rhythmState,
   diagnosticsVisible,
   renderingDiagnostics,
+  snapshot,
   stickCueDiagnostics,
   moveQueue,
   stamina,
@@ -116,7 +266,6 @@ export default function GamePlayHUD({
   const activeInputSource = useGameStore((state) => state.activeInputSource);
   const selectedGamepadIndex = useGameStore((state) => state.selectedGamepadIndex);
   const connectedGamepads = useConnectedGamepads();
-  const snapshot = useGameInputSnapshot();
   const previousR1PressedRef = useRef(snapshot.buttons.r1.pressed);
   const pressedIntentButtons = intentButtons.filter(({ id }) => snapshot.buttons[id].pressed);
   const selectedGamepad = connectedGamepads.find((gamepad) => gamepad.index === selectedGamepadIndex)
@@ -301,103 +450,22 @@ export default function GamePlayHUD({
       ) : null}
 
       {mode === 'training' && diagnosticsVisible && !learningActive ? (
-        <aside className="game-training-input-hud" aria-label="Live input and motion monitor">
-          <div className="game-training-input-hud__header">
-            <div>
-              <span>Live input</span>
-              <strong>{activeInputSource === 'keyboardMouse' ? 'Keyboard + Mouse' : activeInputSource}</strong>
-            </div>
-            <i data-connected={activeInputSource !== 'gamepad' || Boolean(selectedGamepad)} />
-          </div>
-
-          {activeInputSource === 'gamepad' ? (
-            <p className="game-training-input-hud__device">
-              {selectedGamepad?.id ?? 'Waiting for selected controller'}
-            </p>
-          ) : null}
-
-          <div className="game-training-input-hud__buttons">
-            {pressedIntentButtons.length === 0 ? (
-              <span className="game-training-input-hud__empty">No move input</span>
-            ) : pressedIntentButtons.map((button) => (
-              <div key={button.id} data-pressed="true">
-                <span>{button.label}</span>
-                <b>ON</b>
-              </div>
-            ))}
-          </div>
-
-          <section aria-label="Motion diagnostics">
-            <strong>Motion diagnostics</strong>
-            <div>FPS: <output>{renderingDiagnostics?.fps.toFixed(1) ?? 'measuring'}</output></div>
-            <div>Frame time: <output>{renderingDiagnostics ? `${renderingDiagnostics.frameTimeMs.toFixed(1)} ms` : 'measuring'}</output></div>
-            <div>Draw calls: <output>{renderingDiagnostics?.drawCalls ?? 'measuring'}</output></div>
-            <div>Triangles: <output>{renderingDiagnostics?.triangles.toLocaleString() ?? 'measuring'}</output></div>
-            <div>GPU resources: <output>{renderingDiagnostics ? `${renderingDiagnostics.geometries} geo / ${renderingDiagnostics.textures} tex` : 'measuring'}</output></div>
-            <div>Game: <output>{gameState}</output></div>
-            <div>Accepting intents: <output>{gameState === 'playing' ? 'yes' : 'no'}</output></div>
-            <div>BPM: <output>{rhythmState.bpm.toFixed(2)}</output></div>
-            <div>Tempo source: <output>{trainingAudioMode}</output></div>
-            {trainingAudioMode === 'bring-your-music' ? <div>Tempo authority: <output>touch tap</output></div> : null}
-            <div>Global tick: <output>{rhythmState.tick}</output></div>
-            <div>Beat: <output>{rhythmState.beat.toFixed(3)}</output></div>
-            <div>Beat phase: <output>{rhythmState.beatPhase.toFixed(3)}</output></div>
-            <div>Subdivision: <output>{rhythmState.subdivision + 1}/{rhythmState.subdivisionsPerBeat}</output></div>
-            <div>Motion: <output>{motionState.phase}</output></div>
-            <div>Intent: <output>{motionState.activeIntentId ?? 'none'}</output></div>
-            <div>Queue: <output>{moveQueue.queued.length} move(s)</output></div>
-            <div>Tick: <output>{motionState.tick}</output></div>
-            <div>Animation state: <output>{animationStateLabel}</output></div>
-            <div>Animation: <output>{animationContext.current?.definition.id ?? 'none'}</output></div>
-            <div>Catalog: <output>{animationContext.sourceId ?? 'loading'}</output></div>
-            <div>Fallback: <output>{animationContext.usedFallback ? 'yes' : 'no'}</output></div>
-            <div>Outcome: <output>{animationContext.lastEvent?.type ?? 'none'}</output></div>
-            <div>
-              Special event:{' '}
-              <output>
-                {snapshot.lastSystemEvent?.action === 'system.quickMenu'
-                  ? `Quick Menu #${snapshot.lastSystemEvent.sequence}`
-                  : 'none'}
-              </output>
-            </div>
-          </section>
-
-          <section aria-label="Stick cue diagnostics">
-            <strong>Stick cue targets (diagnostic only)</strong>
-            {stickCueDiagnostics.length === 0 ? (
-              <div>No cue tracks for the active move.</div>
-            ) : stickCueDiagnostics.map((cue) => (
-              <div key={cue.id}>
-                {cue.label} [{cue.controllerRole}]:{' '}
-                <output>
-                  ({cue.sample.x.toFixed(2)}, {cue.sample.y.toFixed(2)}) ±{cue.sample.tolerance.toFixed(2)}
-                  {' — '}{(cue.progress * 100).toFixed(0)}%
-                  {' — step #'}{cue.sample.pointIndex + 1}
-                  {' — '}{cue.sample.active ? 'ACTIVE' : `in ${Math.max(0, cue.sample.beatsUntilStep).toFixed(2)} beats`}
-                </output>
-              </div>
-            ))}
-          </section>
-
-          <section aria-label="Accepted move history">
-            <strong>Accepted move history</strong>
-            {moveHistory.length === 0 ? (
-              <div>No accepted synthetic moves yet.</div>
-            ) : (
-              <ol>
-                {moveHistory.slice(-8).reverse().map((entry) => (
-                  <li key={entry.id}>
-                    <b>#{entry.sequence} {PLAYER_MOTION_INTENT_LABELS[entry.intentId]}</b>
-                    {' — '}{entry.outcome}
-                    {' — '}{entry.animationId ?? 'animation pending'}
-                    {' — ticks '}{entry.startedAtTick}–{entry.endedAtTick ?? 'active'}
-                    {' — score '}{entry.scoring.status === 'evaluated' ? `${entry.scoring.score}%` : entry.scoring.status}
-                  </li>
-                ))}
-              </ol>
-            )}
-          </section>
-        </aside>
+        <MemoizedTrainingDiagnosticsHud
+          activeInputSource={activeInputSource}
+          animationContext={animationContext}
+          animationStateLabel={animationStateLabel}
+          gameState={gameState}
+          motionState={motionState}
+          moveHistory={moveHistory}
+          moveQueue={moveQueue}
+          pressedIntentButtons={pressedIntentButtons}
+          renderingDiagnostics={renderingDiagnostics}
+          rhythmState={rhythmState}
+          selectedGamepad={selectedGamepad}
+          snapshot={snapshot}
+          stickCueDiagnostics={stickCueDiagnostics}
+          trainingAudioMode={trainingAudioMode}
+        />
       ) : null}
 
       {touchControlsVisible && (!learningActive || bringYourMusicActive || tutorialNeedsPracticeControls) ? (

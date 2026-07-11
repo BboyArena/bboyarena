@@ -2483,46 +2483,6 @@
 .bboy-game-root .touch-controls__joystick-label b { font-size: 0.58rem; letter-spacing: 0.1em; }
 .bboy-game-root .touch-controls__joystick-label small { font-size: 0.42rem; letter-spacing: 0.06em; }
 
-.bboy-game-root .game-play-status-controls {
-  position: absolute;
-  z-index: 30;
-  top: 0.75rem;
-  left: 0.75rem;
-  display: flex;
-  align-items: stretch;
-  gap: 0.45rem;
-  max-width: calc(100% - 1.5rem);
-  pointer-events: auto;
-  isolation: isolate;
-}
-
-.bboy-game-root .game-play-status-controls .game-status-pill {
-  position: static;
-}
-
-.bboy-game-root .game-training-input-hud__toggle {
-  position: static;
-  min-height: 2rem;
-  padding: 0.35rem 0.6rem;
-  border: 1px solid rgba(255, 217, 92, 0.42);
-  border-radius: 0.45rem;
-  background: rgba(8, 8, 10, 0.86);
-  color: #fff2cf;
-  font-size: 0.58rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  pointer-events: auto;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  flex: 0 0 auto;
-}
-
-.bboy-game-root .game-training-input-hud__toggle[aria-pressed="true"] {
-  border-color: var(--game-gold-hot);
-  color: var(--game-gold-hot);
-}
-
 @media (max-width: 640px), (max-height: 520px) {
   .bboy-game-root .game-training-coach {
     top: calc(0.45rem + env(safe-area-inset-top, 0px));
@@ -2589,27 +2549,6 @@
     width: min(13rem, calc(100% - 1rem));
     gap: 0.45rem;
     padding: 0.55rem;
-  }
-
-  .bboy-game-root .game-play-status-controls {
-    top: 0.45rem;
-    left: 0.45rem;
-    gap: 0.3rem;
-  }
-
-  .bboy-game-root .game-play-status-controls .game-status-pill {
-    min-width: 0;
-    padding: 0.35rem 0.5rem;
-    font-size: 0.48rem;
-    letter-spacing: 0.08em;
-    white-space: nowrap;
-  }
-
-  .bboy-game-root .game-training-input-hud__toggle {
-    min-height: 2.75rem;
-    padding: 0.35rem 0.5rem;
-    font-size: 0.5rem;
-    letter-spacing: 0.04em;
   }
 
   .bboy-game-root .game-training-input-hud__device {
@@ -3721,11 +3660,6 @@
     font-size: 0.52rem;
   }
 
-  .bboy-game-root .game-play-status-controls {
-    top: calc(0.35rem + env(safe-area-inset-top, 0px));
-    left: calc(0.35rem + env(safe-area-inset-left, 0px));
-  }
-
   .bboy-game-root .game-active-move-hud {
     top: calc(0.35rem + env(safe-area-inset-top, 0px));
     width: min(13rem, 34vw);
@@ -3791,6 +3725,70 @@
   background: rgba(8, 8, 9, 0.94);
   box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.55), 0 12px 35px rgba(0, 0, 0, 0.48);
   text-align: center;
+}
+
+.bboy-game-root .training-context-menu {
+  position: absolute;
+  z-index: 42;
+  top: calc(1rem + env(safe-area-inset-top, 0px));
+  left: 50%;
+  width: min(18rem, calc(100% - 2rem));
+  transform: translateX(-50%);
+  padding: clamp(0.75rem, 1.8vw, 1rem);
+  border: 2px solid var(--game-gold);
+  background: rgba(8, 8, 9, 0.95);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.42);
+  text-align: center;
+  pointer-events: auto;
+  contain: layout paint style;
+}
+
+.bboy-game-root .training-context-menu__eyebrow {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: var(--game-gold);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.bboy-game-root .training-context-menu > strong {
+  display: block;
+  font-size: clamp(0.95rem, 2.2vw, 1.25rem);
+}
+
+.bboy-game-root .training-context-menu__actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+}
+
+.bboy-game-root .training-context-menu button {
+  min-height: 2.45rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--game-gold);
+  background: var(--game-gold);
+  color: #090909;
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bboy-game-root .training-context-menu button[aria-pressed="true"] {
+  border-color: var(--game-gold-hot);
+  background: var(--game-gold-hot);
+}
+
+.bboy-game-root .training-context-menu .training-context-menu__close {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .bboy-game-root .training-tutorial__eyebrow {
@@ -3928,6 +3926,17 @@
 }
 
 @media (max-width: 640px), (max-height: 520px) {
+  .bboy-game-root .training-context-menu {
+    top: calc(0.45rem + env(safe-area-inset-top, 0px));
+    width: min(18rem, calc(100% - 1rem));
+    padding: 0.6rem 0.7rem;
+  }
+
+  .bboy-game-root .training-context-menu__actions {
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+  }
+
   .bboy-game-root .training-tutorial {
     bottom: 0.45rem;
     width: min(28rem, calc(100% - 1rem));
