@@ -376,7 +376,7 @@ export default function GamePlayHUD({
         </div>
       ) : null}
 
-      {!learningActive ? <aside className="game-active-move-hud" data-training={mode === 'training'} aria-live="polite" aria-label="Active move">
+      {!learningActive && mode !== 'training' ? <aside className="game-active-move-hud" data-training={mode === 'training'} aria-live="polite" aria-label="Active move">
         <span>Move</span>
         <strong>{moveFamilyLabel}</strong>
         <small>Style: {moveStyleLabel}</small>

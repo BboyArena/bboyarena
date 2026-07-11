@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, type CSSProperties } from 'react';
 import type { MoveDefinition, MoveFamilyId } from '../move/moveDefinitionTypes';
 
 const familyButtons: Record<MoveFamilyId, string> = {
@@ -26,24 +26,16 @@ function TrainingCoachPanel({
   move,
   family,
   progress,
-  feedback,
-  compact,
   learning,
   onLearningChange,
   stamina,
   score,
-  loopPoints,
-  totalPoints
 }: TrainingCoachPanelProps) {
-  const [expanded, setExpanded] = useState(false);
-
-  useEffect(() => {
-    setExpanded(false);
-  }, [compact]);
-
   const progressPercent = Math.round(Math.min(1, Math.max(0, progress)) * 100);
   const displayName = move?.label ?? 'Choose a move';
   const mainButton = family ? familyButtons[family] : null;
+  const staminaLevel = Math.min(1, Math.max(0, stamina / 100));
+  const staminaSaturation = Math.min(1, Math.max(0, (stamina - 5) / 95));
 
   if (learning) {
     return (
@@ -89,50 +81,30 @@ function TrainingCoachPanel({
   }
 
   return (
-    <aside className="game-training-coach" data-expanded={expanded} aria-label="Training coach">
+    <aside
+      className="game-training-coach"
+      data-compact="true"
+      data-expanded="false"
+      aria-label="Training coach"
+      style={{
+        '--training-stamina-level': staminaLevel,
+        '--training-stamina-saturation': staminaSaturation,
+        '--training-loop-progress': progressPercent / 100
+      } as CSSProperties}
+    >
       <div className="game-training-coach__summary">
         <div>
-          <span>Current move</span>
           <strong>{displayName}</strong>
-          <small>{move && family ? `${mainButton} · ${family}` : 'A / B / X / Y · Choose a move'}</small>
         </div>
-        <button
-          type="button"
-          aria-expanded={expanded}
-          aria-controls="game-training-coach-details"
-          onClick={() => {
-            if (compact) onLearningChange(true);
-            else setExpanded((value) => !value);
-          }}
-        >
-          <span aria-hidden="true">?</span>
-          <b>Coach</b>
-        </button>
       </div>
       <div className="game-training-coach__stamina" aria-label={`Stamina ${Math.round(stamina)}%`}>
-        <span>Stamina</span><strong>{Math.round(stamina)}%</strong>
-        <div><i style={{ transform: `scaleX(${Math.min(1, Math.max(0, stamina / 100))})` }} /></div>
+        <div><i /></div>
       </div>
       <div className="game-training-coach__progress" aria-label={`Loop ${progressPercent}% complete`}>
-        <span>Loop {progressPercent}%</span>
         <div>
-        <i style={{ transform: `scaleX(${progressPercent / 100})` }} />
+        <i />
         </div>
       </div>
-      {expanded ? (
-        <div className="game-training-coach__details" id="game-training-coach-details">
-          {move && family ? (
-            <dl>
-              <div><dt>Button</dt><dd>{mainButton} · {family}</dd></div>
-              <div><dt>Skills</dt><dd>{move.skills.join(', ')}</dd></div>
-              <div><dt>Steps</dt><dd>Hit both gold checkpoints when they become active</dd></div>
-              <div><dt>Score</dt><dd>Loop {score ?? 0}% · {loopPoints} pts · Run {totalPoints} pts</dd></div>
-              <div><dt>Energy</dt><dd>Stamina {Math.round(stamina)}% · drains during movement, recovers after the loop</dd></div>
-              {feedback ? <div><dt>Feedback</dt><dd>{feedback}</dd></div> : null}
-            </dl>
-          ) : <p>Choose A Toprock, B Footwork, X Freeze, or Y Powermove.</p>}
-        </div>
-      ) : null}
     </aside>
   );
 }
