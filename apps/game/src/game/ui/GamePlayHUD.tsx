@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import { useGameStore } from '../state/useGameStore';
 import { useConnectedGamepads } from '../input/useConnectedGamepads';
 import type { GameInputButtonId, GameInputSnapshot } from '../input/gameInputTypes';
@@ -14,7 +14,6 @@ import type { StickCueStepSample } from '../move/stickCueTracks';
 import { moveCatalog } from '../move/moveCatalog';
 import type { MoveQueueSnapshot } from '../move/MoveQueueController';
 import type { StickCuePoint } from '../move/moveDefinitionTypes';
-import type { MoveFamilyId } from '../move/moveDefinitionTypes';
 import TrainingCoachPanel from './TrainingCoachPanel';
 import { useTapTempo } from './useTapTempo';
 import type { RenderingDiagnostics } from '../CanvasScene';
@@ -244,8 +243,6 @@ export default function GamePlayHUD({
   stickCueDiagnostics,
   moveQueue,
   stamina,
-  moveScore,
-  loopPoints,
   totalPoints,
   playTimeSeconds,
   staminaRewardFeedback,
@@ -253,14 +250,6 @@ export default function GamePlayHUD({
   tutorialStep,
   leftStickTutorial
 }: GamePlayHudProps) {
-  const [compactTraining, setCompactTraining] = useState(() => (
-    typeof window !== 'undefined' && window.matchMedia('(max-width: 640px), (max-height: 520px)').matches
-  ));
-  const [learning, setLearning] = useState(() => (
-    mode === 'training'
-    && typeof window !== 'undefined'
-    && window.matchMedia('(max-width: 640px), (max-height: 520px)').matches
-  ));
   const touchControlsVisible = useGameStore((state) => state.touchControlsVisible);
   const trainingAudioMode = useGameStore((state) => state.trainingAudioMode);
   const activeInputSource = useGameStore((state) => state.activeInputSource);
@@ -281,13 +270,6 @@ export default function GamePlayHUD({
     ? Math.min(1, Math.max(0, (rhythmState.beat - moveQueue.active.startedAtBeat) / moveQueue.active.durationBeats))
     : 0;
   const nextMove = moveQueue.queued[0] ?? null;
-  const activeStickCues = stickCueDiagnostics.filter((cue) => cue.sample.active);
-  const coachFeedback = activeStickCues.length > 0
-    ? (activeStickCues.every((cue) => {
-        const input = cue.targetInput === 'look' ? snapshot.look : snapshot.move;
-        return Math.hypot(input.x - cue.sample.x, input.y - cue.sample.y) <= cue.sample.tolerance;
-      }) ? 'Step locked — keep the rhythm.' : 'Hit the gold checkpoint now.')
-    : (stickCueDiagnostics.length > 0 ? 'Get ready for the next checkpoint.' : undefined);
   const touchStickTargets = useMemo(() => {
     const targets = Object.fromEntries(stickCueDiagnostics.map((cue) => {
       const input = cue.targetInput === 'look' ? snapshot.look : snapshot.move;
@@ -312,26 +294,9 @@ export default function GamePlayHUD({
     return targets;
   }, [leftStickTutorial, snapshot.look, snapshot.move, stickCueDiagnostics, tutorialStep]);
 
-  useEffect(() => {
-    const compactViewport = window.matchMedia('(max-width: 640px), (max-height: 520px)');
-    const syncTrainingLayout = (matches: boolean) => {
-      setCompactTraining(matches);
-      setLearning(mode === 'training' && matches);
-    };
-    const handleChange = (event: MediaQueryListEvent) => syncTrainingLayout(event.matches);
-    compactViewport.addEventListener('change', handleChange);
-    return () => compactViewport.removeEventListener('change', handleChange);
-  }, [mode]);
-
   const tutorialActive = tutorialStep !== null && tutorialStep !== 'completed';
-  const tutorialNeedsPracticeControls = tutorialActive && tutorialStep !== 'welcome';
-  const learningActive = mode === 'training' && compactTraining && learning && !tutorialNeedsPracticeControls;
   const bringYourMusicActive = mode === 'training' && trainingAudioMode === 'bring-your-music';
   const tapTempo = useTapTempo(bringYourMusicActive);
-
-  useEffect(() => {
-    if (tutorialNeedsPracticeControls) setLearning(false);
-  }, [tutorialNeedsPracticeControls]);
 
   useEffect(() => {
     const r1Pressed = snapshot.buttons.r1.pressed;
@@ -348,23 +313,21 @@ export default function GamePlayHUD({
 
   return (
     <>
-      {!learningActive ? (
-        <aside
-          className="game-rhythm-status"
-          data-active={rhythmState.beatPhase < 0.18}
-          aria-label={`Beat ${(rhythmState.beatIndex % 4) + 1} of 4, ${rhythmState.bpm.toFixed(0)} BPM, total score ${totalPoints}, play time ${formattedPlayTime}`}
-        >
-          <div className="game-rhythm-status__beat" aria-hidden="true">
-            <i />
-            <strong>{(rhythmState.beatIndex % 4) + 1}/4</strong>
-          </div>
-          <div><span>BPM</span><strong>{rhythmState.bpm.toFixed(0)}</strong></div>
-          <div><span>Score</span><strong>{totalPoints}</strong></div>
-          <div><span>Time</span><strong>{formattedPlayTime}</strong></div>
-        </aside>
-      ) : null}
+      <aside
+        className="game-rhythm-status"
+        data-active={rhythmState.beatPhase < 0.18}
+        aria-label={`Beat ${(rhythmState.beatIndex % 4) + 1} of 4, ${rhythmState.bpm.toFixed(0)} BPM, total score ${totalPoints}, play time ${formattedPlayTime}`}
+      >
+        <div className="game-rhythm-status__beat" aria-hidden="true">
+          <i />
+          <strong>{(rhythmState.beatIndex % 4) + 1}/4</strong>
+        </div>
+        <div><span>BPM</span><strong>{rhythmState.bpm.toFixed(0)}</strong></div>
+        <div><span>Score</span><strong>{totalPoints}</strong></div>
+        <div><span>Time</span><strong>{formattedPlayTime}</strong></div>
+      </aside>
 
-      {staminaRewardFeedback && !learningActive ? (
+      {staminaRewardFeedback ? (
         <div
           key={staminaRewardFeedback.sequence}
           className="game-stamina-reward"
@@ -376,7 +339,7 @@ export default function GamePlayHUD({
         </div>
       ) : null}
 
-      {!learningActive && mode !== 'training' ? <aside className="game-active-move-hud" data-training={mode === 'training'} aria-live="polite" aria-label="Active move">
+      {mode !== 'training' ? <aside className="game-active-move-hud" data-training={mode === 'training'} aria-live="polite" aria-label="Active move">
         <span>Move</span>
         <strong>{moveFamilyLabel}</strong>
         <small>Style: {moveStyleLabel}</small>
@@ -397,27 +360,19 @@ export default function GamePlayHUD({
       {mode === 'training' && !tutorialActive ? (
         <TrainingCoachPanel
           move={documentedMove}
-          family={(moveQueue.active?.family ?? (documentedMove?.intentId.split('.')[1] ?? null)) as MoveFamilyId | null}
           progress={activeProgress}
-          feedback={coachFeedback}
-          compact={compactTraining}
-          learning={learningActive}
-          onLearningChange={setLearning}
           stamina={stamina}
-          score={moveScore}
-          loopPoints={loopPoints}
-          totalPoints={totalPoints}
         />
       ) : null}
 
-      {!learningActive && nextMove ? (
+      {nextMove ? (
         <div className="game-next-move-ghost" aria-hidden="true">
           <span>Next</span>
           <strong>{nextMove.family}</strong>
         </div>
       ) : null}
 
-      {!learningActive && stickCueDiagnostics.length > 0 ? (
+      {stickCueDiagnostics.length > 0 ? (
         <aside className="game-stick-cue-hud" data-training={mode === 'training'} aria-label="Timed stick step instructions">
           {stickCueDiagnostics.map((cue) => {
             const input = cue.targetInput === 'look' ? snapshot.look : snapshot.move;
@@ -449,7 +404,7 @@ export default function GamePlayHUD({
         </aside>
       ) : null}
 
-      {mode === 'training' && diagnosticsVisible && !learningActive ? (
+      {mode === 'training' && diagnosticsVisible ? (
         <MemoizedTrainingDiagnosticsHud
           activeInputSource={activeInputSource}
           animationContext={animationContext}
@@ -468,7 +423,7 @@ export default function GamePlayHUD({
         />
       ) : null}
 
-      {touchControlsVisible && (!learningActive || bringYourMusicActive || tutorialNeedsPracticeControls) ? (
+      {touchControlsVisible ? (
         <TouchControlsOverlay
           key={tutorialStep ?? 'gameplay'}
           targets={touchStickTargets}
