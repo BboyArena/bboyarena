@@ -1,6 +1,7 @@
 # build output
 dist/
 dist-game/
+apps/website/public/game/
 
 # generated types
 .astro/

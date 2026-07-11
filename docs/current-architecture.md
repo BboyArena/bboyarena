@@ -47,6 +47,8 @@ The Astro application owns:
 
 It builds statically to root `dist/`. It can point to the game through `PUBLIC_GAME_EMBED_URL`, but it must treat that target as an external document.
 
+Production deployment may stage the already-built game output under the website public directory before the Astro build so the website PWA service worker can include `/game/` assets. That staging directory is generated deployment input, not website source ownership.
+
 ## Game boundary
 
 The Vite application owns:

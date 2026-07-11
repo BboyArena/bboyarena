@@ -74,7 +74,7 @@ jobs:
       - name: Compute public game URL
         shell: bash
         run: |
-          resolved_game_url="${PUBLIC_GAME_URL:-https://bboyarena.org/game}"
+          resolved_game_url="${PUBLIC_GAME_URL:-https://bboyarena.org/game/}"
           resolved_game_embed_url="${PUBLIC_GAME_EMBED_URL:-$resolved_game_url}"
 
           if [ -n "${PUBLIC_GAME_URL:-}" ]; then
@@ -98,17 +98,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build website
-        run: npm run build
-
       - name: Build game
         run: npm run game:build
 
-      - name: Add game build to website dist
+      - name: Stage game build for website PWA
         shell: bash
         run: |
-          mkdir -p dist/game
-          cp -R dist-game/. dist/game/
+          rm -rf apps/website/public/game
+          mkdir -p apps/website/public/game
+          cp -R dist-game/. apps/website/public/game/
+
+      - name: Build website
+        run: npm run build
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
