@@ -3519,13 +3519,41 @@
     --touch-stick-size: clamp(76px, 25vh, 104px);
     --touch-edge-margin: clamp(6px, 2vh, 12px);
     --touch-cluster-size: clamp(124px, 39vh, 156px);
+    --touch-top-hud-clearance: clamp(5.1rem, 29vh, 5.85rem);
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .bboy-game-root .game-training-coach {
+    --game-training-top-height: 2.45rem;
+    padding: 0.34rem 0.45rem 0.38rem;
+  }
+
+  .bboy-game-root .game-training-coach[data-compact="true"] .game-training-coach__summary strong {
+    font-size: clamp(0.54rem, 2.25vh, 0.66rem);
+  }
+
+  .bboy-game-root .game-training-coach[data-compact="true"] .game-training-coach__stamina {
+    margin-top: 0.28rem;
+  }
+
+  .bboy-game-root .game-training-coach[data-compact="true"] .game-training-coach__stamina > div {
+    height: 0.3rem;
+  }
+
+  .bboy-game-root .game-training-coach[data-compact="true"] .game-training-coach__progress {
+    margin-top: 0.18rem;
+  }
+
+  .bboy-game-root .game-rhythm-status {
+    min-height: 2.45rem;
+    gap: clamp(0.28rem, 1.7vh, 0.45rem);
+    padding: 0.22rem 0.32rem;
   }
 
   .bboy-game-root .touch-controls__side {
     min-width: 0;
     gap: var(--touch-control-gap);
-    padding-top: clamp(2.6rem, 14vh, 3.5rem);
+    padding-top: var(--touch-top-hud-clearance);
   }
 
   .bboy-game-root .touch-controls__joystick-group {
@@ -3542,7 +3570,7 @@
   }
 
   .bboy-game-root .touch-controls__shoulders {
-    top: calc(clamp(4.1rem, 13vh, 5rem) + env(safe-area-inset-top, 0px));
+    top: calc(var(--touch-top-hud-clearance) + env(safe-area-inset-top, 0px));
   }
 
   .bboy-game-root .touch-controls__shoulders--left {
