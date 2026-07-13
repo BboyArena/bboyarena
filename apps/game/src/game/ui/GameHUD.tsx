@@ -10,9 +10,10 @@ import { CAMERA_FEELS, type CameraFeel } from '../camera/cameraFeel';
 
 interface GameHudProps {
   copy: GameCopy;
+  enableCreatorMode?: boolean;
 }
 
-export default function GameHUD({ copy }: GameHudProps) {
+export default function GameHUD({ copy, enableCreatorMode = true }: GameHudProps) {
   const [selectedSettingsTab, setSelectedSettingsTab] = useState<'audio' | 'display' | 'controls' | 'accessibility'>('controls');
   const logoSrc = `${import.meta.env.BASE_URL}logo-bboyarena.svg`;
   const screen = useGameStore((state) => state.screen);
@@ -147,9 +148,9 @@ export default function GameHUD({ copy }: GameHudProps) {
           </div>
 
           <GamePanel variant="dark" className="game-splash-card">
-            <p className="game-panel__label">{copy.welcome}</p>
-            <div className="game-panel__title">{copy.enterLobby}</div>
-            <p className="game-panel__description">{copy.splashDescription}</p>
+            <p className="game-panel__label" style={{ padding: '0.9rem 1.25rem 0.2rem' }}>{copy.welcome}</p>
+            <div className="game-panel__title" style={{ padding: '0.05rem 1.25rem 0.3rem' }}>{copy.enterLobby}</div>
+            <p className="game-panel__description" style={{ padding: '0.2rem 1.25rem 0.95rem' }}>{copy.splashDescription}</p>
             <div className="game-splash-actions">
               <GameButton variant="primary" fullWidth onClick={openMainMenu}>
                 {copy.continue}
@@ -192,18 +193,20 @@ export default function GameHUD({ copy }: GameHudProps) {
                 </button>
               ))}
 
-              <button type="button" className="game-mode-button game-mode-button--utility game-mode-button--creator" onClick={openCreator}>
-                <span className="game-mode-button__icon" aria-hidden="true">
-                  ◉
-                </span>
-                <span className="game-mode-button__body">
-                  <span className="game-mode-button__title">{copy.creatorMode}</span>
-                  <span className="game-mode-button__note">{copy.creatorModeNote}</span>
-                </span>
-                <span className="game-mode-button__arrow" aria-hidden="true">
-                  →
-                </span>
-              </button>
+              {enableCreatorMode ? (
+                <button type="button" className="game-mode-button game-mode-button--utility game-mode-button--creator" onClick={openCreator}>
+                  <span className="game-mode-button__icon" aria-hidden="true">
+                    ◉
+                  </span>
+                  <span className="game-mode-button__body">
+                    <span className="game-mode-button__title">{copy.creatorMode}</span>
+                    <span className="game-mode-button__note">{copy.creatorModeNote}</span>
+                  </span>
+                  <span className="game-mode-button__arrow" aria-hidden="true">
+                    →
+                  </span>
+                </button>
+              ) : null}
 
               <button type="button" className="game-mode-button game-mode-button--utility" onClick={openSettings}>
                 <span className="game-mode-button__icon" aria-hidden="true">

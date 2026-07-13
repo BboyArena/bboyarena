@@ -14,9 +14,10 @@ import './game.css';
 
 interface GameAppProps {
   locale?: LocaleCode | string;
+  enableCreatorMode?: boolean;
 }
 
-export default function GameApp({ locale = 'en-US' }: GameAppProps) {
+export default function GameApp({ locale = 'en-US', enableCreatorMode = true }: GameAppProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const hasTouchControls = useHasTouchControls();
   const [copy, setCopy] = useState<GameCopy>(() => getDefaultGameCopy());
@@ -24,6 +25,7 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
   const screen = useGameStore((state) => state.screen);
   const selectedMode = useGameStore((state) => state.selectedMode);
   const trainingAudioMode = useGameStore((state) => state.trainingAudioMode);
+  const openMainMenu = useGameStore((state) => state.openMainMenu);
   const isPlayableScreen = screen === 'career' || screen === 'training';
 
   useEffect(() => {
@@ -54,6 +56,12 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
     };
   }, [locale]);
 
+  useEffect(() => {
+    if (!enableCreatorMode && screen === 'creator') {
+      openMainMenu();
+    }
+  }, [enableCreatorMode, openMainMenu, screen]);
+
   return (
     <RhythmClockProvider>
        <div
@@ -70,10 +78,10 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
                 {selectedMode === 'training' && trainingAudioMode === 'manual' ? <ManualMetronome /> : null}
                 <GamePlayScene mode={selectedMode} copy={copy} />
               </>
-            ) : screen === 'creator' ? (
+            ) : screen === 'creator' && enableCreatorMode ? (
               <CreatorMode copy={copy} />
             ) : (
-              <GameHUD copy={copy} />
+              <GameHUD copy={copy} enableCreatorMode={enableCreatorMode} />
             )}
             <GameFullscreenToggle targetRef={rootRef} />
             <GameFullscreenReticle targetRef={rootRef} />
