@@ -4,6 +4,7 @@ import GameFullscreenToggle from './ui/GameFullscreenToggle';
 import GameFullscreenReticle from './ui/GameFullscreenReticle';
 import GameHUD from './ui/GameHUD';
 import GamePlayScene from './GamePlayScene';
+import CreatorMode from './creator/CreatorMode';
 import { getDefaultGameCopy, loadGameCopy, type GameCopy, type LocaleCode } from './copy';
 import { RhythmClockProvider } from './rhythm/RhythmClockProvider';
 import { useHasTouchControls } from './input/useHasTouchControls';
@@ -69,6 +70,8 @@ export default function GameApp({ locale = 'en-US' }: GameAppProps) {
                 {selectedMode === 'training' && trainingAudioMode === 'manual' ? <ManualMetronome /> : null}
                 <GamePlayScene mode={selectedMode} copy={copy} />
               </>
+            ) : screen === 'creator' ? (
+              <CreatorMode copy={copy} />
             ) : (
               <GameHUD copy={copy} />
             )}

@@ -41,6 +41,8 @@ export interface GameCopy {
   storyModeNote: string;
   training: string;
   trainingNote: string;
+  creatorMode: string;
+  creatorModeNote: string;
   options: string;
   optionsNote: string;
   creditsMenuTitle: string;

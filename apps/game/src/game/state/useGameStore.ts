@@ -11,9 +11,10 @@ import type { CameraFeel } from '../camera/cameraFeel';
 
 export type GameMenuScreen = 'splashscreen' | 'mainMenu' | 'settings' | 'credits';
 export type GamePlayMode = 'career' | 'training';
+export type GameUtilityScreen = 'creator';
 export type GameDifficultyMode = 'assisted' | 'adaptive' | 'expert';
 export type TrainingAudioMode = 'internal' | 'bring-your-music' | 'manual';
-export type GameScreen = GameMenuScreen | GamePlayMode;
+export type GameScreen = GameMenuScreen | GamePlayMode | GameUtilityScreen;
 
 interface GameState {
   screen: GameScreen;
@@ -44,6 +45,7 @@ interface GameState {
   openMainMenu: () => void;
   openSettings: () => void;
   openCredits: () => void;
+  openCreator: () => void;
   startMode: (mode: GamePlayMode) => void;
   setSelectedCharacter: (character: string) => void;
   incrementScore: (amount: number) => void;
@@ -89,6 +91,7 @@ export const useGameStore = create<GameState>((set) => ({
   openMainMenu: () => set({ screen: 'mainMenu' }),
   openSettings: () => set({ screen: 'settings' }),
   openCredits: () => set({ screen: 'credits' }),
+  openCreator: () => set({ screen: 'creator' }),
   startMode: (selectedMode) => set({ screen: selectedMode, selectedMode }),
   setSelectedCharacter: (selectedCharacter) => set({ selectedCharacter }),
   incrementScore: (amount) => set((state) => ({ score: state.score + amount })),

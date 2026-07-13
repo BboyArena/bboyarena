@@ -34,6 +34,8 @@
   "storyModeNote": "Progresion / capitulos",
   "training": "Entrenamiento",
   "trainingNote": "Practica / controles",
+  "creatorMode": "Modo Creator",
+  "creatorModeNote": "Graba videos reales con controles y HUD de BboyArena.",
   "options": "Opciones",
   "optionsNote": "Audio / pantalla",
   "creditsMenuTitle": "Extras / Creditos / Info",

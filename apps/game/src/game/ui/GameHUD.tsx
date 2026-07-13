@@ -41,6 +41,7 @@ export default function GameHUD({ copy }: GameHudProps) {
   const openMainMenu = useGameStore((state) => state.openMainMenu);
   const openSettings = useGameStore((state) => state.openSettings);
   const openCredits = useGameStore((state) => state.openCredits);
+  const openCreator = useGameStore((state) => state.openCreator);
   const openSplash = useGameStore((state) => state.openSplash);
   const startMode = useGameStore((state) => state.startMode);
   const mainMenuItems: Array<{ id: GamePlayMode; label: string; note: string; icon: string }> = [
@@ -190,6 +191,19 @@ export default function GameHUD({ copy }: GameHudProps) {
                   </span>
                 </button>
               ))}
+
+              <button type="button" className="game-mode-button game-mode-button--utility game-mode-button--creator" onClick={openCreator}>
+                <span className="game-mode-button__icon" aria-hidden="true">
+                  ◉
+                </span>
+                <span className="game-mode-button__body">
+                  <span className="game-mode-button__title">{copy.creatorMode}</span>
+                  <span className="game-mode-button__note">{copy.creatorModeNote}</span>
+                </span>
+                <span className="game-mode-button__arrow" aria-hidden="true">
+                  →
+                </span>
+              </button>
 
               <button type="button" className="game-mode-button game-mode-button--utility" onClick={openSettings}>
                 <span className="game-mode-button__icon" aria-hidden="true">
