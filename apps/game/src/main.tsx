@@ -10,9 +10,16 @@ if (!mountNode) {
 }
 
 const gameLocale = document.documentElement.lang || window.navigator.language || 'en-US';
+const isEmbedded = (() => {
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
+  }
+})();
 
 createRoot(mountNode).render(
   <React.StrictMode>
-    <GameApp locale={gameLocale} />
+    <GameApp locale={gameLocale} enableCreatorMode={!isEmbedded} />
   </React.StrictMode>
 );
