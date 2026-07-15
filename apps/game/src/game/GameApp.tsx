@@ -33,13 +33,18 @@ export default function GameApp({ locale = 'en-US', enableCreatorMode = true }: 
     if (!root) return undefined;
 
     const syncViewportHeight = () => {
-      root.style.setProperty('--game-viewport-height', `${window.innerHeight}px`);
+      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+      root.style.setProperty('--game-viewport-height', `${Math.ceil(viewportHeight)}px`);
     };
 
     syncViewportHeight();
     window.addEventListener('resize', syncViewportHeight);
+    window.visualViewport?.addEventListener('resize', syncViewportHeight);
 
-    return () => window.removeEventListener('resize', syncViewportHeight);
+    return () => {
+      window.removeEventListener('resize', syncViewportHeight);
+      window.visualViewport?.removeEventListener('resize', syncViewportHeight);
+    };
   }, []);
 
   useEffect(() => {
@@ -68,6 +73,7 @@ export default function GameApp({ locale = 'en-US', enableCreatorMode = true }: 
         id="bboyarena-game-root"
         className="bboy-game-root"
         ref={rootRef}
+        data-screen={screen}
         data-has-touchscreen={hasTouchControls ? 'true' : 'false'}
       >
         <div className="game-shell">

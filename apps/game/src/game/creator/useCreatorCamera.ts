@@ -72,6 +72,21 @@ function stopStream(stream: MediaStream | null) {
   stream?.getTracks().forEach((track) => track.stop());
 }
 
+function getViewportVideoConstraintHints(): MediaTrackConstraints {
+  if (typeof window === 'undefined') return {};
+
+  const viewportWidth = Math.ceil(window.visualViewport?.width ?? window.innerWidth);
+  const viewportHeight = Math.ceil(window.visualViewport?.height ?? window.innerHeight);
+  const longSide = Math.max(viewportWidth, viewportHeight);
+  const shortSide = Math.min(viewportWidth, viewportHeight);
+
+  return {
+    width: { ideal: longSide },
+    height: { ideal: shortSide },
+    resizeMode: 'crop-and-scale'
+  } as MediaTrackConstraints;
+}
+
 export function useCreatorCamera() {
   const streamRef = useRef<MediaStream | null>(null);
   const [status, setStatus] = useState<CreatorCameraStatus>('idle');
@@ -112,9 +127,10 @@ export function useCreatorCamera() {
     streamRef.current = null;
     setStream(null);
 
+    const coverHints = getViewportVideoConstraintHints();
     const videoConstraints: MediaTrackConstraints = options.deviceId
-      ? { deviceId: { exact: options.deviceId } }
-      : { facingMode: { ideal: nextFacingMode } };
+      ? { ...coverHints, deviceId: { exact: options.deviceId } }
+      : { ...coverHints, facingMode: { ideal: nextFacingMode } };
 
     try {
       const nextStream = await navigator.mediaDevices.getUserMedia({
