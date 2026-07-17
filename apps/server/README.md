@@ -307,6 +307,12 @@ L'unico endpoint pubblico backend dovrebbe essere:
 https://api.bboyarena.org
 ```
 
+Runbook VPS:
+
+```text
+docs/deploy-vps.md
+```
+
 ## Prossimi Step
 
 - Migliorare errori PocketBase distinguendo email gia usata, username gia usato e password invalida.
