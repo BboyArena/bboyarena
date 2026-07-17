@@ -5,11 +5,11 @@ apps/website/public/game/
 
 # generated types
 .astro/
-server/colyseus/dist/
+apps/colyseus/dist/
 
 # dependencies
 node_modules/
-server/colyseus/node_modules/
+apps/*/node_modules/
 
 # logs
 npm-debug.log*

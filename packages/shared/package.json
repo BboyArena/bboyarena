@@ -1,0 +1,16 @@
+{
+  "name": "@bboyarena/shared",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schemas": "./src/schemas/index.ts",
+    "./types": "./src/types/index.ts",
+    "./utils": "./src/utils/index.ts",
+    "./api-contract": "./src/api-contract/index.ts"
+  },
+  "dependencies": {
+    "zod": "^4.2.1"
+  }
+}

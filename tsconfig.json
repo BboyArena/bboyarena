@@ -1,5 +1,14 @@
 {
   "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@bboyarena/shared": ["packages/shared/src/index.ts"],
+      "@bboyarena/shared/*": ["packages/shared/src/*"],
+      "@bboyarena/sdk": ["packages/sdk/src/index.ts"],
+      "@bboyarena/sdk/*": ["packages/sdk/src/*"]
+    }
+  },
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist"]
+  "exclude": ["dist", "dist-game", "dev-dist", "node_modules"]
 }

@@ -31,7 +31,7 @@ The website and game are independent front-end applications. Their integration b
 | --- | --- | --- | --- |
 | Public website | `apps/website` | Astro integrations, website components and libraries, optional remote content clients | Game runtime modules or game CSS |
 | Standalone game | `apps/game` | React, Three.js/R3F, game state, input, UI, game-owned assets | Astro layout, website components, website global CSS |
-| Experimental multiplayer | `server/colyseus` | Colyseus server packages and its own runtime configuration | Front-end source modules |
+| Experimental multiplayer | `apps/colyseus` | Colyseus server packages and its own runtime configuration | Front-end source modules |
 | Governance | `legal` | Other legal documents through relative links | Runtime implementation |
 | AI role prompts | `agents` | Canonical repository documentation | Authority over product or architecture truth |
 
@@ -64,7 +64,7 @@ It builds to root `dist-game/`. The game must remain runnable without Astro, web
 
 ## Server boundary
 
-`server/colyseus` is an experimental service, not a required dependency of the current static website or game shell. A future multiplayer feature may consume it through a network protocol; it must not create shared source imports between server and front-end applications.
+`apps/colyseus` is an experimental service, not a required dependency of the current static website or game shell. A future multiplayer feature may consume it through a network protocol; it must not create shared source imports between server and front-end applications.
 
 ## Permitted communication
 
@@ -99,7 +99,7 @@ Ask these questions in order:
 
 1. Is this public content, website navigation, SEO, legal, or community functionality? Put it in `apps/website`.
 2. Is this gameplay, rendering, game input, game state, or game UI? Put it in `apps/game`.
-3. Is it server-authoritative networking behavior? Put it in `server/colyseus`.
+3. Is it server-authoritative networking behavior? Put it in `apps/colyseus`.
 4. Is it only documentation? Put it in the owning app's docs or repository `docs/`.
 5. Is it genuinely required by more than one runtime? Define the contract first; introduce shared code only when duplication is riskier than the new coupling.
 

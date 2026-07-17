@@ -7,5 +7,5 @@ node_modules
 .DS_Store
 README.md
 readme_dev_notes.md
-server/colyseus/node_modules
-server/colyseus/dist
+apps/colyseus/node_modules
+apps/colyseus/dist

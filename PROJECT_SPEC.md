@@ -12,14 +12,18 @@ This living document is the canonical reference for the repository's current app
 
 ## 2. Repository architecture
 
-The repository contains two independent front-end applications and an experimental multiplayer server:
+The repository contains independent deployable applications and shared packages:
 
 ```text
 .
 ├── apps/
 │   ├── website/       # Astro public website
-│   └── game/          # Standalone Vite/React game
-├── server/colyseus/   # Experimental Colyseus server
+│   ├── game/          # Standalone Vite/React game
+│   ├── server/        # Hono API server
+│   └── colyseus/      # Experimental Colyseus server
+├── packages/
+│   ├── shared/        # Shared Zod schemas and TypeScript contracts
+│   └── sdk/           # Client SDK for BboyArena APIs
 ├── agents/            # AI coding-assistant role definitions
 ├── docs/              # Architecture and technical reports
 ├── legal/             # Governance, licensing, and contribution documents
@@ -56,8 +60,9 @@ Website code must live under `apps/website`; game runtime code must live under `
 
 ### Server and local infrastructure
 
-- An experimental Colyseus WebSocket server under `server/colyseus`
-- Docker Compose services for Traefik, the website, Colyseus, PostgreSQL, and a self-hosted Supabase stack
+- A Hono API server under `apps/server`
+- An experimental Colyseus WebSocket server under `apps/colyseus`
+- Docker Compose services for the API, PocketBase, Traefik, the website, Colyseus, PostgreSQL, and a self-hosted Supabase stack
 
 ## 4. Application boundaries and build output
 
@@ -220,7 +225,7 @@ Input devices must produce canonical game actions through the input layer; they 
 
 ## 11. Experimental server
 
-`server/colyseus` contains an early multiplayer scaffold, not a production gameplay dependency. It currently provides:
+`apps/colyseus` contains an early multiplayer scaffold, not a production gameplay dependency. It currently provides:
 
 - an HTTP health endpoint at `/health`;
 - a `battle` room with a maximum of eight clients;
