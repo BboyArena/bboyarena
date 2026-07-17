@@ -1,0 +1,83 @@
+---
+import AuthCard from '../components/auth/AuthCard.astro';
+import { getPublicApiUrl } from '../lib/auth';
+
+const apiUrl = getPublicApiUrl();
+---
+
+<AuthCard
+  title="Profile"
+  eyebrow="BboyArena ID"
+  description="Your account data as returned by the BboyArena API."
+  pagePath="/profile"
+>
+  <section class="relative z-10 grid gap-4" data-profile-page data-api-url={apiUrl}>
+    <div class="rounded-[1rem] border-2 border-[#4f4337]/50 bg-[#fffaf0] p-4">
+      <p class="text-[10px] font-black uppercase tracking-[0.22em] text-[#756553]">Status</p>
+      <p class="mt-2 text-base font-bold text-[#2d251d]" data-profile-status>Checking session...</p>
+    </div>
+
+    <dl class="grid gap-3 rounded-[1rem] border-2 border-[#4f4337]/50 bg-[#f4ebdf] p-4 text-sm" data-profile-details hidden>
+      <div>
+        <dt class="text-[10px] font-black uppercase tracking-[0.22em] text-[#756553]">Username</dt>
+        <dd class="mt-1 font-bold text-[#2d251d]" data-profile-username></dd>
+      </div>
+      <div>
+        <dt class="text-[10px] font-black uppercase tracking-[0.22em] text-[#756553]">Email</dt>
+        <dd class="mt-1 font-bold text-[#2d251d]" data-profile-email></dd>
+      </div>
+      <div>
+        <dt class="text-[10px] font-black uppercase tracking-[0.22em] text-[#756553]">User ID</dt>
+        <dd class="mt-1 break-all font-bold text-[#2d251d]" data-profile-id></dd>
+      </div>
+    </dl>
+
+    <div class="flex flex-col gap-3 sm:flex-row">
+      <a class="street-button street-button-primary inline-flex min-h-12 items-center justify-center rounded-full px-5 text-[10px] font-black uppercase tracking-[0.24em]" href="/signin" data-profile-signin>
+        Sign in
+      </a>
+      <a class="street-button inline-flex min-h-12 items-center justify-center rounded-full px-5 text-[10px] font-black uppercase tracking-[0.24em]" href="/logout" data-profile-logout hidden>
+        Logout
+      </a>
+    </div>
+  </section>
+</AuthCard>
+
+<script>
+  import { createBboyArenaSdk } from '@bboyarena/sdk';
+  import { authStorageKey } from '../lib/auth';
+
+  const page = document.querySelector<HTMLElement>('[data-profile-page]');
+  const status = document.querySelector<HTMLElement>('[data-profile-status]');
+  const details = document.querySelector<HTMLElement>('[data-profile-details]');
+  const username = document.querySelector<HTMLElement>('[data-profile-username]');
+  const email = document.querySelector<HTMLElement>('[data-profile-email]');
+  const id = document.querySelector<HTMLElement>('[data-profile-id]');
+  const signin = document.querySelector<HTMLElement>('[data-profile-signin]');
+  const logout = document.querySelector<HTMLElement>('[data-profile-logout]');
+
+  const token = localStorage.getItem(authStorageKey);
+
+  if (!token) {
+    if (status) status.textContent = 'No active session on this device.';
+  } else {
+    const sdk = createBboyArenaSdk({
+      baseUrl: page?.dataset.apiUrl ?? 'http://localhost:8787',
+      getToken: () => token,
+    });
+
+    try {
+      const { user } = await sdk.getMe();
+      if (status) status.textContent = 'Signed in.';
+      if (username) username.textContent = user.username;
+      if (email) email.textContent = user.email;
+      if (id) id.textContent = user.id;
+      details?.removeAttribute('hidden');
+      signin?.setAttribute('hidden', '');
+      logout?.removeAttribute('hidden');
+    } catch {
+      localStorage.removeItem(authStorageKey);
+      if (status) status.textContent = 'Session expired. Sign in again.';
+    }
+  }
+</script>

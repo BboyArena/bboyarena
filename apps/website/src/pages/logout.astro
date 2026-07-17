@@ -1,0 +1,29 @@
+---
+import AuthCard from '../components/auth/AuthCard.astro';
+---
+
+<AuthCard
+  title="Logout"
+  eyebrow="Player session"
+  description="End the local BboyArena session on this device."
+  pagePath="/logout"
+>
+  <div class="relative z-10 grid gap-4">
+    <p class="rounded-[0.85rem] border-2 border-[#7f9246] bg-[#e7efd3] px-4 py-3 text-sm font-bold text-[#3f4f22]" data-logout-message>
+      Signing out...
+    </p>
+    <a class="street-button street-button-primary inline-flex min-h-12 items-center justify-center rounded-full px-5 text-[10px] font-black uppercase tracking-[0.24em]" href="/signin">
+      Back to sign in
+    </a>
+  </div>
+</AuthCard>
+
+<script>
+  import { authStorageKey } from '../lib/auth';
+
+  localStorage.removeItem(authStorageKey);
+  const message = document.querySelector<HTMLElement>('[data-logout-message]');
+  if (message) {
+    message.textContent = 'You are signed out on this device.';
+  }
+</script>

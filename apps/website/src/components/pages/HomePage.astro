@@ -21,7 +21,7 @@ const instagramHref = import.meta.env.PUBLIC_INSTAGRAM_URL?.trim() ?? buildLocal
 const githubHref =
   import.meta.env.PUBLIC_GITHUB_URL?.trim() ??
   (process.env.GITHUB_REPOSITORY ? `https://github.com/${process.env.GITHUB_REPOSITORY}` : buildLocalizedPath(locale, '/open-development'));
-const newsletterHref = import.meta.env.PUBLIC_NEWSLETTER_URL?.trim() ?? buildLocalizedPath(locale, '/contact');
+const signupHref = buildLocalizedPath(locale, '/signup');
 const pocketBaseDevlogListUrl = buildPocketBaseDevlogListUrl(3);
 const devlogArchiveHref = buildLocalizedPath(locale, '/news/devlog');
 const latestDevlog = devlogs[0];
@@ -139,9 +139,9 @@ const devNotesCtaLabel = locale === 'it-IT' ? 'Leggi dev notes' : 'Read dev note
         title={copy.newsletterTitle}
         description={copy.newsletterDescription}
         cta={copy.newsletterCta}
-        href={newsletterHref}
+        href={signupHref}
         icon="newsletter"
-        external={Boolean(import.meta.env.PUBLIC_NEWSLETTER_URL?.trim())}
+        external={false}
         buttonPlacement="bottom"
         buttonWidth="full"
       />

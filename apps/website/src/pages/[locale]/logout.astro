@@ -1,0 +1,14 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { LOCALES } from '../../lib/i18n';
+
+export const getStaticPaths: GetStaticPaths = () =>
+  Object.values(LOCALES)
+    .filter((locale) => locale.path)
+    .map((locale) => ({ params: { locale: locale.path } }));
+---
+
+<meta http-equiv="refresh" content="0; url=/logout" />
+<script is:inline>
+  window.location.replace('/logout');
+</script>

@@ -1,0 +1,74 @@
+---
+import AuthCard from '../components/auth/AuthCard.astro';
+import { getPublicApiUrl } from '../lib/auth';
+
+const apiUrl = getPublicApiUrl();
+---
+
+<AuthCard
+  title="Sign in"
+  eyebrow="Player session"
+  description="Access your BboyArena profile through the server API."
+  pagePath="/signin"
+>
+  <form class="relative z-10 grid gap-4" data-auth-form="signin" data-api-url={apiUrl}>
+    <label class="grid gap-2 text-sm font-bold text-[#2d251d]">
+      <span class="text-[10px] font-black uppercase tracking-[0.22em] text-[#5f5346]">Email</span>
+      <input class="min-h-12 rounded-[0.85rem] border-2 border-[#4f4337]/70 bg-[#fffaf0] px-4 text-base outline-none focus:border-[#7f9246]" name="email" type="email" autocomplete="email" required />
+    </label>
+
+    <label class="grid gap-2 text-sm font-bold text-[#2d251d]">
+      <span class="text-[10px] font-black uppercase tracking-[0.22em] text-[#5f5346]">Password</span>
+      <input class="min-h-12 rounded-[0.85rem] border-2 border-[#4f4337]/70 bg-[#fffaf0] px-4 text-base outline-none focus:border-[#7f9246]" name="password" type="password" autocomplete="current-password" required />
+    </label>
+
+    <p class="hidden rounded-[0.85rem] border-2 px-4 py-3 text-sm font-bold" data-auth-message></p>
+
+    <button class="street-button street-button-primary min-h-12 rounded-full px-5 text-[10px] font-black uppercase tracking-[0.24em]" type="submit">
+      Sign in
+    </button>
+
+    <p class="text-sm leading-6 text-[#5f5346]">
+      Need an account?
+      <a class="street-link-secondary font-black" href="/signup">Create one</a>
+    </p>
+  </form>
+</AuthCard>
+
+<script>
+  import { createBboyArenaSdk } from '@bboyarena/sdk';
+  import { authStorageKey } from '../lib/auth';
+
+  const form = document.querySelector<HTMLFormElement>('[data-auth-form="signin"]');
+  const message = document.querySelector<HTMLElement>('[data-auth-message]');
+
+  const setMessage = (text: string, kind: 'error' | 'success') => {
+    if (!message) return;
+    message.textContent = text;
+    message.classList.remove('hidden', 'border-[#bc613a]', 'bg-[#f6ded2]', 'text-[#6f2f1c]', 'border-[#7f9246]', 'bg-[#e7efd3]', 'text-[#3f4f22]');
+    message.classList.add(
+      ...(kind === 'error'
+        ? ['border-[#bc613a]', 'bg-[#f6ded2]', 'text-[#6f2f1c]']
+        : ['border-[#7f9246]', 'bg-[#e7efd3]', 'text-[#3f4f22]']),
+    );
+  };
+
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const data = new FormData(form);
+    const sdk = createBboyArenaSdk({ baseUrl: form.dataset.apiUrl ?? 'http://localhost:8787' });
+
+    try {
+      const session = await sdk.login({
+        email: String(data.get('email') ?? ''),
+        password: String(data.get('password') ?? ''),
+      });
+
+      localStorage.setItem(authStorageKey, session.token);
+      setMessage('Signed in. Opening your profile...', 'success');
+      window.location.assign('/profile');
+    } catch {
+      setMessage('Invalid email or password.', 'error');
+    }
+  });
+</script>
